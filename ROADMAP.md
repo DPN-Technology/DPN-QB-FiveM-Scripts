@@ -21,12 +21,12 @@ This roadmap defines the direction of the official DPN Technology FiveM communit
 
 ## Phase 2 — Script Catalog
 
-- [ ] Publish first QBCore resource
-- [ ] Publish first Standalone resource
-- [ ] Establish Hybrid resource examples
-- [ ] Add per-resource version metadata
+- [x] Publish first QBCore resource
+- [x] Publish first Standalone resource
+- [x] Establish Hybrid resource examples
+- [x] Add per-resource version metadata
 - [ ] Add screenshots / previews where useful
-- [ ] Add dependency matrices
+- [x] Add dependency matrices
 - [ ] Add resource status badges
 
 ## Phase 3 — Engineering Quality
