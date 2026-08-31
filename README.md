@@ -82,6 +82,21 @@ Free scripts. Editable source. Community-focused development.
 | [Resource README Template](docs/RESOURCE_README_TEMPLATE.md) | Standard documentation template for every DPN script |
 | [Release Checklist](docs/RELEASE_CHECKLIST.md) | Pre-release QA, security, compatibility, and branding checklist |
 | [Source Header Standard](docs/SOURCE_HEADER.md) | Standard DPN Technology authorship header for source files |
+| [CHANGELOG.md](CHANGELOG.md) | Repository-wide release history and change format |
+| [ROADMAP.md](ROADMAP.md) | DPN FiveM project development roadmap |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community participation and moderation expectations |
+| [Installation Standard](docs/INSTALLATION_STANDARD.md) | Standard install and upgrade documentation requirements |
+| [Testing Standard](docs/TESTING_STANDARD.md) | Minimum testing matrix for DPN resources |
+| [Security Review Standard](docs/SECURITY_REVIEW_STANDARD.md) | Defensive release security checklist |
+| [Release Process](docs/RELEASE_PROCESS.md) | DPN development-to-release lifecycle |
+
+### Resource Catalogs
+
+| Catalog | Purpose |
+|---|---|
+| [QBCore Resources](qbcore/) | DPN scripts designed for QBCore |
+| [Standalone Resources](standalone/) | DPN scripts without a required core framework |
+| [Hybrid Resources](hybrid/) | DPN scripts supporting multiple framework modes |
 
 ### Official Authorship
 
