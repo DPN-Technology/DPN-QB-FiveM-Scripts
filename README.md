@@ -92,6 +92,7 @@ Free scripts. Editable source. Community-focused development.
 | [Security Review Standard](docs/SECURITY_REVIEW_STANDARD.md) | Defensive release security checklist |
 | [Release Process](docs/RELEASE_PROCESS.md) | DPN development-to-release lifecycle |
 | [Automation Guide](docs/AUTOMATION.md) | Quality gates, automatic indexing, packaging, releases, PR summaries, weekly checks, and Dependabot |
+| [Public Repository Security Baseline](docs/PUBLIC_REPOSITORY_SECURITY.md) | Public-release rules, secret handling, workflow hardening, and GitHub settings required before publishing code |
 
 ### Resource Catalogs
 
@@ -147,7 +148,21 @@ Multi-framework resources are organized under [hybrid/](hybrid/) with dedicated 
 | **Dependabot** | Checks GitHub Actions dependencies weekly and opens update pull requests |
 | **DPN Repo Watch** | External monitoring checks the repository for new or meaningfully updated issues and pull requests that need attention |
 
-#### DPN Resource Starter Kit
+#### Public Repository Security
+
+This repository is intentionally public. Treat every committed file as permanently viewable and clonable.
+
+Before publishing a production DPN script:
+
+- Never commit credentials, production server configuration, API secrets, private keys, or private-only DPN source.
+- Require the DPN Quality Gate for changes to the protected `main` branch.
+- Enable GitHub repository-level secret push protection.
+- Keep write/admin access limited to trusted DPN Technology maintainers.
+- Publish official resource packages with their generated SHA-256 checksum.
+
+See the [Public Repository Security Baseline](docs/PUBLIC_REPOSITORY_SECURITY.md).
+
+### DPN Resource Starter Kit
 
 New scripts can begin from [templates/dpn-resource-template/](templates/dpn-resource-template/), which already includes:
 
