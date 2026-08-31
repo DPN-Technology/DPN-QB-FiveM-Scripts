@@ -1,0 +1,59 @@
+name: DPN Script Request
+description: Request a new free QBCore, Standalone, or Hybrid DPN Technology FiveM resource
+title: "[SCRIPT REQUEST] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # DPN Technology Script Request
+        Propose a useful free FiveM resource for the DPN QB FiveM Scripts project.
+  - type: input
+    id: name
+    attributes:
+      label: Proposed Script Name
+      placeholder: dpn-example-resource
+    validations:
+      required: true
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Framework
+      options:
+        - QBCore
+        - Standalone
+        - Hybrid
+        - Not Sure
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should it solve?
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Desired Features
+      description: Describe the player/server workflow and major features.
+    validations:
+      required: true
+  - type: textarea
+    id: integrations
+    attributes:
+      label: Preferred Integrations
+      description: Inventory, target, menu, database, notifications, jobs, Discord, etc.
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration Needs
+      description: What should server owners be able to configure?
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Project Terms
+      options:
+        - label: I understand DPN Technology decides whether a request is accepted and how it is implemented.
+          required: true
