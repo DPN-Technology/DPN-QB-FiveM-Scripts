@@ -1,0 +1,52 @@
+name: DPN Feature Request
+description: Suggest an improvement for DPN QB FiveM Scripts
+title: "[FEATURE] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # DPN Technology Feature Request
+        Help us understand the problem first, then the feature.
+  - type: input
+    id: resource
+    attributes:
+      label: Resource
+      description: Existing DPN resource, or "New Resource"
+    validations:
+      required: true
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Framework
+      options:
+        - QBCore
+        - Standalone
+        - Hybrid
+        - Framework Independent
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Need
+      description: What problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Feature
+      description: Describe how you want it to work.
+    validations:
+      required: true
+  - type: textarea
+    id: integrations
+    attributes:
+      label: Integrations / Dependencies
+      description: QBCore, inventory, target, ox_lib, database, etc.
+  - type: textarea
+    id: considerations
+    attributes:
+      label: Security / Performance Considerations
