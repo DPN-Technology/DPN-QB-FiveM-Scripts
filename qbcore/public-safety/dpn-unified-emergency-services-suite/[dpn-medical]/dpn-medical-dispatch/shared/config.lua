@@ -1,7 +1,7 @@
 Config = Config or {}
 
-Config.Version = '4.0.0'
-Config.Debug = true
+Config.Version = '14.0.0'
+Config.Debug = false
 Config.Jobs = { ambulance=true, ems=true, paramedic=true, fire=true, dispatch=true }
 Config.DispatcherJobs = { dispatch=true, ambulance=true, ems=true, paramedic=true, fire=true }
 Config.CallExpiryMinutes = 30
