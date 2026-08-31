@@ -1,0 +1,14 @@
+{
+  "name": "dpn_sitanywhere",
+  "display_name": "Dpn Sitanywhere",
+  "version": "1.0",
+  "framework": "qbcore",
+  "category": "civilian",
+  "status": "imported",
+  "description": "DPN Sit Anywhere",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

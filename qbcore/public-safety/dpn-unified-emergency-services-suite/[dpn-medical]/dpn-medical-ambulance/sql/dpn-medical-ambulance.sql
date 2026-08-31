@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS `dpn_medical_ambulance_log` (`id` bigint unsigned NOT NULL AUTO_INCREMENT,`citizenid` varchar(64) NOT NULL,`vehicle_model` varchar(64) NOT NULL,`plate` varchar(16) NULL,`action` varchar(32) NOT NULL,`created_at` timestamp NOT NULL DEFAULT current_timestamp(),PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

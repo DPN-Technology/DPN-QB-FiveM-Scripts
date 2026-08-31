@@ -1,0 +1,23 @@
+DPN_UNES = DPN_UNES or {}
+DPN_UNES.Constants = {
+    STATUS_CREATED = 'created',
+    STATUS_DISPATCHED = 'dispatched',
+    STATUS_ASSIGNED = 'assigned',
+    STATUS_ENROUTE = 'enroute',
+    STATUS_ONSCENE = 'onscene',
+    STATUS_STAGED = 'staged',
+    STATUS_TRANSPORTING = 'transporting',
+    STATUS_HOSPITAL = 'hospital',
+    STATUS_RESOLVED = 'resolved',
+    STATUS_ARCHIVED = 'archived',
+    UNIT_AVAILABLE = 'available',
+    UNIT_BUSY = 'busy',
+    UNIT_ENROUTE = 'enroute',
+    UNIT_ONSCENE = 'onscene',
+    UNIT_TRANSPORTING = 'transporting',
+    UNIT_OFFRADIO = 'offradio',
+    EVENT_INCIDENT = 'incident',
+    EVENT_UNIT = 'unit',
+    EVENT_BOLO = 'bolo',
+    EVENT_AUDIT = 'audit'
+}

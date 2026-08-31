@@ -1,0 +1,14 @@
+{
+  "name": "dpn-starchase",
+  "display_name": "Dpn Starchase",
+  "version": "1.1.1",
+  "framework": "qbcore",
+  "category": "law-enforcement",
+  "status": "imported",
+  "description": "Advanced QBCore StarChase GPS tracker launcher with NUI remote, lock-on HUD, safe low-profile tracker props, GPS blips, logs, and physical removal.",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

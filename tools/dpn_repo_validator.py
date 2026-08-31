@@ -137,7 +137,9 @@ for resource in sorted(set(resources)):
     readme = resource / "README.md"
     metadata = resource / "resource.json"
 
-    if not resource.name.startswith("dpn-"):
+    if resource.name.startswith("dpn_"):
+        warning(resource, "legacy dpn_ resource name preserved for compatibility; new DPN resources should use dpn-")
+    elif not resource.name.startswith("dpn-"):
         error(resource, "resource folder should use the dpn- prefix")
 
     if any(p.is_symlink() for p in resource.rglob("*")):

@@ -1,0 +1,13 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>DPN Digital Dispatch</title><link rel="stylesheet" href="style.css"></head><body>
+<div id="app" class="hidden">
+  <header><div><h1>DPN Digital Dispatch</h1><p>Emergency Operations Console</p></div><button id="close">×</button></header>
+  <section class="topbar">
+    <input id="unit" placeholder="Unit # ex. 2A-12"><button id="saveUnit">Set Unit</button>
+    <select id="status"></select><button id="saveStatus">Update Status</button>
+  </section>
+  <main>
+    <section class="panel"><h2>Create Call</h2><input id="title" placeholder="Call title"><select id="type"><option value="911">911</option><option value="traffic">Traffic Stop</option><option value="backup">Backup</option><option value="medical">Medical</option><option value="fire">Fire</option><option value="shots">Shots Fired</option><option value="pursuit">Vehicle Pursuit</option><option value="warrant">Warrant Service</option><option value="transport">Prisoner Transport</option><option value="roadblock">Roadblock</option><option value="incident">Major Incident</option></select><textarea id="desc" placeholder="Call details"></textarea><button id="create">Create Dispatch Call</button></section>
+    <section class="panel large"><h2>Active Calls</h2><div id="calls"></div></section>
+    <section class="panel"><h2>Units</h2><div id="units"></div></section>
+  </main>
+</div><script src="app.js"></script></body></html>

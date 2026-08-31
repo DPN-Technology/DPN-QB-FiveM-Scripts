@@ -1,0 +1,16 @@
+{
+  "name": "dpn-vehicle-computer",
+  "display_name": "Dpn Vehicle Computer",
+  "version": "4.0.0",
+  "framework": "qbcore",
+  "category": "public-safety",
+  "status": "imported",
+  "description": "Advanced in-vehicle emergency-services terminal and ALPR",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive",
+  "suite": "dpn-unified-emergency-services-suite",
+  "integrated_public_safety": true
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DPN StarChase</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <main id="app" class="hidden">
+        <section class="remote-shell">
+            <div class="top-glow"></div>
+            <header class="remote-header">
+                <div>
+                    <div class="eyebrow">DPN TECHNOLOGY</div>
+                    <h1 id="title">DPN StarChase</h1>
+                    <p id="unitLabel">LAW GPS TRACKER SYSTEM</p>
+                </div>
+                <div class="status-cluster">
+                    <span class="live-dot"></span>
+                    <span>ONLINE</span>
+                    <button id="closeBtn" class="icon-btn">×</button>
+                </div>
+            </header>
+
+            <section class="dashboard-grid">
+                <aside class="control-panel">
+                    <div class="glass-card scanner-card">
+                        <div class="scanner-ring">
+                            <span></span><span></span><span></span>
+                            <div class="scanner-core">GPS</div>
+                        </div>
+                        <div class="scanner-copy">
+                            <h2>Launcher Remote</h2>
+                            <p>Arm, deploy, route, ping, or detach active trackers without unsafe PIT contact.</p>
+                        </div>
+                    </div>
+
+                    <div class="button-grid">
+                        <button id="fireBtn" class="primary-btn danger">Deploy Tracker</button>
+                        <button id="refreshBtn" class="primary-btn">Refresh GPS</button>
+                    </div>
+
+                    <div class="lockon-box">
+                        <div class="lockon-title">Lock-On HUD</div>
+                        <p>Use the green vehicle box before firing. If it says NO LOCK, align the police vehicle front cone with the suspect vehicle.</p>
+                    </div>
+
+                    <div class="metrics">
+                        <div><span id="activeCount">0</span><small>Active</small></div>
+                        <div><span id="staleCount">0</span><small>Weak GPS</small></div>
+                        <div><span id="cooldownText">Ready</span><small>Launcher</small></div>
+                    </div>
+
+                    <div class="tip-box">
+                        <strong>Operator Note</strong>
+                        <p>Keep the suspect vehicle inside the forward cone. The system locks to the nearest vehicle and broadcasts GPS pings to on-duty units.</p>
+                    </div>
+
+                    <div class="keybind-card">
+                        <strong>Controls</strong>
+                        <div id="keybindList" class="keybind-list"></div>
+                        <p class="keybind-note">Change these in ESC → Settings → Key Bindings → FiveM, or edit Config.Controls defaults.</p>
+                    </div>
+                </aside>
+
+                <section class="tracker-panel">
+                    <div class="panel-title-row">
+                        <div>
+                            <h2>Active Trackers</h2>
+                            <p>Live GPS locks synced through DPN StarChase.</p>
+                        </div>
+                        <div class="mini-badge">SECURE REMOTE</div>
+                    </div>
+
+                    <div id="trackerList" class="tracker-list"></div>
+                </section>
+            </section>
+
+            <footer class="remote-footer">
+                <span id="toast">System initialized.</span>
+                <span>ESC to close</span>
+            </footer>
+        </section>
+    </main>
+    <script src="js/app.js"></script>
+</body>
+</html>

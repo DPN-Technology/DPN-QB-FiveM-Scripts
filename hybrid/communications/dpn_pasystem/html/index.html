@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DPN PA System</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div id="app" class="hidden">
+        <div class="panel">
+            <div class="header">
+                <div>
+                    <div class="eyebrow">DPN Technology</div>
+                    <h1>Emergency Vehicle PA</h1>
+                </div>
+                <button id="closeBtn" class="icon-btn">×</button>
+            </div>
+
+            <div class="status-grid">
+                <div class="status-card" id="authCard">
+                    <span>Authorization</span>
+                    <strong id="authText">Loading</strong>
+                </div>
+                <div class="status-card" id="voiceCard">
+                    <span>pma-voice</span>
+                    <strong id="voiceText">Checking</strong>
+                </div>
+                <div class="status-card" id="vehicleCard">
+                    <span>Vehicle</span>
+                    <strong id="vehicleText">Not detected</strong>
+                </div>
+                <div class="status-card" id="liveCard">
+                    <span>PA State</span>
+                    <strong id="liveText">Idle</strong>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <h2>Range Presets</h2>
+                    <span id="rangeValue">160m</span>
+                </div>
+                <div id="presetList" class="presets"></div>
+                <div class="range-row">
+                    <input id="rangeSlider" type="range" min="40" max="260" step="5" />
+                    <input id="rangeNumber" type="number" min="40" max="260" step="5" />
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="startBtn" class="primary">Hold/Start PA</button>
+                <button id="latchBtn" class="secondary">Latch PA</button>
+                <button id="stopBtn" class="danger">Stop PA</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" data-tab="settings">Settings</button>
+                <button class="tab" data-tab="keys">Keybinds</button>
+                <button class="tab" data-tab="help">Install</button>
+            </div>
+
+            <div id="settings" class="tab-page active">
+                <label class="switch-row">
+                    <span>Incoming PA HUD</span>
+                    <input id="hudToggle" type="checkbox" />
+                </label>
+                <label class="switch-row">
+                    <span>Click Sounds</span>
+                    <input id="soundToggle" type="checkbox" />
+                </label>
+                <label class="switch-row">
+                    <span>Default Latch Mode</span>
+                    <input id="latchToggle" type="checkbox" />
+                </label>
+                <label class="select-row">
+                    <span>Panel Position</span>
+                    <select id="positionSelect">
+                        <option value="right">Right</option>
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="top-right">Top Right</option>
+                        <option value="top-left">Top Left</option>
+                        <option value="bottom-right">Bottom Right</option>
+                        <option value="bottom-left">Bottom Left</option>
+                    </select>
+                </label>
+                <button id="saveSettingsBtn" class="secondary full">Save Settings</button>
+            </div>
+
+            <div id="keys" class="tab-page">
+                <div class="key-note">
+                    This resource uses FiveM key mapping. Change keys in <b>Settings → Key Bindings → FiveM</b> and search for <b>DPN PA</b>.
+                </div>
+                <div id="keybindList" class="keybinds"></div>
+            </div>
+
+            <div id="help" class="tab-page">
+                <div class="install-box">
+                    <p><b>Server.cfg order:</b></p>
+                    <code>ensure pma-voice<br />ensure dpn_pasystem</code>
+                    <p>Use <b>/pamenu</b> to open this panel, <b>/pacancel</b> to force stop, and <b>/pastatus</b> for a quick auth/live status report.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+-- Agency client bridge reserved for future per-department UI behavior.
+-- Unit NUI events are handled only in client/main.lua to prevent duplicate UI rows and double renders.

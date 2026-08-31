@@ -1,0 +1,14 @@
+{
+  "name": "dpn_police_qbdoorbell",
+  "display_name": "Dpn Police Qbdoorbell",
+  "version": "1.0",
+  "framework": "qbcore",
+  "category": "law-enforcement",
+  "status": "imported",
+  "description": "DPN QB Police Door Bell",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

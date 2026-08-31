@@ -1,0 +1,10 @@
+local VERSION='11.0.0'
+local timelines, reviews, evidence, releases = {}, {}, {}, {}
+local function uid(p)return('%s-%s-%04d'):format(p,os.time(),math.random(0,9999))end
+local function core(name,...)local a=table.pack(...);local ok,x,y=pcall(function()local p=exports['dpn-medical-core'];return p[name](p,table.unpack(a,1,a.n))end);return ok,x,y end
+exports('CreateForensicTimelineV11',function(target,investigator)local ok,events=core('GetV11NetworkEvents',target,200);local ok2,black=core('GetClinicalBlackBoxV10',target,200);local item={id=uid('FORENSIC11'),target=tonumber(target),investigator=investigator,networkEvents=ok and events or{},clinicalBlackBox=ok2 and black or{},createdAt=os.time()};timelines[item.id]=item;return true,item end)
+exports('RunMortalityReviewV11',function(target,reviewer)local ok,twin=core('GetV11Twin',target);if not ok then return false,'Patient unavailable.'end;local item={id=uid('MORT11'),target=tonumber(target),reviewer=reviewer,predictedMortality=twin.v11.predictedMortality,careGaps=twin.recommendations,preventability=twin.v11.interventionDelayRisk>=65 and'potentially_preventable'or'undetermined',status='open',createdAt=os.time()};reviews[item.id]=item;return true,item end)
+exports('ManageForensicEvidenceV11',function(caseId,evidenceId,action,actor,location)local item={id=uid('EVID11'),caseId=caseId,evidenceId=evidenceId,action=action,actor=actor,location=location,at=os.time()};evidence[#evidence+1]=item;return true,item end)
+exports('AuthorizeBodyReleaseV11',function(caseId,destination,actor)local item={id=uid('REL11'),caseId=caseId,destination=destination,actor=actor,status='authorized',createdAt=os.time()};releases[item.id]=item;return true,item end)
+exports('GetV11CoronerBoard',function()return{version=VERSION,timelines=timelines,reviews=reviews,evidence=evidence,releases=releases,generatedAt=os.time()}end)
+CreateThread(function()Wait(7600);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-coroner',VERSION,{'forensic_timeline','mortality_review','evidence_chain','body_release'})end);print('[dpn-medical-coroner] v11 forensic timeline and mortality review active')end)

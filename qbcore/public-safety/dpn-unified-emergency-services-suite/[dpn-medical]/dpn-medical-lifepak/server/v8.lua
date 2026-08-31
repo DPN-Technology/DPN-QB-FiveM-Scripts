@@ -1,0 +1,8 @@
+local VERSION='8.0.0'
+local shocks, cprQuality, twelveLeads = {}, {}, {}
+local function uid(prefix)return('%s-%s-%04d'):format(prefix,os.time(),math.random(0,9999))end
+exports('RecordShockQuality',function(target,data,actor)data=type(data)=='table'and data or{};local item={id=uid('SHOCK'),target=target,joules=tonumber(data.joules)or 200,preRhythm=data.preRhythm,postRhythm=data.postRhythm,success=data.success==true,actor=actor,createdAt=os.time()};shocks[item.id]=item;return item.id,item end)
+exports('RecordCPRQuality',function(target,data,actor)data=type(data)=='table'and data or{};local rate=tonumber(data.rate)or 100;local depth=tonumber(data.depthCm)or 5;local fraction=tonumber(data.compressionFraction)or 0.8;local score=math.max(0,100-math.abs(rate-110)*1.5-math.abs(depth-5.5)*15-math.max(0,0.8-fraction)*100);local item={id=uid('CPR'),target=target,score=math.floor(score),data=data,actor=actor,createdAt=os.time()};cprQuality[item.id]=item;return item.score,item end)
+exports('InterpretTwelveLead',function(target,leads,actor)leads=type(leads)=='table'and leads or{};local finding=leads.stElevation and'stemi'or(leads.irregular and'atrial_fibrillation'or'no_acute_ischemia');local item={id=uid('ECG12'),target=target,finding=finding,leads=leads,actor=actor,createdAt=os.time()};twelveLeads[item.id]=item;return finding,item end)
+exports('GetLifepakV8Board',function()return{shocks=shocks,cprQuality=cprQuality,twelveLeads=twelveLeads,generatedAt=os.time()}end)
+CreateThread(function()Wait(3000);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-lifepak',VERSION,{'shock_quality','cpr_feedback','twelve_lead_interpretation','resuscitation_analytics'})end);print('[dpn-medical-lifepak] v8 resuscitation quality analytics active')end)

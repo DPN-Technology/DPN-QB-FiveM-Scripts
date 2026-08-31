@@ -1,0 +1,2 @@
+-- DPN MIB menu bridge placeholder.
+-- IMPORTANT: Do not reset Config here. Main NUI menu is handled in client/main.lua.

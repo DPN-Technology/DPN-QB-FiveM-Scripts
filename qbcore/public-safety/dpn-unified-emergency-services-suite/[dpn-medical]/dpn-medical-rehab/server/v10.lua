@@ -1,0 +1,9 @@
+local VERSION='10.0.0'
+local recoveryCommand, cognitive, returnPlans = {}, {}, {}
+local function uid(p)return('%s-%s-%04d'):format(p,os.time(),math.random(0,9999))end
+local function core(name,...)local a=table.pack(...);local ok,x,y=pcall(function()local p=exports['dpn-medical-core'];return p[name](p,table.unpack(a,1,a.n))end);return ok,x,y end
+exports('CreateRecoveryCommandPlanV10',function(target,baseline,supports)local ok,twin=core('GetV10Twin',target);if not ok or type(twin)~='table'then return false,'Patient unavailable.'end;local item={id=uid('REC10'),target=tonumber(target),baseline=baseline or{},supports=supports or{},risk=twin.v10.commandRisk,deliriumRisk=twin.neuroCritical.deliriumRisk,phases={'medical_stability','early_mobility','functional_training','community_transition'},status='active',createdAt=os.time()};recoveryCommand[item.id]=item;return true,item end)
+exports('RecordCognitiveRecoveryV10',function(target,domain,score,therapist)local item={id=uid('COG10'),target=tonumber(target),domain=domain,score=score,therapist=therapist,createdAt=os.time()};cognitive[item.id]=item;return true,item end)
+exports('CreateReturnToRolePlanV10',function(target,role,requirements,actor)local item={id=uid('RTR10'),target=tonumber(target),role=role,requirements=requirements or{},actor=actor,status='planned',createdAt=os.time()};returnPlans[item.id]=item;return true,item end)
+exports('GetV10RehabBoard',function()return{version=VERSION,recoveryCommand=recoveryCommand,cognitive=cognitive,returnPlans=returnPlans,generatedAt=os.time()}end)
+CreateThread(function()Wait(8400);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-rehab',VERSION,{'recovery_command','cognitive_recovery','return_to_role','post_critical_illness'})end);print('[dpn-medical-rehab] v10 recovery command and post-critical illness planning active')end)

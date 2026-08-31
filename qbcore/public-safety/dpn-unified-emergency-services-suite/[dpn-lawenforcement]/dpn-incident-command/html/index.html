@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><title>DPN Incident Command</title><link rel="stylesheet" href="style.css"></head>
+<body><div id="app" class="hidden">
+  <div class="panel">
+    <header><div><h1>DPN Incident Command</h1><p>Unified command, staging, assignments, and scene control</p></div><button onclick="closeUI()">×</button></header>
+    <section class="grid">
+      <div class="card create">
+        <h2>Create Incident</h2>
+        <input id="title" placeholder="Incident title">
+        <select id="type"><option>general</option><option>pursuit</option><option>active_scene</option><option>fire</option><option>medical</option><option>search_rescue</option><option>major_crime</option></select>
+        <select id="priority"><option>low</option><option selected>medium</option><option>high</option><option>critical</option></select>
+        <textarea id="notes" placeholder="Initial notes / command objectives"></textarea>
+        <button class="primary" onclick="createIncident()">Create at My Location</button>
+      </div>
+      <div class="card list"><h2>Active Incidents</h2><div id="incidents"></div></div>
+      <div class="card detail"><h2>Incident Details</h2><div id="details">Select an incident.</div></div>
+    </section>
+  </div>
+</div><script src="app.js"></script></body></html>

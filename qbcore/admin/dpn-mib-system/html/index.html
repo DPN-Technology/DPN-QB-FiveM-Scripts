@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DPN MIB Command Center V4</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="orb">MIB</div>
+        <div><h1>DPN BLACKSITE</h1><p>Admin + Developer Command</p></div>
+      </div>
+      <button class="nav active" data-tab="dashboard">Dashboard</button>
+      <button class="nav" data-tab="admin">Admin Tools</button>
+      <button class="nav" data-tab="dev">Developer Ops</button>
+      <button class="nav" data-tab="neuralizer">Neuralizer</button>
+      <button class="nav" data-tab="pg7x">PG7X Portals</button>
+      <button class="nav" data-tab="players">Players</button>
+      <button class="nav" data-tab="cases">Cases</button>
+      <button class="nav" data-tab="settings">Diagnostics</button>
+      <div class="sidebarFoot"><button id="closeBtn">Close ESC</button></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><h2 id="pageTitle">Dashboard</h2><p id="subtitle">Unified MIB operations suite</p></div>
+        <div class="status"><span id="threatPill">GREEN</span><span id="clock">--:--</span></div>
+      </header>
+
+      <section class="controlStrip">
+        <input id="target" type="number" placeholder="Target Server ID" />
+        <input id="reason" placeholder="Reason / case note required for high-risk actions" />
+        <button data-act="scan">Scan Nearest</button>
+        <button data-act="cloak">Cloak</button>
+        <button data-act="cleanup">Cleanup Area</button>
+      </section>
+
+      <section id="dashboard" class="tab active">
+        <div class="grid cards">
+          <div class="card"><small>Players</small><strong id="playerCount">0</strong><span>online subjects</span></div>
+          <div class="card"><small>Open Cases</small><strong id="caseCount">0</strong><span>active investigations</span></div>
+          <div class="card"><small>Portal System</small><strong>PG7X</strong><span>ready / two-way bridge</span></div>
+          <div class="card"><small>Neuralizer</small><strong>V4</strong><span>target + area protocols</span></div>
+        </div>
+        <div class="panel"><h3>Rapid Operations</h3><div class="toolgrid">
+          <button data-act="healSelf">Heal Self</button><button data-act="armor">Suit Armor</button><button data-act="revive">Revive Target</button><button data-act="freeze">Freeze Target</button>
+          <button data-act="goto_player">Goto Target</button><button data-act="bring">Bring Target</button><button data-act="spectate">Spectate</button><button data-act="lockdown">Blacksite Lockdown</button>
+          <button data-act="pgAim">Open PG7X Aim Portal</button><button data-act="neuralBeta">Beta Neuralize</button><button data-act="neuralArea">Area Neuralize</button><button data-act="copyCoords">Copy Coords</button>
+        </div></div>
+        <div class="panel"><h3>Latest Output</h3><pre id="output">Waiting for command center data...</pre></div>
+      </section>
+
+      <section id="admin" class="tab">
+        <div class="panel"><h3>Player Administration</h3><div class="toolgrid">
+          <button data-act="goto_player">Goto Player</button><button data-act="bring">Bring Player</button><button data-act="spectate">Spectate Player</button><button data-act="freeze">Containment Freeze</button>
+          <button data-act="revive">Revive Player</button><button data-act="setBucket">Set Bucket</button><button data-act="kick">Kick Player</button><button data-act="wipe_scene">Scene Wipe</button>
+        </div></div>
+        <div class="panel"><h3>Self / Vehicle / World Tools</h3><div class="toolgrid">
+          <button data-act="healSelf">Heal Self</button><button data-act="godmode">Toggle Godmode</button><button data-act="invisible">Toggle Invisible</button><button data-act="noclip">Toggle Noclip</button>
+          <button data-act="repairVehicle">Repair Vehicle</button><button data-act="cleanVehicle">Clean Vehicle</button><button data-act="flipVehicle">Flip Vehicle</button><button data-act="deleteVehicle">Delete Vehicle</button>
+          <button data-act="cleanup_world">World Cleanup</button><button data-act="announce">Global Announcement</button><button data-act="weather">Set Weather</button><button data-act="time">Set Time</button>
+        </div></div>
+      </section>
+
+      <section id="dev" class="tab">
+        <div class="panel"><h3>Developer Operations</h3><div class="toolgrid">
+          <button data-act="entityInspector">Entity Inspector</button><button data-act="debugOverlay">Debug Overlay</button><button data-act="copyCoords">Copy Coords</button><button data-act="resourceStatus">Resource Status</button>
+          <button data-act="pgAim">PG7X Aim Portal</button><button data-act="nuiReload">Reload NUI</button><button data-act="vehicle_scan">Vehicle Deep Scan</button><button data-act="cleanup_world">Cleanup Test Area</button>
+        </div></div>
+        <div class="panel"><h3>Developer Notes</h3><p class="muted">Use this tab for building/testing DPN scripts: coordinate copying, entity debugging, portal testing, routing bucket tests, and NUI reloads.</p></div>
+      </section>
+
+      <section id="neuralizer" class="tab">
+        <div class="panel"><h3>Advanced Neuralizer Protocols</h3><div class="toolgrid">
+          <button data-act="neuralAlpha">Alpha Calm Witness</button><button data-act="neuralBeta">Beta Standard Reset</button><button data-act="neuralGamma">Gamma Incident Suppression</button><button data-act="neuralOmega">Omega Blacksite Protocol</button><button data-act="neuralArea">Area Flash Crowd Reset</button>
+        </div></div>
+        <div class="panel warning"><h3>Safety</h3><p>High-risk memory actions require a reason. Area flash affects nearby players inside radius.</p></div>
+      </section>
+
+      <section id="pg7x" class="tab">
+        <div class="panel"><h3>PG7X Portal Destinations</h3><div id="pgDestinations" class="toolgrid"></div></div>
+        <div class="panel"><h3>Portal Controls</h3><div class="toolgrid"><button data-act="pgAim">Open Portal Where Looking</button><button data-act="pg1">MIB HQ</button><button data-act="pg2">Pillbox</button><button data-act="pg5">Zancudo Blacksite</button></div></div>
+      </section>
+
+      <section id="players" class="tab"><div class="panel"><h3>Online Players</h3><div id="playersList" class="list"></div></div></section>
+      <section id="cases" class="tab"><div class="panel"><h3>Cases</h3><div class="caseCreator"><input id="caseTitle" placeholder="Case title"/><select id="caseThreat"><option value="green">Green</option><option value="yellow">Yellow</option><option value="orange">Orange</option><option value="red">Red</option><option value="black">Black</option></select><button data-act="create_case">Create Case</button></div><div id="caseList" class="list"></div></div></section>
+      <section id="settings" class="tab"><div class="panel"><h3>Diagnostics</h3><div class="toolgrid"><button data-act="resourceStatus">Resource Status</button><button data-act="mibDebug">Client Debug</button><button data-act="nuiReload">Reload UI</button></div><pre id="diag">Ready.</pre></div></section>
+    </main>
+  </div>
+  <div id="static"></div>
+  <script src="app.js"></script>
+</body>
+</html>

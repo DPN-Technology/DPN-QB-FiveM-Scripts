@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" style="background:transparent!important;background-color:transparent!important">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DPN Medical Core</title>
+    <style id="dpn-nui-safety">
+        html, body { background: transparent !important; background-color: transparent !important; }
+        #app, #hud { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+        #app.dpn-open { display: grid !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
+        #hud.dpn-open { display: block !important; opacity: 1 !important; visibility: visible !important; pointer-events: none !important; }
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="background:transparent">
+    <section id="hud" class="hud hidden" aria-live="polite" hidden>
+        <div class="hud-top">
+            <span class="pulse"></span>
+            <strong>DPN MEDICAL</strong>
+            <span id="hud-triage" class="triage green">GREEN</span>
+        </div>
+        <div class="hud-grid">
+            <div><small>BLOOD</small><b id="hud-blood">5000 ml</b></div>
+            <div><small>SpO2</small><b id="hud-spo2">99%</b></div>
+            <div><small>PAIN</small><b id="hud-pain">0</b></div>
+            <div><small>SHOCK</small><b id="hud-shock">0</b></div>
+        </div>
+    </section>
+
+    <div id="app" class="app hidden" hidden>
+        <main class="panel" role="dialog" aria-modal="true" aria-label="DPN medical monitor">
+            <header class="header">
+                <div>
+                    <p class="eyebrow">DPN TECHNOLOGY · CLINICAL SYSTEM</p>
+                    <h1>Patient Medical Monitor</h1>
+                    <p id="patient-label" class="patient-label">Patient</p>
+                </div>
+                <div class="header-actions">
+                    <button id="refresh" class="icon-button" type="button" title="Refresh">↻</button>
+                    <button id="close" class="icon-button danger" type="button" title="Close">×</button>
+                </div>
+            </header>
+
+            <nav class="tabs" aria-label="Medical sections">
+                <button class="tab active" data-tab="overview" type="button">Overview</button>
+                <button class="tab" data-tab="injuries" type="button">Injuries</button>
+                <button class="tab" data-tab="treatments" type="button">Treatments</button>
+                <button class="tab" data-tab="clinical" type="button">Clinical</button>
+                <button class="tab" data-tab="history" type="button">History</button>
+            </nav>
+
+            <section id="overview" class="view active">
+                <div id="critical-banner" class="critical-banner hidden">CRITICAL CONDITION</div>
+                <div class="vital-grid">
+                    <article class="vital"><span>Blood Volume</span><strong id="blood">—</strong><small>mL</small></article>
+                    <article class="vital"><span>Blood Pressure</span><strong id="bp">—</strong><small>mmHg</small></article>
+                    <article class="vital"><span>Heart Rate</span><strong id="hr">—</strong><small>bpm</small></article>
+                    <article class="vital"><span>Respiration</span><strong id="rr">—</strong><small>/min</small></article>
+                    <article class="vital"><span>Oxygen</span><strong id="spo2">—</strong><small>SpO2</small></article>
+                    <article class="vital"><span>Temperature</span><strong id="temp">—</strong><small>°F</small></article>
+                </div>
+                <div class="status-grid">
+                    <article><span>Pain</span><div class="meter"><i id="pain-bar"></i></div><b id="pain">0</b></article>
+                    <article><span>Shock</span><div class="meter"><i id="shock-bar"></i></div><b id="shock">0</b></article>
+                    <article><span>Triage</span><b id="triage" class="triage green">GREEN</b></article>
+                    <article><span>Consciousness</span><b id="consciousness">Conscious</b></article>
+                </div>
+                <div class="advanced-grid">
+                    <article><span>MAP</span><strong id="map">—</strong></article>
+                    <article><span>GCS</span><strong id="gcs">—</strong></article>
+                    <article><span>NEWS</span><strong id="news">—</strong></article>
+                    <article><span>qSOFA</span><strong id="qsofa">—</strong></article>
+                    <article><span>Lactate</span><strong id="lactate">—</strong></article>
+                    <article><span>Risk</span><strong id="risk">—</strong></article>
+                    <article><span>Rhythm</span><strong id="rhythm">—</strong></article>
+                    <article><span>Perfusion</span><strong id="perfusion">—</strong></article>
+                    <article><span>Command Risk</span><strong id="command-risk">—</strong></article>
+                    <article><span>Arrest Forecast</span><strong id="arrest-min">—</strong></article>
+                    <article><span>Clot Stability</span><strong id="clot-stability">—</strong></article>
+                    <article><span>ABG</span><strong id="abg-status">—</strong></article>
+                    <article><span>ICU Need</span><strong id="icu-need">—</strong></article>
+                    <article><span>Care Gaps</span><strong id="care-gaps">—</strong></article>
+                    <article><span>Toxicology</span><strong id="toxidrome">—</strong></article>
+                    <article><span>Data Confidence</span><strong id="data-confidence">—</strong></article>
+                    <article><span>V12 Integrated Risk</span><strong id="v12-risk">—</strong></article>
+                    <article><span>Population</span><strong id="v12-population">—</strong></article>
+                    <article><span>Cardiac Reserve</span><strong id="v12-cardiac-reserve">—</strong></article>
+                    <article><span>P/F Ratio</span><strong id="v12-pf-ratio">—</strong></article>
+                    <article><span>ECMO Need</span><strong id="v12-ecmo">—</strong></article>
+                    <article><span>CRRT Need</span><strong id="v12-crrt">—</strong></article>
+                    <article><span>V12 Destination</span><strong id="v12-destination">—</strong></article>
+                    <article><span>Decompensation</span><strong id="v12-decomp">—</strong></article>
+                </div>
+            </section>
+
+            <section id="injuries" class="view">
+                <div class="section-heading">
+                    <div><h2>Body Assessment</h2><p>Select a body region to review and treat.</p></div>
+                    <span id="injury-count" class="counter">0 active</span>
+                </div>
+                <div id="body-grid" class="body-grid"></div>
+            </section>
+
+            <section id="treatments" class="view">
+                <div class="section-heading">
+                    <div><h2>Treatment Console</h2><p id="selected-part-label">Select an injured body region first.</p></div>
+                </div>
+                <div id="treatment-grid" class="treatment-grid"></div>
+                <p class="notice">Treatment permissions, proximity, duty status, and optional inventory requirements are verified server-side.</p>
+            </section>
+
+
+            <section id="clinical" class="view">
+                <div class="section-heading"><div><h2>Clinical Coordination</h2><p>Profile alerts, protocols, devices, and multidisciplinary care plan.</p></div></div>
+                <div class="clinical-columns">
+                    <article class="clinical-card"><h3>Patient Safety</h3><div id="profile-summary" class="clinical-list"></div></article>
+                    <article class="clinical-card"><h3>Active Protocols</h3><div id="protocol-list" class="clinical-list"></div></article>
+                    <article class="clinical-card wide"><h3>Care Plan</h3><div id="care-plan-list" class="clinical-list"></div></article>
+                </div>
+            </section>
+
+            <section id="history" class="view">
+                <div class="section-heading"><div><h2>Clinical Timeline</h2><p>Most recent treatments and trauma records.</p></div></div>
+                <div id="history-list" class="history-list"></div>
+            </section>
+
+            <footer class="footer">
+                <span id="connection">LIVE · SERVER AUTHORITATIVE</span>
+                <span>ESC closes monitor</span>
+            </footer>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

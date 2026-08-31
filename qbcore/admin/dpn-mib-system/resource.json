@@ -1,0 +1,14 @@
+{
+  "name": "dpn-mib-system",
+  "display_name": "Dpn MIB System",
+  "version": "4.0.0-admin-dev-pg7x",
+  "framework": "qbcore",
+  "category": "admin",
+  "status": "imported",
+  "description": "DPN MIB System V4 - Admin + Developer Operations Suite with PG7X and Advanced Neuralizer",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

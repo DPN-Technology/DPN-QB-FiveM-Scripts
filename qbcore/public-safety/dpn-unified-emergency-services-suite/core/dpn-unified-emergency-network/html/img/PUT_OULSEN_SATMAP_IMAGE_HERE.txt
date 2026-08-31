@@ -1,0 +1,5 @@
+Place your exported oulsen_satmap image here and name it:
+
+oulsen_satmap.png
+
+NUI cannot read streamed .ytd map textures directly, so the command center needs a static PNG/JPG copy for the background.

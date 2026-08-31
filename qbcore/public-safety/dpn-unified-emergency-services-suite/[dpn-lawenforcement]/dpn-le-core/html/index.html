@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPN Law Enforcement Network</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" class="hidden">
+    <div class="shell">
+        <header>
+            <div class="brand">
+                <div class="shield">DPN</div>
+                <div><h1 id="title">DPN Law Enforcement Network</h1><p id="identity">Secure emergency operations console</p></div>
+            </div>
+            <div class="header-actions"><span id="dutyBadge" class="badge off">OFF DUTY</span><button id="close" aria-label="Close">×</button></div>
+        </header>
+
+        <nav>
+            <button class="nav active" data-tab="overview">Operations</button>
+            <button class="nav" data-tab="interactions">Field Actions</button>
+            <button class="nav" data-tab="records">Citations & Booking</button>
+            <button class="nav" data-tab="dispatch">Dispatch</button>
+            <button class="nav" data-tab="units">Units</button>
+        </nav>
+
+        <main>
+            <section id="overview" class="tab active">
+                <div class="grid two">
+                    <article class="panel">
+                        <div class="panel-title"><h2>Officer Control</h2><span class="eyebrow">QBCore Native</span></div>
+                        <button id="toggleDuty" class="wide primary">Toggle Duty</button>
+                        <label>Status</label>
+                        <div class="row"><select id="statusSelect"></select><button id="setStatus">Update</button></div>
+                        <label>Unit Identifier</label>
+                        <div class="row"><input id="unitInput" maxlength="16" placeholder="Example: 2A-12"><button id="setUnit">Set Unit</button></div>
+                    </article>
+                    <article class="panel">
+                        <div class="panel-title"><h2>Network Health</h2><span class="live-dot">LIVE</span></div>
+                        <div class="stats">
+                            <div><strong id="unitCount">0</strong><span>Units</span></div>
+                            <div><strong id="callCount">0</strong><span>Calls</span></div>
+                            <div><strong id="priorityCount">0</strong><span>Priority 1</span></div>
+                        </div>
+                        <button id="testCall" class="wide secondary">Run Dispatch Integration Test</button>
+                    </article>
+                </div>
+                <article class="panel"><div class="panel-title"><h2>Priority Dispatch</h2><span class="eyebrow">Current incidents</span></div><div id="priorityCalls" class="card-list"></div></article>
+            </section>
+
+            <section id="interactions" class="tab">
+                <article class="panel">
+                    <div class="panel-title"><h2>Nearby Subject Actions</h2><span class="eyebrow">Server validated</span></div>
+                    <p class="hint">Leave the server ID blank to use the closest player. All actions require an on-duty law-enforcement job and pass server-side distance checks.</p>
+                    <label>Target Server ID</label><input id="actionTarget" type="number" min="1" placeholder="Closest player">
+                    <div class="action-grid">
+                        <button data-action="cuff">Hard Cuff / Uncuff</button>
+                        <button data-action="softcuff">Soft Cuff / Uncuff</button>
+                        <button data-action="escort">Start / Stop Escort</button>
+                        <button data-action="search">Search Subject</button>
+                        <button data-action="putvehicle">Place In Vehicle</button>
+                        <button data-action="removevehicle">Remove From Vehicle</button>
+                    </div>
+                </article>
+                <article class="panel"><div class="panel-title"><h2>Search Results</h2><span id="searchSubject" class="eyebrow">No search completed</span></div><div id="searchResults" class="search-results"><p class="hint">Search data appears here.</p></div></article>
+            </section>
+
+            <section id="records" class="tab">
+                <div class="grid two">
+                    <article class="panel">
+                        <div class="panel-title"><h2>Issue Citation</h2><span class="eyebrow">Permanent record</span></div>
+                        <label>Target Server ID</label><input id="citationTarget" type="number" min="1" placeholder="Closest player">
+                        <label>Amount</label><input id="citationAmount" type="number" min="1" placeholder="500">
+                        <label>Reason</label><textarea id="citationReason" maxlength="255" placeholder="Violation and circumstances"></textarea>
+                        <button id="issueCitation" class="wide primary">Issue Citation</button>
+                    </article>
+                    <article class="panel">
+                        <div class="panel-title"><h2>Book Suspect</h2><span class="eyebrow">Corrections ready</span></div>
+                        <label>Target Server ID</label><input id="bookingTarget" type="number" min="1" placeholder="Closest player">
+                        <label>Charges</label><textarea id="bookingCharges" maxlength="1000" placeholder="List charges"></textarea>
+                        <div class="row"><div class="field"><label>Sentence (minutes)</label><input id="bookingSentence" type="number" min="0" value="0"></div><div class="field"><label>Fine</label><input id="bookingFine" type="number" min="0" value="0"></div></div>
+                        <label>Booking Notes</label><textarea id="bookingNotes" maxlength="2000" placeholder="Probable cause, property, medical alerts, transport notes"></textarea>
+                        <button id="bookSuspect" class="wide danger">Complete Booking</button>
+                    </article>
+                </div>
+            </section>
+
+            <section id="dispatch" class="tab"><article class="panel full"><div class="panel-title"><h2>Active Dispatch Calls</h2><span class="eyebrow">Unified DPN Emergency Network</span></div><div id="calls" class="card-list"></div></article></section>
+            <section id="units" class="tab"><article class="panel full"><div class="panel-title"><h2>Emergency Network Units</h2><span class="eyebrow">Law • Fire • EMS • Dispatch</span></div><div id="officers" class="unit-grid"></div></article></section>
+        </main>
+
+        <footer><span>DPN Technology Secure Operations</span><span>qb-policejob independent</span></footer>
+    </div>
+</div>
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

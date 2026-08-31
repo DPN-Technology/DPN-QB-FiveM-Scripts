@@ -1,0 +1,128 @@
+* {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    background: transparent;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.flash {
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(210,245,255,0.98) 22%, rgba(255,255,255,0.92) 42%, rgba(255,255,255,0.0) 100%);
+    opacity: 0;
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+.flash.full {
+    animation: dpnFlashFull 850ms ease-out forwards;
+}
+
+.flash.nearby {
+    animation: dpnFlashNearby 280ms ease-out forwards;
+}
+
+.flash.source {
+    animation: dpnFlashSource 850ms ease-out forwards;
+}
+
+.charge {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 92px;
+    height: 92px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0;
+    animation: dpnCharge 450ms ease-in-out forwards;
+}
+
+.ring,
+.core {
+    position: absolute;
+    border-radius: 999px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.ring-one {
+    width: 90px;
+    height: 90px;
+    border: 2px solid rgba(0, 240, 255, 0.85);
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.75), inset 0 0 18px rgba(0, 240, 255, 0.45);
+}
+
+.ring-two {
+    width: 55px;
+    height: 55px;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 22px rgba(255, 255, 255, 0.85), inset 0 0 16px rgba(255, 255, 255, 0.55);
+    animation: dpnSpin 450ms linear forwards;
+}
+
+.core {
+    width: 18px;
+    height: 18px;
+    background: rgba(255,255,255,1);
+    box-shadow: 0 0 26px rgba(255,255,255,1), 0 0 52px rgba(0,240,255,0.85);
+}
+
+@keyframes dpnFlashFull {
+    0% { opacity: 0; filter: blur(0px); }
+    8% { opacity: 1; filter: blur(2px); }
+    38% { opacity: 0.96; filter: blur(5px); }
+    100% { opacity: 0; filter: blur(16px); }
+}
+
+@keyframes dpnFlashSource {
+    0% { opacity: 0; filter: blur(0px); }
+    9% { opacity: 0.86; filter: blur(2px); }
+    34% { opacity: 0.72; filter: blur(4px); }
+    100% { opacity: 0; filter: blur(14px); }
+}
+
+@keyframes dpnFlashNearby {
+    0% { opacity: 0; }
+    16% { opacity: 0.55; }
+    100% { opacity: 0; }
+}
+
+@keyframes dpnCharge {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.15) rotate(0deg); }
+    55% { opacity: 1; transform: translate(-50%, -50%) scale(1.0) rotate(160deg); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.35) rotate(260deg); }
+}
+
+@keyframes dpnSpin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+
+.blackout {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.blackout.active {
+    display: block !important;
+    opacity: 1;
+}

@@ -1,0 +1,14 @@
+{
+  "name": "dpn-pg-7x",
+  "display_name": "Dpn Pg 7x",
+  "version": "1.3.1",
+  "framework": "hybrid",
+  "category": "admin",
+  "status": "imported",
+  "description": "DPN PG-7X Admin Portal Gun for FiveM with Nearest Postal Integration, NUI, vertical paired two-way portals",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

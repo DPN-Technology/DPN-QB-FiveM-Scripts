@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>DPN PG-7X</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <div id="app" class="hidden">
+        <div id="panel">
+            <div id="header">
+                <div id="brand">DPN TECHNOLOGY</div>
+                <div id="title">PG-7X PORTAL CONTROL</div>
+                <button id="closeBtn" type="button">X</button>
+            </div>
+
+            <table id="statusTable" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><span>Admin Link</span><b id="adminStatus">LOCKED</b></td>
+                    <td><span>Device</span><b id="deviceStatus">DISARMED</b></td>
+                    <td><span>Selected Destination</span><b id="selectedLabel">NONE</b></td>
+                    <td><span>Current Postal</span><b id="currentPostal">N/A</b></td>
+                </tr>
+            </table>
+
+            <div class="buttonRow">
+                <button id="toggleModeBtn" type="button">ARM / DISARM</button>
+                <button id="firePortalBtn" type="button" class="primary">OPEN PORTAL</button>
+                <button id="closePortalBtn" type="button">CLOSE PORTAL</button>
+                <button id="refreshBtn" type="button">REFRESH</button>
+            </div>
+
+            <div id="tabs">
+                <button type="button" class="tab active" data-tab="saved">SAVED</button>
+                <button type="button" class="tab" data-tab="postal">POSTALS</button>
+                <button type="button" class="tab" data-tab="system">SYSTEM</button>
+            </div>
+
+            <div id="savedTab" class="tabPage active">
+                <div class="formRow">
+                    <input id="saveName" type="text" maxlength="40" placeholder="Destination name at current location">
+                    <button id="saveHereBtn" type="button">SAVE HERE</button>
+                </div>
+                <div class="formRow single">
+                    <input id="destSearch" type="text" placeholder="Search saved destinations">
+                </div>
+                <div id="destList" class="listBox"></div>
+            </div>
+
+            <div id="postalTab" class="tabPage">
+                <table id="postalStatusTable" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td><span>Postal Database</span><b id="postalDbStatus">NOT READY</b></td>
+                        <td><span>Source</span><b id="postalDbSource">N/A</b></td>
+                    </tr>
+                </table>
+
+                <div class="formRow">
+                    <input id="postalInput" type="text" maxlength="12" placeholder="Enter postal code, example 401">
+                    <button id="selectPostalBtn" type="button" class="primary">SET POSTAL</button>
+                </div>
+                <div class="buttonRow small">
+                    <button id="useCurrentPostalBtn" type="button">USE CURRENT POSTAL</button>
+                    <button id="savePostalBtn" type="button">SAVE POSTAL DESTINATION</button>
+                </div>
+                <div class="formRow">
+                    <input id="postalSaveName" type="text" maxlength="40" placeholder="Optional saved destination name">
+                    <button id="searchPostalBtn" type="button">SEARCH POSTAL</button>
+                </div>
+                <div id="postalResults" class="listBox smallList"></div>
+            </div>
+
+            <div id="systemTab" class="tabPage">
+                <div id="terminal">
+                    <p><b>Emergency close:</b> ESC, Backspace, F8, /pguifix, or /pguireset.</p>
+                    <p><b>/pg7x</b> toggles portal gun mode.</p>
+                    <p><b>/pgui</b> opens this interface. Default key: F7.</p>
+                    <p><b>/pgpostal current</b> selects your current nearest postal when the export is available.</p>
+                    <p><b>/pgpostal 401</b> selects postal 401 as a temporary destination.</p>
+                    <p><b>/pgdest save name</b> saves your current position.</p>
+                    <p><b>/pgclose</b> closes your active portal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="app.js"></script>
+</body>
+</html>

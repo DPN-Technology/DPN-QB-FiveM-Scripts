@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <title>DPN Smart City</title>
+</head>
+<body>
+  <div id="app" class="hidden">
+    <div class="panel">
+      <header>
+        <div>
+          <h1>DPN SMART CITY</h1>
+          <p>Citywide law enforcement sensor grid</p>
+        </div>
+        <button id="close">×</button>
+      </header>
+
+      <main>
+        <section class="card wide">
+          <h2>Create BOLO</h2>
+          <div class="form">
+            <input id="plate" placeholder="Plate" maxlength="16" />
+            <input id="reason" placeholder="Reason" />
+            <select id="priority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+            <button id="addBolo">Add BOLO</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Active BOLOs</h2>
+          <div id="bolos" class="list"></div>
+        </section>
+
+        <section class="card">
+          <h2>Traffic Control</h2>
+          <div id="nodes" class="list"></div>
+        </section>
+
+        <section class="card wide">
+          <h2>Recent Smart City Events</h2>
+          <button id="refresh">Refresh Events</button>
+          <div id="events" class="list events"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

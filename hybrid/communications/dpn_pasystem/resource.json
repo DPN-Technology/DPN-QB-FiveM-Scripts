@@ -1,0 +1,14 @@
+{
+  "name": "dpn_pasystem",
+  "display_name": "Dpn Pasystem",
+  "version": "2.0.2",
+  "framework": "hybrid",
+  "category": "communications",
+  "status": "imported",
+  "description": "Advanced in-vehicle PA system for emergency personnel using pma-voice proximity override.",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

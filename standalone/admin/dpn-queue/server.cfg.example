@@ -1,0 +1,18 @@
+# =============================
+# DPN Queue Install Example
+# =============================
+
+# Your total server slots
+sv_maxclients 48
+
+# Start this early so connection deferrals run before heavy framework loading.
+ensure dpn-queue
+
+# Admin reserved queue permission
+add_ace group.admin dpn.queue.admin allow
+
+# Queue command permission for /dpnqueue
+add_ace group.admin dpn.queue.manage allow
+
+# Replace with your real FiveM license identifier.
+add_principal identifier.license:PUT_YOUR_LICENSE_HERE group.admin

@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS `dpn_medical_inventory_log` (`id` bigint unsigned NOT NULL AUTO_INCREMENT,`citizenid` varchar(64) NOT NULL,`item` varchar(64) NOT NULL,`amount` int NOT NULL,`action` varchar(32) NOT NULL,`metadata` longtext NULL,`created_at` timestamp NOT NULL DEFAULT current_timestamp(),PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

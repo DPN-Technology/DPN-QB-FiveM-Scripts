@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>DPN UNES</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="hidden no-flicker">
+    <div class="backdrop"></div>
+    <header>
+      <div class="brand"><div class="logo">DPN</div><div><h1>Unified Emergency Service Network</h1><p id="profile">Disconnected</p></div></div>
+      <div class="header-actions"><select id="unitStatus" onchange="setUnitStatus(this.value)"></select><button onclick="closeUI()">Close</button></div>
+    </header>
+    <nav>
+      <button class="tab active" data-tab="dashboard" onclick="setTab('dashboard', this)">Dashboard</button>
+      <button class="tab" data-tab="incidents" onclick="setTab('incidents', this)">Incidents</button>
+      <button class="tab" data-tab="create" onclick="setTab('create', this)">New Call</button>
+      <button class="tab" data-tab="units" onclick="setTab('units', this)">Units</button>
+      <button class="tab" data-tab="bolos" onclick="setTab('bolos', this)">BOLOs</button>
+      <button class="tab" data-tab="support" onclick="setTab('support', this)">Mutual Aid</button>
+      <button class="tab" data-tab="command" onclick="setTab('command', this)">Command</button>
+      <button class="tab" data-tab="map" onclick="setTab('map', this)">Oulsen Live Map</button>
+      <button class="tab" data-tab="safety" onclick="setTab('safety', this)">Responder Safety</button>
+      <button class="tab" data-tab="hospital" onclick="setTab('hospital', this)">Hospital</button>
+      <button class="tab" data-tab="fireops" onclick="setTab('fireops', this)">Fire Ops</button>
+      <button class="tab" data-tab="resources" onclick="setTab('resources', this)">Resources</button>
+      <button class="tab" data-tab="risk" onclick="setTab('risk', this)">Risk Board</button>
+      <button class="tab" data-tab="queue" onclick="setTab('queue', this)">Call Queue</button>
+      <button class="tab" data-tab="bolointel" onclick="setTab('bolointel', this)">BOLO Intel</button>
+      <button class="tab" data-tab="ops" onclick="setTab('ops', this)">Ops Intel</button>
+      <button class="tab" data-tab="runcards" onclick="setTab('runcards', this)">Run Cards</button>
+      <button class="tab" data-tab="audit" onclick="setTab('audit', this)">Audit</button>
+    </nav>
+    <main>
+      <section id="dashboard" class="panel active-panel">
+        <div class="stats"><div class="stat"><b id="statIncidents">0</b><span>Active Incidents</span></div><div class="stat"><b id="statUnits">0</b><span>Live Units</span></div><div class="stat"><b id="statPriority">0</b><span>Priority 1</span></div><div class="stat"><b id="statAssigned">0</b><span>Assigned Calls</span></div><div class="stat"><b id="statBolos">0</b><span>Active BOLOs</span></div><div class="stat"><b id="statMci">0</b><span>MCI Patients</span></div></div>
+        <div class="grid2"><div><h2>Highest Priority Incidents</h2><div id="dashIncidents"></div></div><div><h2>Unit Status Board</h2><div id="dashUnits"></div></div></div>
+      </section>
+      <section id="incidentsPanel" class="panel"><div class="toolbar"><input id="incidentSearch" oninput="renderAll()" placeholder="Search incident, postal, suspect, vehicle, agency..." /><select id="priorityFilter" onchange="renderAll()"><option value="all">All Priorities</option><option value="1">Priority 1</option><option value="2">Priority 2</option><option value="3">Priority 3</option><option value="4">Priority 4</option></select><select id="statusFilter" onchange="renderAll()"><option value="active">Active</option><option value="all">All</option><option value="created">Created</option><option value="assigned">Assigned</option><option value="enroute">Enroute</option><option value="onscene">On Scene</option><option value="staged">Staged</option><option value="transporting">Transporting</option><option value="resolved">Resolved</option></select></div><div id="incidents"></div></section>
+      <section id="createPanel" class="panel"><h2>Create Emergency Incident</h2><div class="grid2"><div class="form-card"><input id="newTitle" placeholder="Call title, example: Structure Fire"/><select id="newType"><option value="custom">Custom</option><option value="law_call">Law Enforcement</option><option value="medical_call">Medical</option><option value="fire_call">Fire</option><option value="mci">Mass Casualty</option><option value="traffic_collision">Traffic Collision</option><option value="court_transport">Court Transport</option></select><select id="newPriority"><option value="1">Priority 1 - Life Safety</option><option value="2">Priority 2 - Emergency</option><option value="3" selected>Priority 3 - Standard</option><option value="4">Priority 4 - Low</option></select><input id="newPostal" placeholder="Postal / Location"/><input id="newCaller" placeholder="Caller / RP name"/><input id="newCallback" placeholder="Callback phone / Discord / radio"/><select id="newHazard"><option value="unknown">Hazard Unknown</option><option value="low">Low Hazard</option><option value="medium">Medium Hazard</option><option value="high">High Hazard</option><option value="extreme">Extreme / Life Safety</option></select><input id="newStaging" placeholder="Staging / command post location"/><input id="newCross" placeholder="Cross street / landmark"/><input id="newTac" placeholder="Radio TAC channel"/><select id="newMode"><option value="normal">Normal Response</option><option value="hot">Hot Response / lights & sirens</option><option value="silent">Silent Approach</option><option value="stage">Stage Until Cleared</option></select><textarea id="newDescription" placeholder="Caller info, hazards, suspect/vehicle notes, entry instructions..."></textarea><button onclick="createIncidentFromUI()">Create Network Incident</button></div><div class="form-card"><h3>Agency Routing</h3><div class="checks routeChecks"><label><input type="checkbox" value="law" checked> Law</label><label><input type="checkbox" value="ems"> EMS</label><label><input type="checkbox" value="fire"> Fire</label><label><input type="checkbox" value="justice"> Justice</label><label><input type="checkbox" value="corrections"> Corrections</label><label><input type="checkbox" value="bail"> Bail</label><label><input type="checkbox" value="tow"> Tow</label><label><input type="checkbox" value="admin"> MIB/Admin</label></div><p class="hint">Routes the call into the shared network without forcing every department to use the same MDT screen.</p></div></div></section>
+      <section id="unitsPanel" class="panel"><div class="toolbar"><input id="unitSearch" oninput="renderAll()" placeholder="Search unit, callsign, radio, vehicle, agency, status..." /><select id="agencyFilter" onchange="renderAll()"><option value="all">All Agencies</option><option value="law">Law</option><option value="ems">EMS</option><option value="fire">Fire</option><option value="justice">Justice</option><option value="corrections">Corrections</option><option value="admin">MIB/Admin</option></select></div><div id="units"></div></section>
+      <section id="bolosPanel" class="panel"><div class="grid2"><div class="form-card"><h2>Create BOLO</h2><input id="boloTitle" placeholder="BOLO title"/><input id="boloPlate" placeholder="Plate"/><input id="boloVehicle" placeholder="Vehicle"/><input id="boloSuspect" placeholder="Suspect"/><select id="boloPriority"><option value="1">Priority 1 - Armed/Dangerous</option><option value="2">Priority 2 - High Risk</option><option value="3" selected>Priority 3 - Standard</option><option value="4">Priority 4 - Info Only</option></select><input id="boloLastSeen" placeholder="Last seen location / postal"/><input id="boloThreat" placeholder="Threat / officer safety notes"/><input id="boloTag1" placeholder="Tag 1: armed, stolen, wanted, missing..."/><input id="boloTag2" placeholder="Tag 2"/><input id="boloRisk" placeholder="Risk indicators: weapon, flight risk, known violence"/><input id="boloNotify" placeholder="Notify agencies: law,corrections,bail,admin"/><textarea id="boloDescription" placeholder="Description, probable cause, caution notes, linked incidents..."></textarea><button onclick="createBolo()">Create Advanced BOLO</button></div><div><h2>Active BOLOs</h2><div id="bolos"></div></div></div></section>
+      <section id="supportPanel" class="panel"><h2>Request Multi-Agency Support</h2><input id="supportIncident" placeholder="Incident ID" /><div class="checks"><label><input type="checkbox" value="law"> Law</label><label><input type="checkbox" value="ems"> EMS</label><label><input type="checkbox" value="fire"> Fire</label><label><input type="checkbox" value="justice"> Justice</label><label><input type="checkbox" value="corrections"> Corrections</label><label><input type="checkbox" value="bail"> Bail</label><label><input type="checkbox" value="tow"> Tow</label><label><input type="checkbox" value="admin"> MIB/Admin</label></div><textarea id="supportNote" placeholder="Support note"></textarea><button onclick="requestSupport()">Request Support</button></section>
+      <section id="commandPanel" class="panel"><h2>Scene Command Tools</h2><div class="grid2"><div class="form-card"><input id="cmdIncident" placeholder="Incident ID"/><input id="cmdCommander" placeholder="Commander callsign"/><button onclick="setCommander()">Set Scene Commander</button><textarea id="incidentNote" placeholder="Add incident note"></textarea><button onclick="addNote()">Add Note</button><input id="objectiveText" placeholder="New objective"/><button onclick="addObjective()">Add Objective</button></div><div class="form-card"><h3>Mass Casualty Triage</h3><input id="triageIncident" placeholder="Incident ID"/><div class="triage"><input id="triRed" placeholder="Red"><input id="triYellow" placeholder="Yellow"><input id="triGreen" placeholder="Green"><input id="triBlack" placeholder="Black"></div><button onclick="updateTriage()">Update Triage</button><div id="commandPreview"></div></div></div></section>
+      <section id="mapPanel" class="panel"><h2>Oulsen Satmap Live Operations Map</h2><p class="hint">Built for oulsen_satmap. Add your exported satmap image at <b>html/img/oulsen_satmap.png</b>. If the image is missing, the UI still shows GPS dots and diagnostics instead of breaking.</p><div class="map-layout"><div id="mapBoard" class="map-board oulsen-map"></div><aside class="map-side"><h3>Map Points / GPS Diagnostics</h3><div id="mapList"></div></aside></div></section>
+      <section id="safetyPanel" class="panel"><h2>Responder Safety Board</h2><p class="hint">Flags stale GPS, off-radio units, active assignments, and priority life-safety calls.</p><div id="safetyBoard"></div></section>
+      <section id="hospitalPanel" class="panel"><h2>Hospital / EMS Coordination</h2><p class="hint">Shows medical calls, MCI events, transports, and collisions that may need hospital routing.</p><div id="hospitalBoard"></div></section>
+      <section id="fireopsPanel" class="panel"><h2>Fire / Rescue Operations</h2><p class="hint">Shows fire, rescue, collision, and MCI events for incident command and staging.</p><div id="fireOpsBoard"></div></section>
+      <section id="resourcesPanel" class="panel"><h2>Resource Overview</h2><div id="resources"></div></section>
+      <section id="opsPanel" class="panel"><h2>Operations Intelligence</h2><p class="hint">Flags unassigned priority calls, stale units, no-GPS units, and life-safety load for command staff.</p><div id="opsIntel"></div></section>
+      <section id="runcardsPanel" class="panel"><h2>Incident Run Cards</h2><p class="hint">Fast printable-style command summaries for active incidents.</p><div id="runCards"></div></section>
+
+      <section id="riskPanel" class="panel"><h2>Critical Risk Board</h2><p class="hint">Priority 1, high-hazard, extreme-risk, and life-safety incidents are elevated here for command staff.</p><div id="riskBoard"></div></section>
+      <section id="queuePanel" class="panel"><h2>Advanced Call Queue</h2><p class="hint">Dispatcher-friendly queue showing priority, assignment load, status, and agency routing.</p><div id="callQueue"></div></section>
+      <section id="bolointelPanel" class="panel"><h2>BOLO Intelligence Center</h2><p class="hint">Shared law, dispatch, corrections, courts, bail, and admin intelligence board with threat and last-seen data.</p><div id="boloIntel"></div></section>
+      <section id="auditPanel" class="panel"><h2>Recent Audit Log</h2><div id="audit"></div></section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
