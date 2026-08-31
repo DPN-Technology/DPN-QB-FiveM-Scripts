@@ -10,12 +10,15 @@
 Free scripts. Editable source. Community-focused development.  
 **Use them. Learn from them. Customize them. Improve them. Do not sell them without permission.**
 
+![DPN Technology](https://img.shields.io/badge/DPN-Technology-purple?style=for-the-badge)
+![Creator](https://img.shields.io/badge/Creator-Diesel-black?style=for-the-badge)
 ![FiveM](https://img.shields.io/badge/FiveM-Resources-orange?style=for-the-badge)
 ![QBCore](https://img.shields.io/badge/QBCore-Compatible-blue?style=for-the-badge)
 ![Standalone](https://img.shields.io/badge/Standalone-Supported-purple?style=for-the-badge)
 ![Free](https://img.shields.io/badge/Price-FREE-brightgreen?style=for-the-badge)
 ![Editable](https://img.shields.io/badge/Source-Editable-success?style=for-the-badge)
 ![No Resale](https://img.shields.io/badge/Resale-FORBIDDEN-red?style=for-the-badge)
+![License](https://img.shields.io/badge/License-DPN--CSL-red?style=for-the-badge)
 
 </div>
 
@@ -68,12 +71,17 @@ Free scripts. Editable source. Community-focused development.
 | Document | Purpose |
 |---|---|
 | [LICENSE](LICENSE) | DPN Technology Community Source License and commercial-use rules |
+| [AUTHORS.md](AUTHORS.md) | Official DPN Technology authorship and project ownership record |
+| [COMMERCIAL_PERMISSION.md](COMMERCIAL_PERMISSION.md) | How to request commercial authorization from Diesel / DPN Technology |
 | [NOTICE.md](NOTICE.md) | Official creator, ownership, and project notice |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution and pull-request requirements |
 | [SECURITY.md](SECURITY.md) | Vulnerability reporting and server-authority security standard |
 | [SUPPORT.md](SUPPORT.md) | Support scope and required troubleshooting information |
 | [GOVERNANCE.md](GOVERNANCE.md) | DPN Technology project authority and decision structure |
 | [DPN_DEVELOPMENT_STANDARD.md](DPN_DEVELOPMENT_STANDARD.md) | Engineering standard for DPN FiveM releases |
+| [Resource README Template](docs/RESOURCE_README_TEMPLATE.md) | Standard documentation template for every DPN script |
+| [Release Checklist](docs/RELEASE_CHECKLIST.md) | Pre-release QA, security, compatibility, and branding checklist |
+| [Source Header Standard](docs/SOURCE_HEADER.md) | Standard DPN Technology authorship header for source files |
 
 ### Official Authorship
 
