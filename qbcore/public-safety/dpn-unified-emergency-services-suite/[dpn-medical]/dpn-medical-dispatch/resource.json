@@ -1,0 +1,16 @@
+{
+  "name": "dpn-medical-dispatch",
+  "display_name": "Dpn Medical Dispatch",
+  "version": "14.0.0",
+  "framework": "qbcore",
+  "category": "public-safety",
+  "status": "imported",
+  "description": "dpn-medical-dispatch v14 - time-critical trauma and resuscitation command",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive",
+  "suite": "dpn-unified-emergency-services-suite",
+  "integrated_public_safety": true
+}

@@ -1,0 +1,31 @@
+local VERSION = '3.0.0'
+local RESOURCE = GetCurrentResourceName()
+local QBCore = exports['qb-core']:GetCoreObject()
+local function encode(value) local ok,result=pcall(json.encode,value or {}); return ok and result or '{}' end
+local function targetPlayer(target) return QBCore.Functions.GetPlayer(tonumber(target)) end
+local function citizen(target) local p=targetPlayer(target); return p and p.PlayerData and p.PlayerData.citizenid or nil end
+local function actor(sourceValue) if type(sourceValue)=='string' then return sourceValue:sub(1,64) end; local p=targetPlayer(sourceValue); return p and p.PlayerData and p.PlayerData.citizenid or ('source:%s'):format(tostring(sourceValue or 'system')) end
+local function uid(prefix,target) return ('%s-%s-%s-%04d'):format(prefix,os.date('%Y%m%d%H%M%S'),tostring(target or 0),math.random(0,9999)) end
+local function asyncInsert(query,params) CreateThread(function() pcall(function() MySQL.insert.await(query,params) end) end) end
+local function asyncUpdate(query,params) CreateThread(function() pcall(function() MySQL.update.await(query,params) end) end) end
+local function core(method,...)
+    local args=table.pack(...)
+    local ok,a,b,c=pcall(function() local proxy=exports['dpn-medical-core']; local fn=proxy and proxy[method]; if type(fn)~='function' then error('missing core export '..tostring(method)) end; return fn(proxy,table.unpack(args,1,args.n)) end)
+    if not ok then return false,nil,tostring(a) end
+    return true,a,b,c
+end
+local function heartbeat(capabilities)
+    CreateThread(function()
+        Wait(2500)
+        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
+        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
+    end)
+end
+
+local ventilators, infusions, rounds = {}, {}, {}
+exports('SetVentilatorSettings',function(sourceValue,target,settings) settings=type(settings)=='table'and settings or{};local item={mode=settings.mode or'AC',rate=tonumber(settings.rate)or 14,tidalVolume=tonumber(settings.tidalVolume)or 450,peep=tonumber(settings.peep)or 5,fio2=tonumber(settings.fio2)or 0.4,provider=actor(sourceValue),updatedAt=os.time()};ventilators[target]=item;core('SetOrganSupport',target,'ventilator',true,item,sourceValue);asyncInsert('INSERT INTO dpn_medical_v6_ventilator_settings (patient_cid,mode,rate,tidal_volume,peep,fio2,provider_cid,settings_data) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE mode=VALUES(mode),rate=VALUES(rate),tidal_volume=VALUES(tidal_volume),peep=VALUES(peep),fio2=VALUES(fio2),provider_cid=VALUES(provider_cid),settings_data=VALUES(settings_data),updated_at=NOW()',{citizen(target),item.mode,item.rate,item.tidalVolume,item.peep,item.fio2,item.provider,encode(item)});return true,item end)
+exports('SetCriticalInfusion',function(sourceValue,target,drug,rate,unit) infusions[target]=infusions[target]or{};local item={drug=drug,rate=tonumber(rate)or 0,unit=unit or'mcg/min',provider=actor(sourceValue),updatedAt=os.time(),active=(tonumber(rate)or 0)>0};infusions[target][drug]=item;if drug=='norepinephrine'or drug=='epinephrine'then core('SetOrganSupport',target,'vasopressor',item.active,item,sourceValue)end;asyncInsert('INSERT INTO dpn_medical_v6_icu_infusions (patient_cid,drug_name,rate,rate_unit,active,provider_cid,infusion_data) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE rate=VALUES(rate),rate_unit=VALUES(rate_unit),active=VALUES(active),provider_cid=VALUES(provider_cid),infusion_data=VALUES(infusion_data),updated_at=NOW()',{citizen(target),drug,item.rate,item.unit,item.active,item.provider,encode(item)});return true,item end)
+exports('RecordICURound',function(sourceValue,target,goals,assessment,plan) local id=uid('RND',target);local item={id=id,target=tonumber(target),patientCid=citizen(target),goals=goals or{},assessment=assessment or{},plan=plan or{},provider=actor(sourceValue),roundedAt=os.time()};rounds[target]=rounds[target]or{};rounds[target][#rounds[target]+1]=item;asyncInsert('INSERT INTO dpn_medical_v6_icu_rounds (round_id,patient_cid,provider_cid,round_data) VALUES (?,?,?,?)',{id,item.patientCid,item.provider,encode(item)});core('CreateStructuredHandoff',target,'ICU multidisciplinary team',{assessment=assessment,recommendation=plan,metadata={dailyGoals=goals}},sourceValue);return id,item end)
+exports('EvaluateICUV6Alarms',function(target) local ok,twin=core('GetDigitalTwin',target);if not ok then return{}end;local out={};local function add(code,severity,message)out[#out+1]={code=code,severity=severity,message=message}end;if twin.advanced.map<65 then add('map','critical','MAP below 65')end;if twin.vitals.spo2<90 then add('spo2','critical','Severe hypoxemia')end;if twin.v6.sofa>=10 then add('sofa','critical','High multi-organ dysfunction')end;if twin.labs.ph<7.25 then add('ph','critical','Severe acidemia')end;if twin.fluids.urineMlHr<20 then add('urine','high','Oliguria')end;return out end)
+exports('GetICUCommandCenter',function()return {ventilators=ventilators,infusions=infusions,rounds=rounds,generatedAt=os.time()}end)
+heartbeat({'ventilator_management','critical_infusions','daily_rounds','organ_support','icu_alarms','multidisciplinary_goals'})

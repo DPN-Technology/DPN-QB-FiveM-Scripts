@@ -1,0 +1,15 @@
+let incidents={}, units={}, markers={}, selected=null;
+const $=id=>document.getElementById(id);
+window.addEventListener('message',e=>{const d=e.data;if(d.action==='open'){ $('app').classList.remove('hidden'); sync(d); } if(d.action==='close') $('app').classList.add('hidden'); if(d.action==='sync') sync(d);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeUI();});
+function post(name,data={}){fetch(`https://${GetParentResourceName()}/${name}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}
+function closeUI(){post('close')}
+function sync(d){incidents=d.incidents||{};units=d.units||{};markers=d.markers||{};renderList();renderDetails();}
+function createIncident(){post('createIncident',{title:$('title').value||'New Incident',incident_type:$('type').value,priority:$('priority').value,notes:$('notes').value||''});}
+function selectIncident(id){selected=id;renderDetails();}
+function renderList(){let html='';Object.values(incidents).forEach(i=>{html+=`<div class="incident" onclick="selectIncident('${i.incident_uid}')"><h3>${esc(i.title)}</h3><span class="tag ${i.priority}">${i.priority}</span><span class="tag">${i.incident_type}</span><p>${esc(i.commander||'No commander')}</p></div>`});$('incidents').innerHTML=html||'<p class="muted">No active incidents.</p>';}
+function renderDetails(){if(!selected||!incidents[selected]){$('details').innerHTML='Select an incident.';return}let i=incidents[selected];let u=units[selected]||[];let m=markers[selected]||[];$('details').innerHTML=`<h3>${esc(i.title)}</h3><p>${esc(i.notes||'No notes')}</p><span class="tag ${i.priority}">${i.priority}</span><span class="tag">${i.status}</span><div class="unitbar"><h2>Units</h2>${u.map(x=>`<div class="row"><b>${esc(x.unit_name)}</b><br><span class="muted">${esc(x.division)} • ${esc(x.role)}</span></div>`).join('')||'<p class="muted">No units assigned.</p>'}<button class="small" onclick="addSelf()">Assign Self</button><button class="small" onclick="addSelf('Operations','Operations Unit')">Operations</button><button class="small" onclick="addSelf('Medical','EMS/Fire')">EMS/Fire</button></div><div class="markerbar"><h2>Scene Markers</h2>${m.map(x=>`<div class="row"><b>${esc(x.label)}</b><br><span class="muted">${esc(x.marker_type)}</span></div>`).join('')||'<p class="muted">No markers.</p>'}<button class="small" onclick="addMarker('staging','Staging Area')">Add Staging</button><button class="small" onclick="addMarker('roadblock','Roadblock')">Add Roadblock</button><button class="small" onclick="addMarker('search_grid','Search Grid')">Add Search Grid</button><button class="small danger" onclick="archiveIncident()">Archive Incident</button></div>`;}
+function addSelf(div='Operations',role='Assigned Unit'){post('addSelf',{id:selected,division:div,role:role})}
+function addMarker(type,label){post('addMarker',{id:selected,marker_type:type,label:label})}
+function archiveIncident(){post('archiveIncident',{id:selected});selected=null;}
+function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}

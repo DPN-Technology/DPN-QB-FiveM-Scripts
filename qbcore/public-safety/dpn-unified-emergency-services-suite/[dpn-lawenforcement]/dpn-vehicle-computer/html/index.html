@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset="utf-8"><title>DPN Vehicle Computer</title><link rel="stylesheet" href="style.css"></head><body>
+<div id="app" class="hidden">
+  <header><div><b>DPN VEHICLE COMPUTER</b><span id="officer">Not logged in</span></div><button onclick="closeUI()">×</button></header>
+  <nav><button onclick="tab('dash')">Dashboard</button><button onclick="tab('dispatch')">Dispatch</button><button onclick="tab('alpr')">ALPR</button><button onclick="tab('radar')">Radar</button><button onclick="tab('modules')">Modules</button><button onclick="tab('notes')">Notes</button></nav>
+  <main>
+    <section id="dash" class="tab active"><h2>Unit Dashboard</h2><div id="vehicle" class="card"></div><div id="statuses" class="grid"></div><button class="panic" onclick="panic()">PANIC BUTTON</button></section>
+    <section id="dispatch" class="tab"><h2>Create Dispatch Call</h2><input id="callTitle" placeholder="Call title"><input id="callCode" placeholder="Code e.g. 10-11"><textarea id="callDesc" placeholder="Description"></textarea><button onclick="createCall()">Send to Dispatch</button></section>
+    <section id="alpr" class="tab"><h2>ALPR / Plate Check</h2><button onclick="toggleALPR()">Toggle ALPR</button><input id="plate" placeholder="Plate"><button onclick="plateCheck()">Run Plate</button><input id="hotPlate" placeholder="Hotlist plate"><input id="hotReason" placeholder="Reason"><button onclick="hotlist()">Add Hotlist</button><div id="plateResults"></div><div id="scans"></div></section>
+    <section id="radar" class="tab"><h2>Radar</h2><button onclick="toggleRadar()">Toggle Radar</button><div class="speed"><span id="speed">0</span><small>MPH</small></div></section>
+    <section id="modules" class="tab"><h2>Connected Modules</h2><button onclick="moduleOpen('starchase')">StarChase Remote</button><button onclick="moduleOpen('bodycam')">Toggle Bodycam</button><button onclick="moduleOpen('operations')">Advanced Operations Center</button><button onclick="moduleOpen('pursuit')">Pursuit Command</button><button onclick="moduleOpen('warrants')">Warrant Registry</button><button disabled>Doorbell Alerts</button><button disabled>Officer Safety</button></section>
+    <section id="notes" class="tab"><h2>Officer Notes</h2><textarea id="noteText" placeholder="Write quick patrol note..."></textarea><button onclick="saveNote()">Save Note</button></section>
+  </main>
+</div><script src="app.js"></script></body></html>

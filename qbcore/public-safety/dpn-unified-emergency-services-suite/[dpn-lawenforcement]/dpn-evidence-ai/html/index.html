@@ -1,0 +1,13 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>DPN Evidence AI</title><link rel="stylesheet" href="style.css"></head>
+<body><div id="app" class="hidden">
+  <div class="panel">
+    <header><div><h1>DPN Evidence AI</h1><span>Case Management • Chain of Custody • Court Reports</span></div><button onclick="closeUi()">×</button></header>
+    <main>
+      <section class="card"><h2>Create Case</h2><input id="caseTitle" placeholder="Case title"><textarea id="caseDesc" placeholder="Case description"></textarea><button onclick="createCase()">Create Case</button></section>
+      <section class="card"><h2>Add Evidence</h2><input id="evCase" placeholder="Case ID optional"><select id="evType"></select><input id="evTitle" placeholder="Evidence title"><textarea id="evNotes" placeholder="Notes / probable cause / collection details"></textarea><button onclick="addEvidence()">Add Evidence</button></section>
+      <section class="card wide"><h2>Cases</h2><div id="cases"></div></section>
+      <section class="card wide"><h2>Recent Evidence</h2><div id="evidence"></div></section>
+      <section class="card wide"><h2>Court Report</h2><pre id="report">Select Generate Court Report on a case.</pre></section>
+    </main>
+  </div>
+</div><script src="app.js"></script></body></html>

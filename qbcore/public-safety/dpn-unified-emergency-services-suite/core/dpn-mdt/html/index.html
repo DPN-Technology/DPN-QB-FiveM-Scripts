@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DPN MDT</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">DPN</div>
+        <div>
+          <h1>DPN-MDT</h1>
+          <p>Unified Emergency Terminal</p>
+        </div>
+      </div>
+      <nav id="nav"></nav>
+      <div class="operator-card">
+        <span id="operatorName">Operator</span>
+        <small id="operatorDept">Department</small>
+        <select id="unitStatus">
+          <option value="available">Available</option>
+          <option value="busy">Busy</option>
+          <option value="enroute">Enroute</option>
+          <option value="onscene">On Scene</option>
+          <option value="transporting">Transporting</option>
+          <option value="offline">Offline</option>
+        </select>
+      </div>
+    </aside>
+
+    <main class="terminal">
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageSubtitle">DPN Unified Emergency Service Network</p>
+        </div>
+        <div class="top-actions">
+          <button id="refreshBtn">Refresh</button>
+          <button id="closeBtn" class="danger">Close</button>
+        </div>
+      </header>
+
+      <section id="alerts" class="alerts"></section>
+      <section id="content" class="content"></section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

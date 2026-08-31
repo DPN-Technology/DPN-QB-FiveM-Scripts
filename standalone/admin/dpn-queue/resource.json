@@ -1,0 +1,14 @@
+{
+  "name": "dpn-queue",
+  "display_name": "Dpn Queue",
+  "version": "1.0.0",
+  "framework": "standalone",
+  "category": "admin",
+  "status": "imported",
+  "description": "Advanced FiveM server queue with configurable reserved admin slots, priority, reconnect grace, and ACE/identifier checks.",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

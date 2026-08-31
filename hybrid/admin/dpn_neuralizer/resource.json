@@ -1,0 +1,14 @@
+{
+  "name": "dpn_neuralizer",
+  "display_name": "Dpn Neuralizer",
+  "version": "2.0.0",
+  "framework": "hybrid",
+  "category": "admin",
+  "status": "imported",
+  "description": "Advanced FiveM RP Neuralizer with admin immunity, server validation, NUI flash effects, cooldowns, and model source.",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

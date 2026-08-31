@@ -1,0 +1,8 @@
+local VERSION='8.0.0'
+local eligibility, authorizations, appeals = {}, {}, {}
+local function uid(prefix)return('%s-%s-%04d'):format(prefix,os.time(),math.random(0,9999))end
+exports('CheckRealTimeEligibility',function(citizenId,service,data)data=type(data)=='table'and data or{};local active=data.active~=false;local item={id=uid('ELIG'),citizenId=citizenId,service=service,active=active,copay=tonumber(data.copay)or 0,deductibleRemaining=tonumber(data.deductibleRemaining)or 0,checkedAt=os.time()};eligibility[item.id]=item;return active,item end)
+exports('RequestPrecisionAuthorization',function(citizenId,service,clinicalRisk,actor)local approved=(tonumber(clinicalRisk)or 0)>=70 or tostring(service):find('emergency',1,true)~=nil;local item={id=uid('AUTH'),citizenId=citizenId,service=service,clinicalRisk=clinicalRisk,status=approved and'approved'or'pending_review',actor=actor,createdAt=os.time()};authorizations[item.id]=item;return approved,item end)
+exports('FileInsuranceAppeal',function(authId,reason,actor)local item={id=uid('APPEAL'),authorizationId=authId,reason=reason,actor=actor,status='submitted',createdAt=os.time()};appeals[item.id]=item;return item.id,item end)
+exports('GetInsuranceV8Board',function()return{eligibility=eligibility,authorizations=authorizations,appeals=appeals,generatedAt=os.time()}end)
+CreateThread(function()Wait(3000);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-insurance',VERSION,{'real_time_eligibility','precision_preauthorization','appeals','financial_clearance'})end);print('[dpn-medical-insurance] v8 eligibility and authorization operations active')end)

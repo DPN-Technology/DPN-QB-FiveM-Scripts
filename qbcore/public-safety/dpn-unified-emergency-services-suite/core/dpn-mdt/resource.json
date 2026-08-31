@@ -1,0 +1,16 @@
+{
+  "name": "dpn-mdt",
+  "display_name": "Dpn MDT",
+  "version": "1.1.0-charges",
+  "framework": "qbcore",
+  "category": "public-safety",
+  "status": "imported",
+  "description": "DPN Mobile Data Terminal for Law Enforcement, EMS, Fire, Courts, MIB/Admin, Dispatch, and Unified Emergency Service Network",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive",
+  "suite": "dpn-unified-emergency-services-suite",
+  "integrated_public_safety": true
+}

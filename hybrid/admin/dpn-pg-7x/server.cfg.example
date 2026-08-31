@@ -1,0 +1,10 @@
+# DPN PG-7X install lines
+# Start your postal script first if you want postal destinations.
+ensure nearest-postal
+ensure dpn-pg-7x
+
+# Permission for portal gun usage
+add_ace group.admin dpn.pg7x.use allow
+
+# Example: put your own license here
+# add_principal identifier.license:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx group.admin

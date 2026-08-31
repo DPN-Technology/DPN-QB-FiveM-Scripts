@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS `dpn_medical_lifepak_sessions` (`id` bigint unsigned NOT NULL AUTO_INCREMENT,`patient_cid` varchar(64) NOT NULL,`provider_cid` varchar(64) NOT NULL,`session_data` longtext NULL,`created_at` timestamp NOT NULL DEFAULT current_timestamp(),PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

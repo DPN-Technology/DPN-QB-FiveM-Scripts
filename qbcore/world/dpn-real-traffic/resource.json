@@ -1,0 +1,14 @@
+{
+  "name": "dpn-real-traffic",
+  "display_name": "Dpn Real Traffic",
+  "version": "1.0.0",
+  "framework": "qbcore",
+  "category": "world",
+  "status": "imported",
+  "description": "Advanced realistic AI traffic for QBCore with emergency vehicle yielding and ts_Trafficlights compatibility.",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

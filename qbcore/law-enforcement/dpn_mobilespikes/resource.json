@@ -1,0 +1,14 @@
+{
+  "name": "dpn_mobilespikes",
+  "display_name": "Dpn Mobilespikes",
+  "version": "2.0.0",
+  "framework": "qbcore",
+  "category": "law-enforcement",
+  "status": "imported",
+  "description": "Mobile Vehicle Spike System for Police Vehicles - QBCore",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "source_import": "user-provided DPN release archive"
+}

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DPN Dispatch</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <main id="app" class="hidden">
+        <section class="shell">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">DPN Unified Emergency Service Network</p>
+                    <h1>DPN Dispatch Command</h1>
+                    <p class="subline">CAD • RMS Reports • MDT Bridge • Multi-Department Command</p>
+                </div>
+                <div class="top-actions">
+                    <button id="panicBtn" class="danger">PANIC</button>
+                    <button id="refreshBtn">Refresh</button>
+                    <button id="closeBtn">Close</button>
+                </div>
+            </header>
+
+            <section id="analyticsBar" class="analytics"></section>
+
+            <section id="agencyModeBar" class="agency-mode"></section>
+
+            <nav class="tabs">
+                <button class="tab active" data-tab="calls">Active Calls</button>
+                <button class="tab" data-tab="command">Live Command</button>
+                <button class="tab" data-tab="units">Units</button>
+                <button class="tab" data-tab="create">Create Call</button>
+                <button class="tab" data-tab="reports">Reports</button>
+                <button class="tab" data-tab="builder">Report Builder</button>
+                <button class="tab" data-tab="mdt">MDT Sync</button>
+                <button class="tab" data-tab="audit">Notes / Audit</button>
+            </nav>
+
+            <section class="filters">
+                <input id="searchInput" type="text" placeholder="Search calls, reports, code, location, case, caller, narrative..." />
+                <select id="departmentFilter"></select>
+                <select id="statusFilter">
+                    <option value="active">Active Calls</option>
+                    <option value="all">All Call Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="enroute">En Route</option>
+                    <option value="onscene">On Scene</option>
+                    <option value="holding">Holding</option>
+                    <option value="investigating">Investigating</option>
+                    <option value="transporting">Transporting</option>
+                    <option value="staged">Staged</option>
+                    <option value="clear">Clear / Available</option>
+                    <option value="closed">Closed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </section>
+
+            <section id="calls" class="panel active">
+                <div id="callList" class="grid-list"></div>
+            </section>
+
+            <section id="command" class="panel">
+                <div id="commandView" class="command-grid"></div>
+            </section>
+
+            <section id="units" class="panel">
+                <div class="unit-status-row">
+                    <select id="myStatus">
+                        <option value="available">Available</option>
+                        <option value="busy">Busy</option>
+                        <option value="enroute">En Route</option>
+                        <option value="onscene">On Scene</option>
+                        <option value="transporting">Transporting</option>
+                        <option value="court">Court Detail</option>
+                        <option value="corrections">Corrections Detail</option>
+                        <option value="unavailable">Unavailable</option>
+                    </select>
+                    <input id="radioInput" placeholder="Radio channel / tactical channel" />
+                    <button id="setStatusBtn">Update My Status</button>
+                </div>
+                <div id="unitList" class="grid-list"></div>
+            </section>
+
+            <section id="create" class="panel">
+                <form id="createForm" class="create-form">
+                    <h2>Create Dispatch Call</h2>
+                    <label>Department(s)</label>
+                    <div id="departmentChecks" class="check-grid"></div>
+
+                    <div class="form-row">
+                        <label>Call Code<input id="callCode" placeholder="911 / 10-70 / MED-1 / CRT-1 / MIB-1" /></label>
+                        <label>Priority
+                            <select id="priorityInput">
+                                <option value="1">1 - Critical</option>
+                                <option value="2">2 - High</option>
+                                <option value="3" selected>3 - Normal</option>
+                                <option value="4">4 - Low</option>
+                                <option value="5">5 - Administrative</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <label>Title<input id="titleInput" placeholder="Structure Fire / MVA / Court Transport / Admin Assist" /></label>
+                    <label>Description<textarea id="descriptionInput" placeholder="Details, suspect info, hazards, injuries, court case number, etc."></textarea></label>
+
+                    <div class="section-title">Operational CAD Intelligence</div>
+                    <div class="form-row four">
+                        <label>Incident Class<select id="incidentClassInput"></select></label>
+                        <label>Response Level<select id="responseLevelInput"></select></label>
+                        <label>Staging Area<input id="stagingInput" placeholder="Staging point / safe approach" /></label>
+                        <label>Tactical Channel<input id="radioChannelInput" placeholder="LE TAC 1 / FIRE TAC 2" /></label>
+                    </div>
+                    <div class="form-row three">
+                        <label>Incident Command<input id="commandInput" placeholder="IC / supervisor / command post" /></label>
+                        <label>Risk Flags<textarea id="riskFlagsInput" placeholder="Weapons, hostile crowd, fire spread, hazmat, mental health, escape risk..."></textarea></label>
+                        <label>Units Requested<textarea id="unitsRequestedInput" placeholder="Primary unit, backup, engine, medic, supervisor, transport, corrections..."></textarea></label>
+                    </div>
+                    <label>Response Plan / SOP Checklist<textarea id="responsePlanInput" placeholder="Auto-filled by agency mode; edit for this incident."></textarea></label>
+
+                    <label>Location<input id="locationInput" placeholder="Leave blank to use current location" /></label>
+                    <label class="inline-check"><input id="useCurrentLocation" type="checkbox" checked /> Use my current GPS location</label>
+                    <button class="primary" type="submit">Create Dispatch Call</button>
+                </form>
+            </section>
+
+            <section id="reports" class="panel">
+                <div class="report-toolbar">
+                    <select id="reportTypeFilter"></select>
+                    <select id="reportStatusFilter"></select>
+                    <button id="newReportBtn" class="primary">New Report</button>
+                    <button id="clearReportSelectionBtn">Clear Selection</button>
+                </div>
+                <div id="reportList" class="grid-list"></div>
+            </section>
+
+            <section id="builder" class="panel">
+                <form id="reportForm" class="report-form">
+                    <div class="builder-head">
+                        <div>
+                            <h2 id="reportBuilderTitle">Advanced Dispatch Report Builder</h2>
+                            <p class="muted">Build RMS-ready reports linked to CAD calls and mirrored to dpn-mdt when enabled.</p>
+                        </div>
+                        <div class="builder-actions">
+                            <button type="button" id="createReportBtn" class="primary">Create Report</button>
+                            <button type="button" id="saveReportBtn">Save Selected</button>
+                            <button type="button" id="submitReportBtn" class="success">Submit Review</button>
+                        </div>
+                    </div>
+
+                    <div class="form-row four">
+                        <label>Report Type<select id="reportTypeInput"></select></label>
+                        <label>Linked Call<select id="reportCallInput"></select></label>
+                        <label>Department<select id="reportDepartmentInput"></select></label>
+                        <label>Priority
+                            <select id="reportPriorityInput">
+                                <option value="1">1 - Critical</option>
+                                <option value="2">2 - High</option>
+                                <option value="3" selected>3 - Normal</option>
+                                <option value="4">4 - Low</option>
+                                <option value="5">5 - Admin</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="form-row three">
+                        <label>Status<select id="reportStatusInput"></select></label>
+                        <label>Location<input id="reportLocationInput" placeholder="Leave blank for current location" /></label>
+                        <label>Tags<input id="reportTagsInput" placeholder="Use commas or new lines: mva, evidence, high-risk" /></label>
+                    </div>
+
+                    <label>Report Title<input id="reportTitleInput" placeholder="Detailed report title" /></label>
+                    <label>Executive Summary<textarea id="reportSummaryInput" placeholder="Short summary for supervisors / MDT / case board."></textarea></label>
+                    <label>Narrative<textarea id="reportNarrativeInput" class="tall" placeholder="Full chronological narrative, observations, actions taken, outcome, pending follow-up."></textarea></label>
+
+                    <div class="structured-grid">
+                        <label>Involved Persons<textarea id="involvedPersonsInput" placeholder="One per line: Name | CID | DOB | role | phone"></textarea></label>
+                        <label>Vehicles<textarea id="vehiclesInput" placeholder="One per line: Plate | VIN | model | owner | damage"></textarea></label>
+                        <label>Witnesses<textarea id="witnessesInput" placeholder="One per line: Name | contact | statement summary"></textarea></label>
+                        <label>Evidence / Attachment Links<textarea id="evidenceInput" placeholder="Evidence item, bodycam link, image link, Discord CDN link, locker ID"></textarea></label>
+                        <label>Charges / Citations<textarea id="chargesInput" placeholder="Charge/citation, statute, class, bond, notes"></textarea></label>
+                        <label>Medical Section<textarea id="medicalInput" placeholder="Patient care notes, vitals, injuries, treatment, hospital transport"></textarea></label>
+                        <label>Fire / Rescue Section<textarea id="fireInput" placeholder="Fire cause, size-up, hydrants, utilities, K-9/search, suppression actions"></textarea></label>
+                        <label>Court / DOJ Section<textarea id="courtInput" placeholder="Case number, warrant, subpoena, transport, hearing result"></textarea></label>
+                        <label>MIB / Admin Actions<textarea id="adminActionsInput" placeholder="Admin intervention, scene control, neuralizer review, sensitive actions"></textarea></label>
+                        <label>Corrections Section<textarea id="correctionsInput" placeholder="Booking number, custody status, inmate transport, restraints, property, facility lockdown"></textarea></label>
+                        <label>Risk / Safety Flags<textarea id="reportRiskInput" placeholder="Officer safety, medical hazards, fire hazards, escape risk, admin sensitivity"></textarea></label>
+                        <label>Dispatch Timeline<textarea id="dispatchTimelineInput" placeholder="Timestamped chronology: received, dispatched, enroute, on scene, cleared"></textarea></label>
+                        <label>Supervisor Notes<textarea id="supervisorNotesInput" placeholder="Review notes, returned corrections, approvals, command notes"></textarea></label>
+                        <label>Disposition / Outcome<textarea id="dispositionInput" placeholder="Cleared by report, transported, arrested, referred to court, admin sealed"></textarea></label>
+                        <label>MDT / External Links<textarea id="mdtLinksInput" placeholder="MDT case ID, report link, evidence locker, bodycam, Discord evidence thread"></textarea></label>
+                        <label>QA Checklist<textarea id="qaChecklistInput" placeholder="Required fields complete, narrative clear, evidence attached, supervisor reviewed"></textarea></label>
+                        <label>NCIC / Warrant / Records Checks<textarea id="ncicChecksInput" placeholder="Name/plate checks, warrant confirmation, probation/parole, BOLO match"></textarea></label>
+                        <label>Property / Chain of Custody<textarea id="propertyInput" placeholder="Property inventory, evidence transfer, inmate property, locker ID"></textarea></label>
+                    </div>
+
+                    <div class="seal-row">
+                        <label class="inline-check"><input id="reportUseCurrentLocation" type="checkbox" checked /> Use my GPS on save</label>
+                        <label class="inline-check"><input id="sealedInput" type="checkbox" /> Sealed</label>
+                        <label class="inline-check"><input id="confidentialInput" type="checkbox" /> Confidential</label>
+                        <label class="inline-check"><input id="lockedInput" type="checkbox" /> Locked</label>
+                    </div>
+                </form>
+            </section>
+
+            <section id="mdt" class="panel">
+                <div class="mdt-grid">
+                    <article class="card">
+                        <h3>dpn-mdt Bridge Status</h3>
+                        <p class="desc">Dispatch automatically fires generic dpn-mdt events and safe optional exports when calls, units, and reports change. If your MDT export names are different, edit <strong>Config.MDT.exports</strong>.</p>
+                        <div class="meta">
+                            <span class="badge">Events: callCreated / callUpdated / reportCreated / reportUpdated / unitUpdated</span>
+                            <span class="badge">Exports: SyncDispatchCall / SyncDispatchReport / CreateCaseFromDispatch</span>
+                            <span class="badge">Safe Mode: pcall protected</span>
+                        </div>
+                        <div class="actions">
+                            <button id="forceMdtSyncBtn" class="primary">Force Visible MDT Resync</button>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <h3>MDT Reference Links</h3>
+                        <div id="mdtList" class="audit-list"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="audit" class="panel">
+                <div id="auditList" class="audit-list"></div>
+            </section>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

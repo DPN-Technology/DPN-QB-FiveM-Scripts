@@ -1,0 +1,22 @@
+{
+  "name": "dpn-unified-emergency-services-suite",
+  "display_name": "DPN Unified Emergency Services Suite",
+  "version": "1.0.0-import",
+  "framework": "qbcore",
+  "type": "multi-resource-suite",
+  "organization": "DPN Technology",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "license": "DPN-CSL-1.0",
+  "components": 35,
+  "integrations": [
+    "law-enforcement",
+    "ems",
+    "medical",
+    "fire-rescue",
+    "dispatch",
+    "mdt",
+    "incident-command",
+    "emergency-network"
+  ]
+}

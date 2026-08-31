@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="style.css" />
+  <title>DPN Drone Command</title>
+</head>
+<body>
+  <div id="app" class="hidden">
+    <header>
+      <div>
+        <h1>DPN DRONE COMMAND</h1>
+        <p>Law Enforcement Aerial Support</p>
+      </div>
+      <button onclick="closeUI()">×</button>
+    </header>
+    <main>
+      <section class="card">
+        <h2>Telemetry</h2>
+        <div class="battery"><span id="bar"></span></div>
+        <p>Battery: <b id="battery">100%</b></p>
+        <p>Mode: <b id="mode">NORMAL</b></p>
+        <p>Target Lock: <b id="lock">NO</b></p>
+        <p>Coords: <b id="coords">--</b></p>
+      </section>
+      <section class="card">
+        <h2>Actions</h2>
+        <button onclick="scan()">Area Scan</button>
+        <button onclick="alertDispatch()">Send Dispatch Alert</button>
+        <button class="danger" onclick="recall()">Recall Drone</button>
+      </section>
+      <section class="card wide">
+        <h2>Scan Results</h2>
+        <p id="scan">No scan performed.</p>
+      </section>
+      <section class="card wide">
+        <h2>Controls</h2>
+        <p>WASD move · Q/E altitude · Shift boost · H night vision · G thermal/scan · X spotlight · Backspace recall · Mouse wheel zoom</p>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

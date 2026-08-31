@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS `dpn_medical_ems_reports` (`id` bigint unsigned NOT NULL AUTO_INCREMENT,`patient_cid` varchar(64) NOT NULL,`provider_cid` varchar(64) NOT NULL,`report_data` longtext NOT NULL,`created_at` timestamp NOT NULL DEFAULT current_timestamp(),PRIMARY KEY (`id`),KEY `idx_ems_patient` (`patient_cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

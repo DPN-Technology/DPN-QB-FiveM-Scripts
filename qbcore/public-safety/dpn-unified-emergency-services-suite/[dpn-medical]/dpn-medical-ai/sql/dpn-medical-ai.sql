@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS `dpn_medical_ai_assessments` (`id` bigint unsigned NOT NULL AUTO_INCREMENT,`patient_cid` varchar(64) NOT NULL,`score` int NOT NULL,`risk` varchar(32) NOT NULL,`recommendations` longtext NULL,`created_at` timestamp NOT NULL DEFAULT current_timestamp(),PRIMARY KEY (`id`),KEY `idx_ai_patient` (`patient_cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

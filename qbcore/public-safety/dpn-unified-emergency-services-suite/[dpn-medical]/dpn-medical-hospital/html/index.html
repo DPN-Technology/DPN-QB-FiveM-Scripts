@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" style="background:transparent!important;background-color:transparent!important">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DPN Hospital System</title>
+    <style id="dpn-nui-safety">
+        html, body { background: transparent !important; background-color: transparent !important; }
+        #app { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+        #app.dpn-open { display: flex !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; }
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="background:transparent;pointer-events:none">
+    <main id="app" class="hidden" aria-hidden="true" hidden>
+        <section class="panel" role="dialog" aria-modal="true" aria-labelledby="hospital-title">
+            <header class="panel-header">
+                <div>
+                    <span class="eyebrow">DPN Unified Medical Network</span>
+                    <h1 id="hospital-title">Hospital Patient Portal</h1>
+                </div>
+                <button class="icon-button" type="button" aria-label="Close" onclick="closeUI()">&times;</button>
+            </header>
+
+            <section id="content" class="content"></section>
+
+            <footer class="panel-footer">
+                <span id="footer-status" class="footer-status">Hospital record synchronized</span>
+                <div class="actions">
+                    <button id="pay-button" class="button secondary" type="button" onclick="payBill()">Pay Bill</button>
+                    <button id="discharge-button" class="button primary" type="button" onclick="discharge()">Request Discharge</button>
+                </div>
+            </footer>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

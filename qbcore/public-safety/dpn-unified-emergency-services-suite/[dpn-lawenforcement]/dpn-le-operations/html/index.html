@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DPN Public Safety Command Center</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" class="hidden">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><span>DPN</span><small>4</small></div>
+        <div><h1>PUBLIC SAFETY</h1><p>Unified Command Center</p></div>
+      </div>
+      <div class="network-pill"><i></i><div><strong id="networkLabel">NETWORK CONNECTING</strong><span id="networkDetail">Checking DPN resources</span></div></div>
+      <nav>
+        <p class="nav-label">COMMAND</p>
+        <button class="nav active" data-tab="dashboard"><span>⌂</span><b>Command Overview</b><em id="criticalNavCount">0</em></button>
+        <button class="nav" data-tab="dispatch"><span>◉</span><b>Dispatch & Calls</b><em id="callsNavCount">0</em></button>
+        <button class="nav" data-tab="agencies"><span>✦</span><b>Agency Coordination</b><em id="eventsNavCount">0</em></button>
+        <p class="nav-label">OPERATIONS</p>
+        <button class="nav" data-tab="roster"><span>◎</span><b>Roll Call & Units</b></button>
+        <button class="nav" data-tab="warrants"><span>⌕</span><b>Warrants</b></button>
+        <button class="nav" data-tab="pursuits"><span>➤</span><b>Pursuit Command</b></button>
+        <button class="nav" data-tab="force"><span>◇</span><b>Force & Accountability</b></button>
+        <button class="nav" data-tab="fleet"><span>▣</span><b>Fleet & Armory</b></button>
+        <p class="nav-label">ADMINISTRATION</p>
+        <button class="nav" data-tab="network"><span>⌁</span><b>Systems Network</b><em id="offlineNavCount">0</em></button>
+        <button class="nav supervisor-only" data-tab="supervisor"><span>⚑</span><b>Supervisor Queue</b></button>
+      </nav>
+      <div class="side-footer">
+        <div class="avatar">D</div><div class="identity-wrap"><strong id="identity">Secure terminal</strong><span id="identitySub">No active session</span></div>
+        <div id="accessBadge" class="badge">OFFLINE</div>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div class="title-block"><span class="eyebrow">DPN EMERGENCY SERVICES NETWORK</span><h2 id="pageTitle">Command Overview</h2><p id="pageSubtitle">Unified operational awareness across every connected DPN system.</p></div>
+        <div class="header-tools">
+          <label class="search"><span>⌕</span><input id="globalSearch" placeholder="Search calls, events, units, records..."></label>
+          <div class="clock"><strong id="liveClock">00:00</strong><span id="liveDate">Loading</span></div>
+          <button id="refresh" class="icon-button" title="Refresh">↻</button>
+          <button id="close" class="icon-button close-button" title="Close">×</button>
+        </div>
+      </header>
+
+      <div id="criticalBanner" class="critical-banner hidden"><div><span>CRITICAL NETWORK EVENT</span><strong id="criticalBannerText">Immediate action required.</strong></div><button data-open-tab="agencies">OPEN EVENT FEED</button></div>
+
+      <main>
+        <section id="dashboard" class="tab active">
+          <div class="hero-row">
+            <article class="hero-card">
+              <div><span class="eyebrow">CURRENT OPERATING PICTURE</span><h3 id="heroGreeting">Command center ready</h3><p id="heroSummary">Live law-enforcement and emergency-network information is loading.</p></div>
+              <div class="hero-actions" id="quickSignals"></div>
+            </article>
+            <article class="readiness-card"><span>NETWORK READINESS</span><div class="readiness-ring"><strong id="readinessPercent">0%</strong></div><p id="readinessText">Evaluating systems</p></article>
+          </div>
+          <div id="metrics" class="metrics"></div>
+          <div class="grid command-grid">
+            <article class="panel span-2"><div class="panel-title"><div><span>LIVE OPERATIONS</span><h3>Priority Dispatch Calls</h3></div><button class="text-button" data-open-tab="dispatch">View all calls →</button></div><div id="dashboardCalls" class="timeline-list"></div></article>
+            <article class="panel"><div class="panel-title"><div><span>FIELD STATUS</span><h3>Operational Units</h3></div></div><div id="dashboardUnits" class="list compact-list"></div></article>
+            <article class="panel"><div class="panel-title"><div><span>ACTIVE THREATS</span><h3>Pursuit Command</h3></div></div><div id="dashboardPursuits" class="list compact-list"></div></article>
+          </div>
+          <div class="grid three">
+            <article class="panel"><div class="panel-title"><div><span>MY STATUS</span><h3>Shift Activity</h3></div></div><div id="myShift" class="list"></div></article>
+            <article class="panel"><div class="panel-title"><div><span>QUALIFICATIONS</span><h3>Certifications</h3></div></div><div id="certifications" class="list"></div></article>
+            <article class="panel"><div class="panel-title"><div><span>CONNECTED TOOLS</span><h3>Rapid Launcher</h3></div></div><div id="moduleLauncher" class="launcher-grid"></div></article>
+          </div>
+        </section>
+
+        <section id="dispatch" class="tab">
+          <div class="section-toolbar"><div class="filter-group"><button class="filter active" data-call-filter="all">All Calls</button><button class="filter" data-call-filter="1">Priority 1</button><button class="filter" data-call-filter="law">Law</button><button class="filter" data-call-filter="medical">Medical</button><button class="filter" data-call-filter="fire">Fire</button></div><span id="dispatchUpdated">Live network feed</span></div>
+          <div class="grid dispatch-grid">
+            <article class="panel span-2"><div class="panel-title"><div><span>ACTIVE INCIDENT QUEUE</span><h3>Dispatch Calls</h3></div><strong id="activeCallCount">0 ACTIVE</strong></div><div id="dispatchCallList" class="cards call-cards"></div></article>
+            <article class="panel"><div class="panel-title"><div><span>RESOURCE BOARD</span><h3>On-Duty Units</h3></div></div><div id="dispatchUnitList" class="unit-board"></div></article>
+          </div>
+        </section>
+
+        <section id="agencies" class="tab">
+          <div class="agency-status-grid" id="agencyStatusGrid"></div>
+          <div class="grid agency-grid">
+            <article class="panel span-2"><div class="panel-title"><div><span>CROSS-AGENCY EVENT STREAM</span><h3>Unified Emergency Timeline</h3></div><div class="filter-group mini"><button class="filter active" data-event-filter="active">Active</button><button class="filter" data-event-filter="all">All</button><button class="filter" data-event-filter="critical">Critical</button></div></div><div id="networkEventList" class="event-stream"></div></article>
+            <article class="panel"><div class="panel-title"><div><span>QUICK COORDINATION</span><h3>Agency Requests</h3></div></div><div id="agencyQuickActions" class="action-stack"></div><div class="panel-divider"></div><div class="panel-title small"><div><span>CORRELATION</span><h3>Link Records</h3></div></div><div class="link-form"><input id="linkLeftId" placeholder="Left record ID"><input id="linkRightId" placeholder="Right record ID"><select id="linkRelationship"><option value="related">Related</option><option value="evidence_for">Evidence for</option><option value="subject_of">Subject of</option><option value="resulted_in">Resulted in</option></select><button id="linkRecords">Create Cross-System Link</button></div></article>
+          </div>
+        </section>
+
+        <section id="roster" class="tab">
+          <div class="grid two">
+            <article class="panel"><div class="panel-title"><div><span>PERSONNEL</span><h3>Shift Control</h3></div><span>Clock in before field assignment</span></div><textarea id="shiftNotes" placeholder="Briefing notes, beat assignment, special instructions"></textarea><div class="actions"><button id="startShift">Start Operational Shift</button><button id="endShift" class="danger">End Shift</button></div></article>
+            <article class="panel"><div class="panel-title"><div><span>UNIT FORMATION</span><h3>Create Operational Unit</h3></div><span>Pair officers and define mission role</span></div><div class="form-row"><input id="unitCode" placeholder="Unit code, e.g. 2A-12"><input id="unitName" placeholder="Unit name"></div><select id="unitRole"></select><div class="actions"><button id="createUnit">Create Unit</button><button id="leaveUnit" class="ghost">Leave Current Unit</button></div></article>
+          </div>
+          <article class="panel"><div class="panel-title"><div><span>AGENCY ROLL CALL</span><h3>Active Units & Partnerships</h3></div><span>Roles, leadership, and assignment readiness</span></div><div id="rosterUnits" class="cards"></div></article>
+        </section>
+
+        <section id="warrants" class="tab">
+          <div class="grid two">
+            <article class="panel law-only"><div class="panel-title"><div><span>JUDICIAL WORKFLOW</span><h3>Request Warrant</h3></div><span>Server-audited probable cause</span></div><div class="form-row"><select id="warrantType"></select><select id="warrantSubjectType"><option value="person">Person</option><option value="vehicle">Vehicle</option></select></div><div class="form-row"><input id="warrantSubjectKey" placeholder="Citizen ID or plate"><input id="warrantSubjectName" placeholder="Subject / vehicle description"></div><div class="form-row"><select id="warrantRisk"></select><input id="warrantExpiry" type="number" min="1" max="90" value="14" placeholder="Expiry days"></div><textarea id="warrantCharges" placeholder="Charges / items sought"></textarea><textarea id="warrantCause" placeholder="Detailed probable cause"></textarea><button id="requestWarrant">Submit for Judicial Review</button></article>
+            <article class="panel"><div class="panel-title"><div><span>REGISTRY SEARCH</span><h3>Warrant Intelligence</h3></div><span>Active and historical records</span></div><label class="search wide"><span>⌕</span><input id="warrantFilter" placeholder="Search ID, subject, plate, charge, or status"></label><div class="warrant-summary"><div><strong id="warrantPendingCount">0</strong><span>Pending</span></div><div><strong id="warrantApprovedCount">0</strong><span>Approved</span></div><div><strong id="warrantHighRiskCount">0</strong><span>High Risk</span></div></div><p class="hint">Approved warrants automatically feed Crime Intelligence, vehicle checks, dispatch alerts, and the DPN justice/corrections network.</p></article>
+          </div>
+          <article class="panel"><div class="panel-title"><div><span>WARRANT REGISTRY</span><h3>Judicial Review & Service Tracking</h3></div></div><div id="warrantList" class="cards"></div></article>
+        </section>
+
+        <section id="pursuits" class="tab">
+          <div class="grid two"><article class="panel law-only"><div class="panel-title"><div><span>VEHICLE ACQUISITION</span><h3>Initiate Pursuit</h3></div><span>Aim at or approach suspect vehicle</span></div><div class="form-row"><select id="pursuitRisk"></select><input id="pursuitReason" placeholder="Reason for pursuit"></div><button id="startPursuit" class="danger">Acquire Vehicle & Start Pursuit</button></article><article class="panel policy-panel"><div class="panel-title"><div><span>COMMAND POLICY</span><h3>Tactical Authorization</h3></div></div><div class="policy-grid"><div><strong>PIT</strong><span>Supervisor review</span></div><div><strong>ROADBLOCK</strong><span>Command authorization</span></div><div><strong>STARCHASE</strong><span>Tracker integration</span></div><div><strong>AIR / K-9</strong><span>Multi-unit coordination</span></div></div></article></div>
+          <article class="panel"><div class="panel-title"><div><span>LIVE PURSUIT BOARD</span><h3>Active Pursuits</h3></div><span>Units, tactics, speed, and location</span></div><div id="pursuitList" class="cards"></div></article>
+        </section>
+
+        <section id="force" class="tab">
+          <div class="grid two law-only"><article class="panel"><div class="panel-title"><div><span>ACCOUNTABILITY</span><h3>Submit Use-of-Force Report</h3></div><span>Discharge drafts are generated automatically</span></div><div class="form-row"><select id="forceLevel"></select><input id="forceReason" placeholder="Reason / legal justification"></div><div class="form-row"><input id="forceSubjectCid" placeholder="Subject citizen ID"><input id="forceSubjectName" placeholder="Subject name"></div><div class="form-row"><input id="forceWeapons" placeholder="Weapons / tools used"><input id="forceBodycam" placeholder="Bodycam reference"></div><div class="form-row"><input id="forceCase" placeholder="Case reference"><input id="forceMedical" placeholder="Medical aid provided"></div><textarea id="forceInjuries" placeholder="Known or reported injuries"></textarea><textarea id="forceNarrative" placeholder="Complete force narrative and de-escalation efforts"></textarea><button id="submitForce">Submit Secure Report</button></article><article class="panel"><div class="panel-title"><div><span>REVIEW STANDARD</span><h3>Policy & Evidence Correlation</h3></div></div><div class="review-flow"><div><b>1</b><span>Officer completes narrative</span></div><div><b>2</b><span>Bodycam and evidence linked</span></div><div><b>3</b><span>Medical treatment recorded</span></div><div><b>4</b><span>Supervisor finding issued</span></div><div><b>5</b><span>Training or investigation referral</span></div></div></article></div>
+          <article class="panel"><div class="panel-title"><div><span>FORCE REGISTRY</span><h3>Reports & Supervisor Findings</h3></div></div><div id="forceList" class="cards"></div></article>
+        </section>
+
+        <section id="fleet" class="tab">
+          <div class="grid two law-only"><article class="panel"><div class="panel-title"><div><span>FLEET ACCOUNTABILITY</span><h3>Vehicle Checkout</h3></div><span>Captures plate and condition</span></div><button id="checkoutVehicle">Checkout Current / Nearby Vehicle</button><textarea id="fleetDamageNotes" placeholder="Return damage notes"></textarea></article><article class="panel"><div class="panel-title"><div><span>ARMORY CONTROL</span><h3>Issue Equipment</h3></div><span>Certification-aware inventory</span></div><select id="armoryCatalog"></select><div class="form-row"><input id="armoryQuantity" type="number" min="1" max="10" value="1"><input id="armorySerial" placeholder="Serial number, optional"></div><button id="checkoutArmory">Issue Equipment</button></article></div>
+          <div class="grid two"><article class="panel"><div class="panel-title"><div><span>ACTIVE CHECKOUTS</span><h3>Fleet Assignments</h3></div></div><div id="fleetList" class="cards"></div></article><article class="panel"><div class="panel-title"><div><span>ISSUED EQUIPMENT</span><h3>Armory Assignments</h3></div></div><div id="armoryList" class="cards"></div></article></div>
+        </section>
+
+        <section id="network" class="tab">
+          <div class="network-summary" id="networkSummaryCards"></div>
+          <div class="grid network-grid"><article class="panel span-2"><div class="panel-title"><div><span>INTEGRATION HEALTH</span><h3>DPN Resource Matrix</h3></div><div class="filter-group mini"><button class="filter active" data-resource-filter="all">All</button><button class="filter" data-resource-filter="offline">Offline</button><button class="filter" data-resource-filter="core">Core</button><button class="filter" data-resource-filter="law">Law</button></div></div><div id="resourceMatrix" class="resource-matrix"></div></article><article class="panel"><div class="panel-title"><div><span>NETWORK CAPABILITIES</span><h3>Integration Coverage</h3></div></div><div id="capabilityList" class="capability-list"></div></article></div>
+        </section>
+
+        <section id="supervisor" class="tab">
+          <div class="supervisor-metrics" id="supervisorMetrics"></div>
+          <article class="panel"><div class="panel-title"><div><span>ACTION REQUIRED</span><h3>Supervisor Queue</h3></div><span>Warrants, tactics, force, fleet, and pursuit review</span></div><div id="taskList" class="cards"></div></article>
+          <article class="panel"><div class="panel-title"><div><span>POST-INCIDENT REVIEW</span><h3>Recent Pursuits</h3></div><span>Disposition, speed, tactics, and policy findings</span></div><div id="recentPursuitList" class="cards"></div></article>
+        </section>
+      </main>
+    </section>
+  </div>
+  <div id="toast"></div>
+  <div id="modal" class="modal hidden"><div class="modal-card"><div class="modal-head"><div><span>DPN SECURE WORKFLOW</span><h3 id="modalTitle">Action</h3></div><button id="modalClose">×</button></div><div id="modalBody"></div></div></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
