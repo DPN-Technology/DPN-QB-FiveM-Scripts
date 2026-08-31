@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Build a distributable ZIP for one DPN FiveM resource."""
+"""Build a safe distributable ZIP for one DPN FiveM resource."""
 from __future__ import annotations
 
 import argparse
 import json
 import pathlib
-import shutil
 import sys
 import zipfile
 
@@ -13,7 +12,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 ALLOWED_ROOTS = {"qbcore", "standalone", "hybrid"}
 EXCLUDED_NAMES = {
     ".DS_Store", "Thumbs.db", "desktop.ini", ".env",
-    "credentials.json", "service-account.json"
+    "credentials.json", "service-account.json", "server.cfg"
 }
 EXCLUDED_SUFFIXES = {".log", ".pem", ".pfx", ".key", ".tmp", ".bak"}
 
@@ -43,7 +42,10 @@ if not resource.is_dir():
     fail("resource directory does not exist")
 
 for required in ("fxmanifest.lua", "README.md", "resource.json"):
-    if not (resource / required).is_file():
+    required_path = resource / required
+    if required_path.is_symlink():
+        fail(f"required file may not be a symbolic link: {required}")
+    if not required_path.is_file():
         fail(f"missing required file: {required}")
 
 try:
@@ -74,12 +76,22 @@ if archive.exists():
 
 with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
     for path in sorted(resource.rglob("*")):
+        if path.is_symlink():
+            fail(f"symbolic links are forbidden in release packages: {path.relative_to(resource)}")
         if not path.is_file():
             continue
+
+        resolved = path.resolve()
+        try:
+            resolved.relative_to(resource)
+        except ValueError:
+            fail(f"file escapes the resource directory: {path.relative_to(resource)}")
+
         if path.name in EXCLUDED_NAMES or path.suffix.lower() in EXCLUDED_SUFFIXES:
             continue
         if any(part in {"node_modules", ".git", "dist", "build", "cache"} for part in path.parts):
             continue
+
         arcname = pathlib.Path(name) / path.relative_to(resource)
         zf.write(path, arcname.as_posix())
 
