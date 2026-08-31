@@ -14,13 +14,6 @@ local function core(method,...)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
 end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
-end
 
 local parLevels, recalls, cycleCounts = {}, {}, {}
 exports('SetParLevel',function(sourceValue,location,itemName,minimum,target) parLevels[location]=parLevels[location]or{};local item={location=location,item=itemName,minimum=tonumber(minimum)or 0,target=tonumber(target)or tonumber(minimum)or 0,updatedBy=actor(sourceValue),updatedAt=os.time()};parLevels[location][itemName]=item;asyncInsert('INSERT INTO dpn_medical_v6_par_levels (location,item_name,minimum_quantity,target_quantity,updated_by) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE minimum_quantity=VALUES(minimum_quantity),target_quantity=VALUES(target_quantity),updated_by=VALUES(updated_by),updated_at=NOW()',{location,itemName,item.minimum,item.target,item.updatedBy});return true,item end)
@@ -28,4 +21,3 @@ exports('TransferMedicalStock',function(sourceValue,itemName,quantity,fromLocati
 exports('RecallMedicalLot',function(sourceValue,itemName,lot,reason) local id=uid('RCL',sourceValue);local item={id=id,item=itemName,lot=lot,reason=reason,status='active',issuedBy=actor(sourceValue),issuedAt=os.time()};recalls[id]=item;asyncInsert('INSERT INTO dpn_medical_v6_inventory_recalls (recall_id,item_name,lot_number,status,reason,issued_by,recall_data) VALUES (?,?,?,?,?,?,?)',{id,itemName,lot,item.status,reason,item.issuedBy,encode(item)});return id,item end)
 exports('RecordCycleCount',function(sourceValue,location,itemName,expected,actual) local item={id=uid('CNT',sourceValue),location=location,item=itemName,expected=tonumber(expected)or 0,actual=tonumber(actual)or 0,variance=(tonumber(actual)or 0)-(tonumber(expected)or 0),countedBy=actor(sourceValue),countedAt=os.time()};cycleCounts[item.id]=item;asyncInsert('INSERT INTO dpn_medical_v6_cycle_counts (count_id,location,item_name,expected_quantity,actual_quantity,variance,counted_by,count_data) VALUES (?,?,?,?,?,?,?,?)',{item.id,location,itemName,item.expected,item.actual,item.variance,item.countedBy,encode(item)});return item.id,item end)
 exports('GetSupplyCommandCenter',function()return {parLevels=parLevels,recalls=recalls,cycleCounts=cycleCounts,generatedAt=os.time()}end)
-heartbeat({'par_levels','stock_transfers','lot_recalls','cycle_counts','expiry_tracking','controlled_supply_accountability'})
