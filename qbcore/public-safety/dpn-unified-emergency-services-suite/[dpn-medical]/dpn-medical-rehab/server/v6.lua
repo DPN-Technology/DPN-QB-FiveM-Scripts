@@ -1,4 +1,3 @@
-local VERSION = '3.0.0'
 local RESOURCE = GetCurrentResourceName()
 local QBCore = exports['qb-core']:GetCoreObject()
 local function encode(value) local ok,result=pcall(json.encode,value or {}); return ok and result or '{}' end
@@ -14,13 +13,6 @@ local function core(method,...)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
 end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
-end
 
 local pathways, sessions = {}, {}
 exports('CreateRehabPathway',function(sourceValue,target,pathwayType,goals,baseline) local id=uid('RHB',target);local item={id=id,target=tonumber(target),patientCid=citizen(target),type=pathwayType or'trauma_recovery',goals=goals or{},baseline=tonumber(baseline)or 0,current=tonumber(baseline)or 0,status='active',provider=actor(sourceValue),createdAt=os.time(),milestones={}};pathways[id]=item;asyncInsert('INSERT INTO dpn_medical_v6_rehab_pathways (pathway_id,patient_cid,pathway_type,status,baseline_score,current_score,provider_cid,pathway_data) VALUES (?,?,?,?,?,?,?,?)',{id,item.patientCid,item.type,item.status,item.baseline,item.current,item.provider,encode(item)});return id,item end)
@@ -28,4 +20,3 @@ exports('RecordTherapySessionV6',function(sourceValue,pathwayId,interventions,sc
 exports('AddRehabMilestone',function(pathwayId,label,targetScore) local path=pathways[tostring(pathwayId)];if not path then return false end;local item={id=uid('MLS',pathwayId),label=label,targetScore=tonumber(targetScore)or 100,completed=false};path.milestones[#path.milestones+1]=item;return item.id,item end)
 exports('DischargeRehabPathway',function(sourceValue,pathwayId,outcome) local path=pathways[tostring(pathwayId)];if not path then return false end;path.status='completed';path.outcome=outcome;path.dischargedBy=actor(sourceValue);path.dischargedAt=os.time();asyncUpdate('UPDATE dpn_medical_v6_rehab_pathways SET status=?,current_score=?,pathway_data=?,completed_at=NOW() WHERE pathway_id=?',{path.status,path.current,encode(path),path.id});return true,path end)
 exports('GetRehabDashboard',function()return {pathways=pathways,sessions=sessions,generatedAt=os.time()}end)
-heartbeat({'rehab_pathways','functional_scoring','therapy_sessions','milestones','discharge_outcomes'})
