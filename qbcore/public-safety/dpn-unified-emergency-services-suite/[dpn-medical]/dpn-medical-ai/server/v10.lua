@@ -6,4 +6,4 @@ exports('GenerateCommandRecommendationV10',function(target,context)local ok,twin
 exports('RecordModelGovernanceV10',function(model,version,validation,actor)local item={id=uid('GOV10'),model=model,version=version,validation=validation or{},actor=actor,status='approved_for_advisory',createdAt=os.time()};governance[item.id]=item;return true,item end)
 exports('RecordRecommendationOutcomeV10',function(recommendationId,outcome,reviewer)local item={id=uid('OUT10'),recommendationId=recommendationId,outcome=outcome,reviewer=reviewer,createdAt=os.time()};outcomes[item.id]=item;return true,item end)
 exports('GetV10AIBoard',function()return{version=VERSION,commandRecommendations=commandRecommendations,governance=governance,outcomes=outcomes,generatedAt=os.time()}end)
-CreateThread(function()Wait(8100);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-ai',VERSION,{'command_recommendations','model_governance','outcome_calibration','advisory_only_ai'})end);print('[dpn-medical-ai] v10 governed clinical-command recommendations active')end)
+CreateThread(function()Wait(8100);print('[dpn-medical-ai] v10 governed clinical-command recommendations active')end)
