@@ -23,7 +23,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Validate DPN repository
         run: python3 tools/dpn_repo_validator.py
@@ -34,6 +36,14 @@ jobs:
         run: |
           archive="$(python3 tools/package_resource.py "${{ inputs.resource_path }}")"
           echo "archive=$archive" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release checksum
+        id: checksum
+        shell: bash
+        run: |
+          checksum_file="${{ steps.package.outputs.archive }}.sha256"
+          sha256sum "${{ steps.package.outputs.archive }}" > "$checksum_file"
+          echo "checksum=$checksum_file" >> "$GITHUB_OUTPUT"
 
       - name: Read DPN resource metadata
         id: metadata
@@ -54,10 +64,12 @@ jobs:
           PY
 
       - name: Upload packaged resource
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.metadata.outputs.name }}-v${{ steps.metadata.outputs.version }}
-          path: ${{ steps.package.outputs.archive }}
+          path: |
+            ${{ steps.package.outputs.archive }}
+            ${{ steps.checksum.outputs.checksum }}
           if-no-files-found: error
 
       - name: Publish GitHub Release
@@ -67,6 +79,7 @@ jobs:
           TAG: ${{ steps.metadata.outputs.name }}-v${{ steps.metadata.outputs.version }}
           TITLE: ${{ steps.metadata.outputs.display_name }} v${{ steps.metadata.outputs.version }}
           ARCHIVE: ${{ steps.package.outputs.archive }}
+          CHECKSUM: ${{ steps.checksum.outputs.checksum }}
           DESCRIPTION: ${{ steps.metadata.outputs.description }}
         shell: bash
         run: |
@@ -74,7 +87,7 @@ jobs:
             echo "Release tag $TAG already exists."
             exit 1
           fi
-          gh release create "$TAG" "$ARCHIVE"             --title "$TITLE"             --notes "Official DPN Technology FiveM resource release.
+          gh release create "$TAG" "$ARCHIVE" "$CHECKSUM"             --title "$TITLE"             --notes "Official DPN Technology FiveM resource release.
 
           $DESCRIPTION
 
