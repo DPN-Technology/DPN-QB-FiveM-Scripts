@@ -1,0 +1,40 @@
+name: DPN Automatic Script Index
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "qbcore/**"
+      - "standalone/**"
+      - "hybrid/**"
+      - "tools/generate_script_index.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-index:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate DPN script index
+        run: python3 tools/generate_script_index.py
+
+      - name: Commit updated index
+        shell: bash
+        run: |
+          if git diff --quiet -- SCRIPT_INDEX.md; then
+            echo "DPN Script Index is already current."
+            exit 0
+          fi
+          git config user.name "DPN Technology Automation"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SCRIPT_INDEX.md
+          git commit -m "docs: auto-update DPN script index"
+          git push

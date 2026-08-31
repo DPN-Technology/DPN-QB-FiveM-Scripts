@@ -1,0 +1,13 @@
+{
+  "name": "dpn-example-resource",
+  "display_name": "DPN Example Resource",
+  "version": "0.1.0",
+  "framework": "qbcore",
+  "category": "utilities",
+  "status": "experimental",
+  "description": "Replace with a concise description of the resource.",
+  "creator": "Diesel",
+  "creator_title": "CEO of DPN Technology",
+  "organization": "DPN Technology",
+  "license": "DPN-CSL-1.0"
+}
