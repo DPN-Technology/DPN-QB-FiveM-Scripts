@@ -1,8 +1,16 @@
-local ADV_RESOURCE = 'dpn-medical-radiology'
-local ADV_VERSION = '2.0.0'
+local ADV_RESOURCE = GetCurrentResourceName()
+local ADV_VERSION = GetResourceMetadata(ADV_RESOURCE, 'version', 0) or 'unknown'
 CreateThread(function()
     Wait(1800)
-    pcall(function() exports['dpn-medical-core']:RegisterModule(ADV_RESOURCE,ADV_VERSION,'imaging_queue','turnaround','critical_results','contrast_safety','structured_reports') end)
+    pcall(function()
+        exports['dpn-medical-core']:RegisterModule(ADV_RESOURCE, ADV_VERSION, {
+            'imaging_queue',
+            'turnaround',
+            'critical_results',
+            'contrast_safety',
+            'structured_reports'
+        })
+    end)
     while true do
         TriggerEvent('dpn-medical-core:server:moduleHeartbeat',ADV_RESOURCE,ADV_VERSION,{status='operational'})
         Wait(60000)
