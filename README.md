@@ -98,6 +98,66 @@ Free scripts. Editable source. Community-focused development.
 | [Standalone Resources](standalone/) | DPN scripts without a required core framework |
 | [Hybrid Resources](hybrid/) | DPN scripts supporting multiple framework modes |
 
+### DPN Script Catalog & Automation
+
+The repository is organized by framework first, then by script department/category.
+
+#### QBCore Categories
+
+- [Law Enforcement](qbcore/law-enforcement/)
+- [EMS](qbcore/ems/)
+- [Fire & Rescue](qbcore/fire/)
+- [Civilian](qbcore/civilian/)
+- [Jobs](qbcore/jobs/)
+- [Businesses](qbcore/businesses/)
+- [Criminal / Underground](qbcore/criminal/)
+- [Vehicles](qbcore/vehicles/)
+- [Economy](qbcore/economy/)
+- [Inventory](qbcore/inventory/)
+- [Housing](qbcore/housing/)
+- [Dispatch](qbcore/dispatch/)
+- [Communications](qbcore/communications/)
+- [UI & UX](qbcore/ui/)
+- [Administration](qbcore/admin/)
+- [Developer Tools](qbcore/developer-tools/)
+- [QB Extensions](qbcore/qb-extensions/)
+- [World & Interaction](qbcore/world/)
+- [Utilities](qbcore/utilities/)
+
+#### Standalone Categories
+
+Standalone resources are organized into dedicated Law Enforcement, EMS, Fire, Civilian, Jobs, Businesses, Criminal, Vehicles, Communications, UI, Administration, Developer Tools, World, and Utility sections under [standalone/](standalone/).
+
+#### Hybrid Categories
+
+Multi-framework resources are organized under [hybrid/](hybrid/) with dedicated Law Enforcement, EMS, Fire, Civilian, Jobs, Vehicles, Communications, Administration, and Utilities categories.
+
+#### Automated Repository Systems
+
+| Automation | Purpose |
+|---|---|
+| **DPN Quality Gate** | Runs on pushes and pull requests and checks DPN resource structure, metadata, required documentation, version declarations, framework metadata, and obvious credential/private-key files |
+| **DPN Automatic Script Index** | Rebuilds [SCRIPT_INDEX.md](SCRIPT_INDEX.md) whenever actual resources or resource metadata change |
+| **DPN Repo Watch** | External monitoring checks the repository for new or meaningfully updated issues and pull requests that need attention |
+
+#### DPN Resource Starter Kit
+
+New scripts can begin from [templates/dpn-resource-template/](templates/dpn-resource-template/), which already includes:
+
+- `fxmanifest.lua`
+- `resource.json`
+- `README.md`
+- `config.lua`
+- `client/main.lua`
+- `server/main.lua`
+- DPN Technology attribution
+- Diesel creator attribution
+- DPN-CSL notice
+
+Each production script should be placed in its own `dpn-resource-name/` folder inside the correct framework/category directory.
+
+See [DPN Resource Metadata Standard](docs/RESOURCE_METADATA_SCHEMA.md) for the metadata used by repository automation.
+
 ### Official Authorship
 
 This repository and its original DPN Technology resources are released under the direction of **Diesel, CEO of DPN Technology**. DPN Technology is the publisher and project identity for these community releases.
