@@ -1,5 +1,3 @@
-local VERSION = '3.0.0'
-local RESOURCE = GetCurrentResourceName()
 local QBCore = exports['qb-core']:GetCoreObject()
 local function encode(value) local ok,result=pcall(json.encode,value or {}); return ok and result or '{}' end
 local function targetPlayer(target) return QBCore.Functions.GetPlayer(tonumber(target)) end
@@ -14,13 +12,6 @@ local function core(method,...)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
 end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
-end
 
 local cases, certificates = {}, {}
 exports('OpenCoronerCaseV6',function(sourceValue,target,sceneData) local id=uid('COR',target);local item={id=id,target=tonumber(target),patientCid=citizen(target),status='open',investigator=actor(sourceValue),openedAt=os.time(),scene=sceneData or{},autopsy={status='not_started',steps={},findings={}},evidence={},release={}};cases[id]=item;asyncInsert('INSERT INTO dpn_medical_v6_coroner_cases (case_id,patient_cid,status,investigator_cid,case_data) VALUES (?,?,?,?,?)',{id,item.patientCid,item.status,item.investigator,encode(item)});return id,item end)
@@ -28,4 +19,3 @@ exports('RecordAutopsyStep',function(caseId,step,findings,sourceValue) local ite
 exports('IssueDeathCertificate',function(caseId,cause,manner,contributing,sourceValue) local item=cases[tostring(caseId)];if not item then return false end;local cert={id=uid('DC',caseId),caseId=item.id,patientCid=item.patientCid,cause=cause,manner=manner or'undetermined',contributing=contributing or{},certifier=actor(sourceValue),issuedAt=os.time(),status='issued'};certificates[cert.id]=cert;item.status='certified';asyncInsert('INSERT INTO dpn_medical_v6_death_certificates (certificate_id,case_id,patient_cid,cause_of_death,manner_of_death,certifier_cid,certificate_data) VALUES (?,?,?,?,?,?,?)',{cert.id,cert.caseId,cert.patientCid,cert.cause,cert.manner,cert.certifier,encode(cert)});return cert.id,cert end)
 exports('AuthorizeBodyRelease',function(caseId,destination,recipient,sourceValue) local item=cases[tostring(caseId)];if not item then return false end;item.release={destination=destination,recipient=recipient,authorizedBy=actor(sourceValue),authorizedAt=os.time()};item.status='released';asyncUpdate('UPDATE dpn_medical_v6_coroner_cases SET status=?,case_data=?,closed_at=NOW() WHERE case_id=?',{item.status,encode(item),item.id});return true,item.release end)
 exports('GetCoronerBoard',function()return {cases=cases,certificates=certificates,generatedAt=os.time()}end)
-heartbeat({'medicolegal_case_management','autopsy_workflow','death_certification','body_release','evidence_chain_of_custody'})
