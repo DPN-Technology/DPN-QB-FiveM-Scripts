@@ -1,0 +1,51 @@
+name: DPN Weekly Repository Check
+
+on:
+  schedule:
+    - cron: "15 12 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-health:
+    name: DPN Repository Health Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Python tooling
+        run: |
+          python3 -m py_compile tools/dpn_repo_validator.py
+          python3 -m py_compile tools/generate_script_index.py
+          python3 -m py_compile tools/package_resource.py
+
+      - name: Run DPN Quality Gate
+        run: python3 tools/dpn_repo_validator.py
+
+      - name: Verify generated script index
+        shell: bash
+        run: |
+          cp SCRIPT_INDEX.md /tmp/SCRIPT_INDEX.before.md
+          python3 tools/generate_script_index.py
+          if ! diff -u /tmp/SCRIPT_INDEX.before.md SCRIPT_INDEX.md; then
+            echo "::error::SCRIPT_INDEX.md is out of date."
+            exit 1
+          fi
+
+      - name: Health summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "# DPN Weekly Repository Check"
+            echo
+            echo "- Repository validation executed."
+            echo "- DPN tooling syntax checked."
+            echo "- Script index consistency checked."
+            echo
+            echo "**DPN Technology — Created by Diesel, CEO of DPN Technology**"
+          } >> "$GITHUB_STEP_SUMMARY"
