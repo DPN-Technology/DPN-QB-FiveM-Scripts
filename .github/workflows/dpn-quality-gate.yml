@@ -23,3 +23,19 @@ jobs:
 
       - name: Run DPN repository validator
         run: python3 tools/dpn_repo_validator.py
+
+      - name: Install Lua syntax checker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.4
+
+      - name: Validate Lua syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          while IFS= read -r -d '' file; do
+            luac5.4 -p "$file"
+            count=$((count + 1))
+          done < <(find qbcore hybrid standalone -type f \( -name '*.lua' -o -name 'fxmanifest.lua' \) -print0)
+          echo "Validated $count Lua files."
