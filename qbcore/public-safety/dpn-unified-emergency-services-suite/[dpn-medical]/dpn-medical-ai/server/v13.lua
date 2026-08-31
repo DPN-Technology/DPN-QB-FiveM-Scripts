@@ -14,4 +14,4 @@ exports('AuditAlgorithmBiasV13', function(cohort,results) local item={id=uid('BI
 
 exports('GetV13AIBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-ai', VERSION, {'GenerateCausalRecommendationV13','CalibrateOutcomeV13','AuditAlgorithmBiasV13'}) end); print('[dpn-medical-ai] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-ai] v13 continuum-command operations active') end)
