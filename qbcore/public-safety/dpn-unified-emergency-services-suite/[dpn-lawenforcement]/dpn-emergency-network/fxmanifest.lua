@@ -8,7 +8,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 name 'dpn-emergency-network'
-author 'Diesel — CEO of DPN Technology'Diesel" Sherk'
+author 'Diesel — CEO of DPN Technology'
 description 'Unified DPN emergency-service integration bus, health monitor, cross-system event correlation, and secure interoperability layer.'
 version '4.0.0'
 lua54 'yes'

@@ -98,15 +98,15 @@ Config.Dispatch = {
 Config.UnifiedNetwork = {
     enabled = true,
     resource = 'dpn-unified-emergency-network',
-    incidentEvent = 'dpn-uen:server:IncidentUpdated',
-    unitStatusEvent = 'dpn-uen:server:UnitStatusChanged',
-    recordEvent = 'dpn-uen:server:RecordLinked'
+    incidentEvent = 'dpn-unes:server:mdtIncidentUpdated',
+    unitStatusEvent = 'dpn-unes:server:mdtUnitStatusChanged',
+    recordEvent = 'dpn-unes:server:mdtRecordLinked'
 }
 
 Config.MIB = {
     enabled = true,
     allowedAce = { 'admin', 'god' },
-    neuralizerResource = 'dpn-neuralizer',
+    neuralizerResource = 'dpn_neuralizer',
     portalResource = 'dpn-pg-7x',
     allowPlayerLookup = true,
     allowAuditExport = true,

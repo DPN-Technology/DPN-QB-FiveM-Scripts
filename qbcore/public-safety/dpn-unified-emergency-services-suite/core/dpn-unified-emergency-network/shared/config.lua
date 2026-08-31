@@ -1,6 +1,7 @@
 DPN_UNES = DPN_UNES or {}
 DPN_UNES.Config = {
     Command = 'unes',
+    DispatchCommand = 'dpndispatch',
     PanicCommand = 'panic',
     UnitRefreshMs = 10000,
     ClientLocationRefreshMs = 3500,
@@ -50,6 +51,23 @@ DPN_UNES.Config = {
         adminAgencies = { admin = true }
     },
 
+    AlertBlips = {
+        Enabled = true,
+        Sprite = 161,
+        Scale = 0.95,
+        TimeMs = 300000,
+        Colors = {
+            law = 3,
+            ems = 47,
+            fire = 1,
+            justice = 5,
+            corrections = 17,
+            bail = 5,
+            tow = 2,
+            admin = 40
+        }
+    },
+
     LiveMap = {
         Provider = 'oulsen_satmap',
         -- oulsen_satmap streams GTA minimap .ytd textures. NUI cannot read .ytd directly, so this UI uses an exported/static image.
@@ -61,6 +79,12 @@ DPN_UNES.Config = {
         ForceGpsOnOpen = true,
         RefreshSeconds = 5
     },
+    Integrations = {
+        -- Optional server-side webhook for unified incident notifications.
+        -- Leave empty for public releases; configure privately on your server.
+        DiscordWebhook = ''
+    },
+
     Routing = {
         hospitals = {
             { name = 'Pillbox Medical Center', x = 307.0, y = -1433.0, z = 29.8 },

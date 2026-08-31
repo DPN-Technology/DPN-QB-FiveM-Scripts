@@ -9,7 +9,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'dpn-smart-city'
-author 'Diesel — CEO of DPN Technology'Diesel" Sherk'
+author 'Diesel — CEO of DPN Technology'
 description 'Smart-city sensors, cameras, traffic controls and automated alerts'
 version '4.0.0'
 

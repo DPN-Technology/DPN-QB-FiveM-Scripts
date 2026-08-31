@@ -1,7 +1,7 @@
 Config = Config or {}
 
 Config.Debug = false
-Config.Version = 4.02
+Config.Version = '14.0.0'
 Config.Framework = 'qb-core'
 
 Config.Persistence = {

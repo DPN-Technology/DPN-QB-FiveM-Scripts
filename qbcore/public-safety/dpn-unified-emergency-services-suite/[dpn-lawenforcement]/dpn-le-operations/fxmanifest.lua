@@ -8,7 +8,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 name 'dpn-le-operations'
-author 'Diesel — CEO of DPN Technology'Diesel" Sherk'
+author 'Diesel — CEO of DPN Technology'
 description 'DPN Law Enforcement Advanced Operations Center: shifts, units, warrants, pursuits, force review, fleet, armory and supervisor workflows.'
 version '4.0.0'
 lua54 'yes'

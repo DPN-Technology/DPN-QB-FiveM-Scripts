@@ -1116,22 +1116,29 @@ callback('GetAuditLogs', function(src, payload)
     return { ok = true, results = rows }
 end)
 
-RegisterNetEvent('dpn-mdt:server:ReceiveDispatchCall', function(call)
+AddEventHandler('dpn-mdt:server:ReceiveDispatchCall', function(call)
     local src = source
     createDispatchCall(call, src and src > 0 and src or nil)
 end)
 
-RegisterNetEvent('dpn-dispatch:server:SendToMDT', function(call)
+AddEventHandler('dpn-dispatch:server:SendToMDT', function(call)
     local src = source
     createDispatchCall(call, src and src > 0 and src or nil)
 end)
 
-RegisterNetEvent('dpn-uen:server:SendIncidentToMDT', function(incident)
-    local call = incident or {}
-    call.metadata = call.metadata or {}
+local function receiveUnifiedIncident(incident)
+    local call = type(incident) == 'table' and incident or {}
+    call.metadata = type(call.metadata) == 'table' and call.metadata or {}
     call.metadata.unifiedNetwork = true
-    createDispatchCall(call, source and source > 0 and source or nil)
-end)
+    call.metadata.unifiedIncidentId = call.id or call.call_id
+    createDispatchCall(call, nil)
+end
+
+-- Current Unified Emergency Service Network integration.
+AddEventHandler('dpn-unes:server:integrationIncidentCreated', receiveUnifiedIncident)
+
+-- Legacy server-only compatibility alias. Do not expose this bridge to clients.
+AddEventHandler('dpn-uen:server:SendIncidentToMDT', receiveUnifiedIncident)
 
 RegisterNetEvent('dpn-mdt:server:SetUnitStatus', function(status, callId)
     local src = source

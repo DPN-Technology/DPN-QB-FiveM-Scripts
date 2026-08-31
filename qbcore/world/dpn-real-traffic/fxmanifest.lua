@@ -9,7 +9,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'dpn-real-traffic'
-author 'Diesel — CEO of DPN Technology'Diesel" Sherk'
+author 'Diesel — CEO of DPN Technology'
 description 'Advanced realistic AI traffic for QBCore with emergency vehicle yielding and ts_Trafficlights compatibility.'
 version '1.0.0'
 

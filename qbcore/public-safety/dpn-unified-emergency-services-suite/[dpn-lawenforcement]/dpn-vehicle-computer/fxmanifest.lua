@@ -9,7 +9,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'dpn-vehicle-computer'
-author 'Diesel — CEO of DPN Technology'Diesel" Sherk'
+author 'Diesel — CEO of DPN Technology'
 description 'Advanced in-vehicle emergency-services terminal and ALPR'
 version '4.0.0'
 

@@ -97,11 +97,31 @@ function DPN_UNES.Server.UpsertUnit(src, data)
     if previousKey and previousKey ~= key then DPN_UNES.Cache.units[previousKey] = nil; TriggerClientEvent('dpn-unes:client:unitRemoved', -1, previousKey) end
 
     local old = DPN_UNES.Cache.units[key] or {}
-    data = data or {}
-    profile.coords = data.coords or old.coords or profile.coords
-    profile.heading = data.heading or old.heading
-    profile.vehicle = data.vehicle or old.vehicle
-    profile.status = data.status or old.status or profile.status or 'available'
+    data = type(data) == 'table' and data or {}
+
+    -- Live-map position is server authoritative. Client GPS payloads are treated as hints only.
+    local ped = GetPlayerPed(src)
+    if ped and ped > 0 and DoesEntityExist(ped) then
+        local coords = GetEntityCoords(ped)
+        profile.coords = { x = coords.x + 0.0, y = coords.y + 0.0, z = coords.z + 0.0 }
+        profile.heading = GetEntityHeading(ped) + 0.0
+    else
+        profile.coords = old.coords or profile.coords
+        profile.heading = old.heading
+    end
+
+    if type(data.vehicle) == 'table' then
+        profile.vehicle = {
+            plate = tostring(data.vehicle.plate or ''):sub(1, 16),
+            model = tostring(data.vehicle.model or ''):sub(1, 64),
+            speed = math.max(0, math.min(250, tonumber(data.vehicle.speed) or 0)),
+            netId = tonumber(data.vehicle.netId)
+        }
+    else
+        profile.vehicle = old.vehicle
+    end
+
+    profile.status = tableHas(DPN_UNES.Config.UnitStatuses, data.status) and data.status or old.status or profile.status or 'available'
     profile.assignment = old.assignment
     profile.lastSeen = now()
     profile.heartbeat = now()
