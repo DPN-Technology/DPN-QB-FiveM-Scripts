@@ -4,6 +4,16 @@ Official **DPN Technology** FiveM script category.
 
 **Created under the direction of Diesel, CEO of DPN Technology**
 
+## Integrated DPN Law Enforcement Platform
+
+The main uploaded `[dpn-lawenforcement]` package is a coordinated multi-resource suite and is intentionally kept with the shared emergency-services backbone rather than split into this general category.
+
+➡️ **[Open the DPN Law Enforcement Suite](../public-safety/dpn-unified-emergency-services-suite/[dpn-lawenforcement]/)**
+
+Independent law-enforcement utilities such as StarChase, mobile spikes and the police doorbell remain directly in this category because they are separate resources.
+
+---
+
 ## Scope
 
 Police, sheriff, state police, corrections, dispatch, evidence, MDT integrations, traffic enforcement, K9, warrants, citations, and related public-safety resources.
