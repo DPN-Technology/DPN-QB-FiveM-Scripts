@@ -5,4 +5,4 @@ exports('CalculateUnitReadiness',function(unitId,data)data=type(data)=='table'an
 exports('RecordAmbulanceRestock',function(unitId,items,actor)local item={id=uid('RESTOCK'),unitId=unitId,items=items or{},actor=actor,createdAt=os.time()};restocks[item.id]=item;return item.id,item end)
 exports('ReportAmbulanceDefect',function(unitId,kind,severity,actor)local item={id=uid('DEFECT'),unitId=unitId,kind=kind,severity=severity or'moderate',actor=actor,status='open',createdAt=os.time()};defects[item.id]=item;return item.id,item end)
 exports('GetAmbulanceV8Board',function()return{readiness=readiness,restocks=restocks,defects=defects,generatedAt=os.time()}end)
-CreateThread(function()Wait(3000);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-ambulance',VERSION,{'unit_readiness','smart_restock','defect_management','fleet_resilience'})end);print('[dpn-medical-ambulance] v8 fleet readiness and resilient operations active')end)
+CreateThread(function()Wait(3000);print('[dpn-medical-ambulance] v8 fleet readiness and resilient operations active')end)
