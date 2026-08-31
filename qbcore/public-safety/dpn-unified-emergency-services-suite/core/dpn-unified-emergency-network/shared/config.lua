@@ -61,6 +61,12 @@ DPN_UNES.Config = {
         ForceGpsOnOpen = true,
         RefreshSeconds = 5
     },
+    Integrations = {
+        -- Optional server-side webhook for unified incident notifications.
+        -- Leave empty for public releases; configure privately on your server.
+        DiscordWebhook = ''
+    },
+
     Routing = {
         hospitals = {
             { name = 'Pillbox Medical Center', x = 307.0, y = -1433.0, z = 29.8 },
