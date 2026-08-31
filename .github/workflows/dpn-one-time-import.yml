@@ -23,20 +23,19 @@ jobs:
         id: ready
         shell: bash
         run: |
-          expected=37
-          actual=$(find _import_xz -maxdepth 1 -type f -name 'chunk_*' 2>/dev/null | wc -l)
-          echo "Found $actual of $expected import chunks."
-          if [ "$actual" -ne "$expected" ]; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          else
+          if [ -s "_import_xz/archive.b64" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "DPN import archive is present."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "DPN import archive has not been staged yet."
           fi
 
       - name: Decode and install organized DPN resource bundle
         if: steps.ready.outputs.ready == 'true'
         shell: bash
         run: |
-          cat _import_xz/chunk_* | base64 -d > /tmp/dpn-resource-import.tar.xz
+          base64 -d _import_xz/archive.b64 > /tmp/dpn-resource-import.tar.xz
           tar -tJf /tmp/dpn-resource-import.tar.xz >/dev/null
           tar -xJf /tmp/dpn-resource-import.tar.xz -C .
           rm -rf _import _import_xz
