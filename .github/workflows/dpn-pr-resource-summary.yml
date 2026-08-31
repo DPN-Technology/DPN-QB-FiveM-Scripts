@@ -1,0 +1,63 @@
+name: DPN Pull Request Resource Summary
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  summarize:
+    name: Summarize DPN Resource Changes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build DPN change summary
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+          from collections import defaultdict
+
+          base = os.environ["BASE_SHA"]
+          head = os.environ["HEAD_SHA"]
+          changed = subprocess.check_output(
+              ["git", "diff", "--name-only", base, head],
+              text=True
+          ).splitlines()
+
+          buckets = defaultdict(list)
+          for path in changed:
+              parts = path.split("/")
+              if len(parts) >= 3 and parts[0] in {"qbcore", "standalone", "hybrid"}:
+                  buckets[f"{parts[0]}/{parts[1]}"].append(path)
+              else:
+                  buckets["repository"].append(path)
+
+          summary = os.environ["GITHUB_STEP_SUMMARY"]
+          with open(summary, "a", encoding="utf-8") as f:
+              f.write("# DPN Technology Pull Request Summary\n\n")
+              f.write(f"**Changed files:** {len(changed)}\n\n")
+              if not changed:
+                  f.write("No changed files detected.\n")
+              for section in sorted(buckets):
+                  f.write(f"## {section}\n\n")
+                  for path in buckets[section][:100]:
+                      f.write(f"- `{path}`\n")
+                  if len(buckets[section]) > 100:
+                      f.write(f"- ...and {len(buckets[section]) - 100} more\n")
+                  f.write("\n")
+              f.write("---\n\n")
+              f.write("**DPN Technology — Created by Diesel, CEO of DPN Technology**\n")
+          PY
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
