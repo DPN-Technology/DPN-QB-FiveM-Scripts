@@ -23,7 +23,7 @@ jobs:
         id: ready
         shell: bash
         run: |
-          expected=14
+          expected=56
           actual=$(find _import -maxdepth 1 -type f -name 'chunk_*' 2>/dev/null | wc -l)
           echo "Found $actual of $expected import chunks."
           if [ "$actual" -ne "$expected" ]; then
