@@ -13,6 +13,8 @@ Free scripts. Editable source. Community-focused development.
 ![DPN Technology](https://img.shields.io/badge/DPN-Technology-purple?style=for-the-badge)
 ![Creator](https://img.shields.io/badge/Creator-Diesel-black?style=for-the-badge)
 ![FiveM](https://img.shields.io/badge/FiveM-Resources-orange?style=for-the-badge)
+![DPN Resources](https://img.shields.io/badge/DPN_Resources-45-purple?style=for-the-badge)
+![Emergency Suite](https://img.shields.io/badge/Emergency_Suite-35_Resources-darkred?style=for-the-badge)
 ![QBCore](https://img.shields.io/badge/QBCore-Compatible-blue?style=for-the-badge)
 ![Standalone](https://img.shields.io/badge/Standalone-Supported-purple?style=for-the-badge)
 ![Free](https://img.shields.io/badge/Price-FREE-brightgreen?style=for-the-badge)
@@ -94,6 +96,8 @@ Free scripts. Editable source. Community-focused development.
 | [Automation Guide](docs/AUTOMATION.md) | Quality gates, automatic indexing, packaging, releases, PR summaries, weekly checks, and Dependabot |
 | [Public Repository Security Baseline](docs/PUBLIC_REPOSITORY_SECURITY.md) | Public-release rules, secret handling, workflow hardening, and GitHub settings required before publishing code |
 | [Uploaded Resource Catalog](docs/UPLOADED_RESOURCE_CATALOG.md) | Categorized record of the initial DPN FiveM resource library import |
+| [Detailed Import Catalog](docs/IMPORTED_RESOURCE_CATALOG.md) | Functional inventory of all 45 imported resources and integrated suite components |
+| [Detailed Import Report](docs/IMPORT_REPORT.md) | Import decisions, static hygiene review, suite boundaries, and runtime-testing status |
 | [Automatic Script Index](SCRIPT_INDEX.md) | Auto-generated index of every DPN FiveM resource and its current metadata |
 
 ### Resource Catalogs
@@ -138,6 +142,15 @@ This suite preserves the original coordinated structure of:
 > The bracketed law-enforcement and medical groups are intentionally **not split apart**. Their internal resources are designed to operate as coordinated suites, and the repository preserves that relationship while still exposing each individual FiveM resource through the automatic Script Index.
 
 The suite includes dedicated documentation for architecture, resource relationships, database installation, and recommended startup order.
+
+Deployment and department navigation:
+
+- **[FiveM Deployment Topology](qbcore/public-safety/dpn-unified-emergency-services-suite/docs/DEPLOYMENT.md)**
+- **[Pre-Install Checklist](qbcore/public-safety/dpn-unified-emergency-services-suite/docs/PRE_INSTALL_CHECKLIST.md)**
+- **[Law Enforcement Suite](qbcore/public-safety/dpn-unified-emergency-services-suite/[dpn-lawenforcement]/README.md)**
+- **[Medical / EMS Suite](qbcore/public-safety/dpn-unified-emergency-services-suite/[dpn-medical]/README.md)**
+- **[Fire & Rescue Integration](qbcore/public-safety/dpn-unified-emergency-services-suite/departments/fire-rescue/README.md)**
+- **[Dispatch / MDT Core](qbcore/public-safety/dpn-unified-emergency-services-suite/departments/dispatch-mdt/README.md)**
 
 ### DPN Script Catalog & Automation
 
