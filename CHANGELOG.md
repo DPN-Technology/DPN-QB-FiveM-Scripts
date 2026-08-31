@@ -7,6 +7,13 @@ All notable changes to the official DPN Technology FiveM community repository ar
 ## [Unreleased]
 
 ### Added
+- 45 organized FiveM resources from the initial DPN script-library import
+- DPN Unified Emergency Services Suite preserving the complete law-enforcement and medical resource groups
+- Integrated DPN Dispatch, MDT, Unified Emergency Network, and cross-agency public-safety documentation
+- Per-resource metadata for automatic indexing
+- Unified-suite architecture, resource matrix, SQL installation inventory, and recommended startup order
+- Categorized QBCore, Hybrid, and Standalone imported resources
+- Uploaded resource catalog and automatic 45-resource Script Index
 - Advanced DPN Technology repository documentation
 - DPN Technology Community Source License (DPN-CSL)
 - Security policy
