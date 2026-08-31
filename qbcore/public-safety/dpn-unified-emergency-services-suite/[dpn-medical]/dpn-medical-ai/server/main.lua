@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-ai','2.0.0',{'clinical_ai','deterioration_score','recommendations'})
-end)
-
 local function assess(state)
     local v,s=state.vitals,state.status; local score=0; local rec={}
     if v.spo2<90 then score=score+3; rec[#rec+1]='Administer oxygen and assess airway' end
