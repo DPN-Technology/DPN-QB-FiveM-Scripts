@@ -8,7 +8,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 name 'dpn-le-core'
-author 'Diesel — CEO of DPN Technology'Diesel" Sherk'
+author 'Diesel — CEO of DPN Technology'
 description 'DPN Law Enforcement Core v2 - independent qb-core law enforcement framework, officer actions, records, permissions and DPN Emergency Network bridge.'
 version '4.0.0'
 lua54 'yes'

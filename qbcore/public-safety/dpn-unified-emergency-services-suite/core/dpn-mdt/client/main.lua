@@ -115,7 +115,7 @@ RegisterNetEvent('dpn-dispatch:client:SendCallToMDT', function(call)
     SendNUIMessage({ action = 'dispatchUpdated', call = call })
 end)
 
-RegisterNetEvent('dpn-uen:client:IncidentUpdated', function(incident)
+RegisterNetEvent('dpn-unes:client:incidentUpdated', function(incident)
     SendNUIMessage({ action = 'unifiedIncidentUpdated', incident = incident })
 end)
 

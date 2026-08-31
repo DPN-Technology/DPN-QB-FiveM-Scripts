@@ -839,7 +839,7 @@ end)
 
 
 -- dpn-mdt can use these events when it wants dispatch to generate a live CAD call/report.
-RegisterNetEvent('dpn-dispatch:server:mdtCreateCall', function(data)
+AddEventHandler('dpn-dispatch:server:mdtCreateCall', function(data)
     local src = source or 0
     local payload = type(data) == 'table' and data or {}
     payload.meta = payload.meta or {}
@@ -848,7 +848,7 @@ RegisterNetEvent('dpn-dispatch:server:mdtCreateCall', function(data)
     Dispatch.CreateCall(payload, src)
 end)
 
-RegisterNetEvent('dpn-dispatch:server:mdtCreateReport', function(data)
+AddEventHandler('dpn-dispatch:server:mdtCreateReport', function(data)
     local src = source or 0
     local payload = type(data) == 'table' and data or {}
     payload.meta = payload.meta or {}
