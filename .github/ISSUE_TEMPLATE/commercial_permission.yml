@@ -1,0 +1,70 @@
+name: Commercial Permission Request
+description: Request authorization to commercially distribute a DPN Technology script
+title: "[COMMERCIAL REQUEST] "
+labels:
+  - commercial-request
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # DPN Technology Commercial Permission
+        Commercial resale is not authorized by default.
+        Requests are subject to approval by Diesel, CEO of DPN Technology, or an authorized DPN Technology representative.
+        Do not post private payment information, passwords, API keys, or other secrets.
+  - type: input
+    id: resource
+    attributes:
+      label: DPN Resource
+    validations:
+      required: true
+  - type: input
+    id: project
+    attributes:
+      label: Your Project / Business
+    validations:
+      required: true
+  - type: textarea
+    id: changes
+    attributes:
+      label: Modifications
+      description: Describe what you changed or plan to change.
+    validations:
+      required: true
+  - type: textarea
+    id: distribution
+    attributes:
+      label: Distribution Plan
+      description: Where and how would the product be distributed?
+    validations:
+      required: true
+  - type: input
+    id: price
+    attributes:
+      label: Intended Price / Revenue Model
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Will buyers receive source code?
+      options:
+        - "Yes"
+        - "No"
+        - "Partially"
+    validations:
+      required: true
+  - type: textarea
+    id: attribution
+    attributes:
+      label: Proposed DPN Attribution
+    validations:
+      required: true
+  - type: checkboxes
+    id: acknowledge
+    attributes:
+      label: Acknowledgement
+      options:
+        - label: I understand submitting this request does not itself grant commercial permission.
+          required: true
+        - label: I will not commercially distribute the DPN-derived resource unless permission is explicitly granted.
+          required: true
