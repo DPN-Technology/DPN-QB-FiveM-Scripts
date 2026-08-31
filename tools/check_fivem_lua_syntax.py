@@ -44,6 +44,17 @@ with tempfile.TemporaryDirectory(prefix="dpn-lua-check-") as tmp:
         normalized, replaced = CFX_HASH.subn("0", source)
         cfx_literals += replaced
 
+        # Some shipped *.lua files are documented table fragments intended to be
+        # pasted inside qb-core/ox_inventory item tables. Validate the fragment
+        # by wrapping it in a temporary table instead of treating it as a chunk.
+        code_lines = [
+            line.strip()
+            for line in normalized.splitlines()
+            if line.strip() and not line.lstrip().startswith("--")
+        ]
+        if code_lines and code_lines[0].startswith("["):
+            normalized = "return {\n" + normalized + "\n}\n"
+
         temp_path = temp_root / f"{index:05d}.lua"
         temp_path.write_text(normalized, encoding="utf-8")
 
