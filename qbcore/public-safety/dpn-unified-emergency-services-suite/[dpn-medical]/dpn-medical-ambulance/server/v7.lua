@@ -36,10 +36,5 @@ end)
 
 CreateThread(function()
     Wait(2900)
-    pcall(function()
-        exports['dpn-medical-core']:RegisterModule('dpn-medical-ambulance', '4.0.0', {
-            'fleet_management', 'vehicle_readiness', 'crew_assignment', 'dispatch_availability', 'unit_status_board'
-        })
-    end)
     print('[dpn-medical-ambulance] v4.0.0 dispatch fleet readiness board active')
 end)
