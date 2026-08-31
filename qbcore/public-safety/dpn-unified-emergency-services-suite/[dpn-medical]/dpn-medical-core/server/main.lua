@@ -5,6 +5,10 @@ DPNMedicalServer = DPNMedicalServer or {}
 local loaded, dirty, sourceCitizen = {}, {}, {}
 local damageCooldowns, treatmentCooldowns = {}, {}
 local moduleRegistry = {}
+local CORE_RESOURCE = GetCurrentResourceName()
+local CORE_VERSION = GetResourceMetadata(CORE_RESOURCE, 'version', 0) or 'unknown'
+local MODULE_HEALTHY_SECONDS = 90
+local MODULE_DEGRADED_SECONDS = 180
 
 local function nowMs() return GetGameTimer() end
 local function getPlayer(src) return QBCore.Functions.GetPlayer(tonumber(src)) end
@@ -19,6 +23,123 @@ end
 
 local function hasAdminPermission(src)
     return src == 0 or QBCore.Functions.HasPermission(src, 'admin') or QBCore.Functions.HasPermission(src, 'god')
+end
+
+local function addCapability(result, seen, value)
+    value = tostring(value or ''):gsub('^%s+', ''):gsub('%s+$', ''):sub(1, 96)
+    if value == '' or seen[value] then return end
+    seen[value] = true
+    result[#result + 1] = value
+end
+
+local function normalizeCapabilities(capabilities, ...)
+    local result, seen = {}, {}
+    local function consume(value)
+        if type(value) == 'table' then
+            for key, item in pairs(value) do
+                if type(key) == 'string' and item == true then
+                    addCapability(result, seen, key)
+                elseif type(item) == 'string' or type(item) == 'number' then
+                    addCapability(result, seen, item)
+                end
+            end
+        elseif type(value) == 'string' or type(value) == 'number' then
+            addCapability(result, seen, value)
+        end
+    end
+    consume(capabilities)
+    for index = 1, select('#', ...) do consume(select(index, ...)) end
+    table.sort(result)
+    return result
+end
+
+local function mergeCapabilities(existing, incoming)
+    local result, seen = {}, {}
+    for _, list in ipairs({ existing or {}, incoming or {} }) do
+        for _, value in ipairs(list) do addCapability(result, seen, value) end
+    end
+    table.sort(result)
+    return result
+end
+
+local function resolveResourceVersion(name, reported)
+    local metadataVersion = GetResourceMetadata(name, 'version', 0)
+    if metadataVersion and metadataVersion ~= '' then
+        if reported and tostring(reported) ~= '' and tostring(reported) ~= 'unknown' and tostring(reported) ~= tostring(metadataVersion) then
+            print(('[dpn-medical-core] Module %s reported legacy version %s; manifest version %s is authoritative'):format(name, tostring(reported), tostring(metadataVersion)))
+        end
+        return tostring(metadataVersion)
+    end
+    return tostring(reported or 'unknown')
+end
+
+local function classifyModule(entry)
+    local state = GetResourceState(entry.name)
+    entry.state = state
+    if state ~= 'started' and entry.name ~= CORE_RESOURCE then return 'offline' end
+    local anchor = tonumber(entry.lastHeartbeat or entry.lastRegisteredAt or entry.registeredAt) or os.time()
+    local age = math.max(0, os.time() - anchor)
+    if age <= MODULE_HEALTHY_SECONDS then return 'healthy' end
+    if age <= MODULE_DEGRADED_SECONDS then return 'degraded' end
+    return 'stale'
+end
+
+local function persistModule(entry)
+    pcall(function()
+        MySQL.insert('INSERT INTO dpn_medical_modules (resource_name, version, capabilities, last_seen) VALUES (?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE version=VALUES(version), capabilities=VALUES(capabilities), last_seen=NOW()', {
+            entry.name, entry.version, json.encode(entry.capabilities or {})
+        })
+    end)
+end
+
+local function registerModule(name, version, capabilities, ...)
+    name = tostring(name or ''):sub(1, 64)
+    if name == '' then return false, 'invalid module name' end
+    local normalized = normalizeCapabilities(capabilities, ...)
+    local now = os.time()
+    local existing = moduleRegistry[name] or {
+        name = name,
+        capabilities = {},
+        registeredAt = now
+    }
+    existing.version = resolveResourceVersion(name, version)
+    existing.capabilities = mergeCapabilities(existing.capabilities, normalized)
+    existing.lastRegisteredAt = now
+    existing.health = classifyModule(existing)
+    moduleRegistry[name] = existing
+    persistModule(existing)
+    print(('[dpn-medical-core] Registered module %s v%s (%d capabilities)'):format(name, existing.version, #existing.capabilities))
+    return true, existing
+end
+
+local function heartbeatModule(name, version, metrics)
+    name = tostring(name or ''):sub(1, 64)
+    if name == '' then return false, 'invalid module name' end
+    local now = os.time()
+    local existing = moduleRegistry[name] or {
+        name = name,
+        capabilities = {},
+        registeredAt = now
+    }
+    existing.version = resolveResourceVersion(name, version)
+    existing.lastHeartbeat = now
+    existing.metrics = type(metrics) == 'table' and metrics or {}
+    existing.health = classifyModule(existing)
+    moduleRegistry[name] = existing
+    persistModule(existing)
+    pcall(function()
+        MySQL.insert('INSERT INTO dpn_medical_module_health (resource_name,version,health_data,last_seen) VALUES (?,?,?,NOW()) ON DUPLICATE KEY UPDATE version=VALUES(version),health_data=VALUES(health_data),last_seen=NOW()', {
+            name,
+            existing.version,
+            json.encode({ metrics = existing.metrics, health = existing.health, state = existing.state })
+        })
+    end)
+    return true, existing
+end
+
+local function moduleSnapshot()
+    for _, entry in pairs(moduleRegistry) do entry.health = classifyModule(entry) end
+    return moduleRegistry
 end
 
 local levelOrder = { basic = 1, ems = 2, doctor = 3, surgeon = 4 }
@@ -152,6 +273,10 @@ DPNMedicalServer.RevivePatient = revivePatient
 DPNMedicalServer.CitizenId = citizenId
 DPNMedicalServer.IsMedicalJob = isMedicalJob
 DPNMedicalServer.HasAdminPermission = hasAdminPermission
+DPNMedicalServer.RegisterModule = registerModule
+DPNMedicalServer.ModuleHeartbeat = heartbeatModule
+DPNMedicalServer.GetModules = moduleSnapshot
+DPNMedicalServer.Version = CORE_VERSION
 
 RegisterNetEvent(DPN_MED.Events.RequestState, function() sync(source) end)
 
@@ -279,11 +404,9 @@ end)
 
 CreateThread(function()
     Wait(1000)
-    moduleRegistry['dpn-medical-core'] = { name='dpn-medical-core', version='6.0.0', capabilities={'injuries','vitals','lifecycle','death','revive','persistence','module_registry'}, registeredAt=os.time() }
-    print('[dpn-medical-core] v6.0.0 advanced medical platform base active')
-    pcall(function()
-        MySQL.insert('INSERT INTO dpn_medical_modules (resource_name, version, capabilities, last_seen) VALUES (?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE version=VALUES(version), capabilities=VALUES(capabilities), last_seen=NOW()', {'dpn-medical-core','5.0.0',json.encode(moduleRegistry['dpn-medical-core'].capabilities)})
-    end)
+    registerModule(CORE_RESOURCE, CORE_VERSION, {'injuries','vitals','lifecycle','death','revive','persistence','module_registry','module_health'})
+    heartbeatModule(CORE_RESOURCE, CORE_VERSION, { role = 'core', authoritative = true })
+    print(('[dpn-medical-core] v%s advanced medical platform base active'):format(CORE_VERSION))
     Wait(500)
     for _, sourceId in ipairs(GetPlayers()) do ensureState(tonumber(sourceId)); sync(tonumber(sourceId)) end
 end)
@@ -316,6 +439,14 @@ CreateThread(function()
         for id in pairs(dirty) do
             if MedicalStates[id] and DPNMedicalStorage.Save(id, MedicalStates[id]) then dirty[id] = nil end
         end
+    end
+end)
+
+CreateThread(function()
+    while true do
+        Wait(30000)
+        heartbeatModule(CORE_RESOURCE, CORE_VERSION, { role = 'core', authoritative = true })
+        for _, entry in pairs(moduleRegistry) do entry.health = classifyModule(entry) end
     end
 end)
 
@@ -369,14 +500,20 @@ exports('SetFlag', function(sourceId, key, value)
     key = tostring(key or ''):sub(1, 64); if key == '' then return false end
     state.flags[key] = value; commit(tonumber(sourceId), id, state, 'flag', { key = key, value = value }); return true
 end)
-exports('RegisterModule', function(name, version, capabilities)
-    name = tostring(name or ''):sub(1, 64); if name == '' then return false end
-    moduleRegistry[name] = { name = name, version = tostring(version or 'unknown'), capabilities = capabilities or {}, registeredAt = os.time() }
-    MySQL.insert('INSERT INTO dpn_medical_modules (resource_name, version, capabilities, last_seen) VALUES (?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE version=VALUES(version), capabilities=VALUES(capabilities), last_seen=NOW()', { name, tostring(version or 'unknown'), json.encode(capabilities or {}) })
-    print(('[dpn-medical-core] Registered module %s v%s'):format(name, tostring(version or 'unknown')))
-    return true
+exports('RegisterModule', function(name, version, capabilities, ...)
+    return registerModule(name, version, capabilities, ...)
 end)
-exports('GetModules', function() return moduleRegistry end)
+exports('ModuleHeartbeat', function(name, version, metrics)
+    return heartbeatModule(name, version, metrics)
+end)
+exports('GetModules', function() return moduleSnapshot() end)
+exports('GetModule', function(name)
+    name = tostring(name or ''):sub(1, 64)
+    local entry = moduleRegistry[name]
+    if entry then entry.health = classifyModule(entry) end
+    return entry
+end)
+exports('GetRuntimeVersion', function() return CORE_VERSION end)
 exports('IsMedicalJob', function(sourceId, level) return isMedicalJob(getPlayer(sourceId), level or 'ems') end)
 exports('EmitIntegration', function(name, payload)
     TriggerEvent(DPN_MED.Events.Integration, tostring(name or 'unknown'), payload or {})
