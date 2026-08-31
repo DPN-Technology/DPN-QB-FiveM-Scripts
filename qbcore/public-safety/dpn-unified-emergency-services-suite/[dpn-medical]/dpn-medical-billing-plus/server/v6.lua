@@ -14,13 +14,6 @@ local function core(method,...)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
 end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
-end
 
 local claims, coding = {}, {}
 exports('CreateRevenueCycleClaim',function(sourceValue,target,invoiceId,payer,total) local id=uid('RCM',target);local item={id=id,target=tonumber(target),patientCid=citizen(target),invoiceId=invoiceId,payer=payer or'self_pay',total=tonumber(total)or 0,status='draft',createdBy=actor(sourceValue),createdAt=os.time(),codes={},edits={}};claims[id]=item;asyncInsert('INSERT INTO dpn_medical_v6_revenue_claims (claim_id,patient_cid,invoice_id,payer,status,total_amount,created_by,claim_data) VALUES (?,?,?,?,?,?,?,?)',{id,item.patientCid,tostring(invoiceId),item.payer,item.status,item.total,item.createdBy,encode(item)});return id,item end)
@@ -28,4 +21,3 @@ exports('AddClinicalCode',function(claimId,codeType,code,description,amount,sour
 exports('ScrubRevenueClaim',function(claimId) local item=claims[tostring(claimId)];if not item then return false end;local edits={};if #item.codes==0 then edits[#edits+1]='No clinical codes attached'end;local sum=0;for _,line in ipairs(item.codes)do sum=sum+(line.amount or 0);if not line.code or line.code==''then edits[#edits+1]='Blank code line'end end;if math.abs(sum-item.total)>1 then edits[#edits+1]=('Code total %.2f does not match claim %.2f'):format(sum,item.total)end;item.edits=edits;item.status=#edits==0 and'ready'or'needs_correction';return #edits==0,item end)
 exports('SubmitRevenueClaim',function(sourceValue,claimId) local clean,item=exports['dpn-medical-billing-plus']:ScrubRevenueClaim(claimId);if not item then return false end;if not clean then return false,item.edits end;item.status='submitted';item.submittedBy=actor(sourceValue);item.submittedAt=os.time();asyncUpdate('UPDATE dpn_medical_v6_revenue_claims SET status=?,submitted_by=?,submitted_at=NOW(),claim_data=? WHERE claim_id=?',{item.status,item.submittedBy,encode(item),item.id});return true,item end)
 exports('GetRevenueCycleDashboard',function()local totals={draft=0,ready=0,submitted=0,needs_correction=0,value=0};for _,item in pairs(claims)do totals[item.status]=(totals[item.status]or 0)+1;totals.value=totals.value+(item.total or 0)end;return {claims=claims,totals=totals,generatedAt=os.time()}end)
-heartbeat({'clinical_coding','claim_scrubber','revenue_cycle','payer_submission','denial_prevention','payment_plans'})
