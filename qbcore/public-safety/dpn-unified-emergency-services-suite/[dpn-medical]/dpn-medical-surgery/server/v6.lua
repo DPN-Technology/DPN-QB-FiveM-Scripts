@@ -14,13 +14,6 @@ local function core(method,...)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
 end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
-end
 
 local rooms, cases = {}, {}
 for i=1,4 do rooms['OR'..i]={id='OR'..i,status='available',caseId=nil} end
@@ -41,4 +34,3 @@ exports('CloseORCase',function(caseId,outcome,bloodLoss,sourceValue)
     local item=cases[tostring(caseId)];if not item then return false end;if not item.checklist.count then return false,'Final surgical count is incomplete'end;item.status='completed';item.outcome=outcome or 'stable';item.bloodLoss=tonumber(bloodLoss)or 0;item.closedAt=os.time();item.closedBy=actor(sourceValue);rooms[item.room]={id=item.room,status='turnover',caseId=nil};core('AddProcedure',item.target,{name=item.procedure,outcome=item.outcome,bloodLoss=item.bloodLoss,caseId=item.id});core('CreateStructuredHandoff',item.target,'PACU',{situation='Postoperative transfer',assessment={outcome=item.outcome,bloodLoss=item.bloodLoss},recommendation='Post-anesthesia monitoring'},sourceValue);asyncUpdate('UPDATE dpn_medical_v6_or_cases SET status=?,completed_at=NOW(),case_data=? WHERE case_id=?',{item.status,encode(item),item.id});return true,item
 end)
 exports('GetORBoard',function()return {rooms=rooms,cases=cases,generatedAt=os.time()}end)
-heartbeat({'or_scheduling','surgical_safety_checklist','anesthesia_record','surgical_counts','pacu_handoff','room_turnover'})
