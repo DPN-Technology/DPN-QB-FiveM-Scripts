@@ -221,8 +221,8 @@ end)
 
 AddEventHandler('playerDropped',function()distressCooldowns[source]=nil;responders[source]=nil end)
 CreateThread(function()
-    Wait(1000);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-dispatch','4.0.0',{'medical_dispatch','distress_key','call_queue','external_dispatch_bridge','responder_status','gps_routing','cad'})end)
-    print('[dpn-medical-dispatch] v4.0.0 distress, responder coordination and DPN Dispatch bridge active')
+    Wait(1000);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-dispatch','14.0.0',{'medical_dispatch','distress_key','call_queue','external_dispatch_bridge','responder_status','gps_routing','cad'})end)
+    print('[dpn-medical-dispatch] v14.0.0 distress, responder coordination and DPN Dispatch bridge active')
     while true do
         Wait(60000);local cutoff=os.time()-((tonumber(Config.CallExpiryMinutes)or 30)*60)
         for id,call in pairs(activeCalls)do if call.createdAt<cutoff and call.status~='closed'then call.status='expired';activeCalls[id]=nil end end
