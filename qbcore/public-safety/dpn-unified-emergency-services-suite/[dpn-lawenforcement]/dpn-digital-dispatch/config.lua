@@ -5,10 +5,10 @@ Config.CoreResource = 'dpn-le-core'
 Config.Framework = 'qbcore'
 Config.RequireDuty = true
 
-Config.Command = 'dispatch'
-Config.PanicCommand = 'panic'
-Config.Civilian911Command = '911'
-Config.OpenKey = 'F7'
+Config.Command = 'digitaldispatch'
+Config.PanicCommand = 'digitalpanic'
+Config.Civilian911Command = 'd911'
+Config.OpenKey = 'F9'
 Config.PanicKey = '' -- Officer Safety owns the default F10 panic key; /panic still works.
 
 Config.AllowedJobs = {
