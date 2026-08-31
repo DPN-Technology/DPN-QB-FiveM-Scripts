@@ -19,6 +19,8 @@ Free scripts. Editable source. Community-focused development.
 ![Editable](https://img.shields.io/badge/Source-Editable-success?style=for-the-badge)
 ![No Resale](https://img.shields.io/badge/Resale-FORBIDDEN-red?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-DPN--CSL-red?style=for-the-badge)
+[![DPN Quality Gate](https://github.com/directordiesel/DPN-QB-FiveM-Scripts/actions/workflows/dpn-quality-gate.yml/badge.svg)](https://github.com/directordiesel/DPN-QB-FiveM-Scripts/actions/workflows/dpn-quality-gate.yml)
+[![DPN Weekly Check](https://github.com/directordiesel/DPN-QB-FiveM-Scripts/actions/workflows/dpn-weekly-repo-check.yml/badge.svg)](https://github.com/directordiesel/DPN-QB-FiveM-Scripts/actions/workflows/dpn-weekly-repo-check.yml)
 
 </div>
 
@@ -89,6 +91,7 @@ Free scripts. Editable source. Community-focused development.
 | [Testing Standard](docs/TESTING_STANDARD.md) | Minimum testing matrix for DPN resources |
 | [Security Review Standard](docs/SECURITY_REVIEW_STANDARD.md) | Defensive release security checklist |
 | [Release Process](docs/RELEASE_PROCESS.md) | DPN development-to-release lifecycle |
+| [Automation Guide](docs/AUTOMATION.md) | Quality gates, automatic indexing, packaging, releases, PR summaries, weekly checks, and Dependabot |
 
 ### Resource Catalogs
 
@@ -138,6 +141,10 @@ Multi-framework resources are organized under [hybrid/](hybrid/) with dedicated 
 |---|---|
 | **DPN Quality Gate** | Runs on pushes and pull requests and checks DPN resource structure, metadata, required documentation, version declarations, framework metadata, and obvious credential/private-key files |
 | **DPN Automatic Script Index** | Rebuilds [SCRIPT_INDEX.md](SCRIPT_INDEX.md) whenever actual resources or resource metadata change |
+| **DPN Build & Release** | Validates a selected resource, creates a versioned ZIP, uploads the artifact, and can publish an official GitHub Release |
+| **DPN PR Resource Summary** | Shows which framework/category areas and files a pull request changes |
+| **DPN Weekly Repository Check** | Re-validates tooling, resource standards, and Script Index consistency each Monday |
+| **Dependabot** | Checks GitHub Actions dependencies weekly and opens update pull requests |
 | **DPN Repo Watch** | External monitoring checks the repository for new or meaningfully updated issues and pull requests that need attention |
 
 #### DPN Resource Starter Kit
