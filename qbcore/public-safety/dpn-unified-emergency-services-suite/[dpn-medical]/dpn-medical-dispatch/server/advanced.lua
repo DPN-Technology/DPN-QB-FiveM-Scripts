@@ -1,5 +1,5 @@
 local ADV_RESOURCE = 'dpn-medical-dispatch'
-local ADV_VERSION = '4.0.0'
+local ADV_VERSION = '14.0.0'
 CreateThread(function()
     Wait(1800)
     pcall(function() exports['dpn-medical-core']:RegisterModule(ADV_RESOURCE,ADV_VERSION,'call_lifecycle','unit_assignment','response_timers','clinical_priority','mutual_aid') end)

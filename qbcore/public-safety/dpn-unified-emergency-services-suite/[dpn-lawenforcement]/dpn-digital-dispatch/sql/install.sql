@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `dpn_dispatch_calls` (
+CREATE TABLE IF NOT EXISTS `dpn_digital_dispatch_calls` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `call_id` VARCHAR(64) NOT NULL,
   `call_type` VARCHAR(64) NOT NULL,
@@ -15,12 +15,12 @@ CREATE TABLE IF NOT EXISTS `dpn_dispatch_calls` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `closed_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_dpn_dispatch_call_id` (`call_id`),
-  KEY `idx_dpn_dispatch_status` (`status`),
-  KEY `idx_dpn_dispatch_created` (`created_at`)
+  UNIQUE KEY `uq_dpn_digital_dispatch_call_id` (`call_id`),
+  KEY `idx_dpn_digital_dispatch_status` (`status`),
+  KEY `idx_dpn_digital_dispatch_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS `dpn_dispatch_units` (
+CREATE TABLE IF NOT EXISTS `dpn_digital_dispatch_units` (
   `identifier` VARCHAR(80) NOT NULL,
   `unit_number` VARCHAR(32) NOT NULL,
   `name` VARCHAR(128) NULL,
@@ -30,6 +30,6 @@ CREATE TABLE IF NOT EXISTS `dpn_dispatch_units` (
   `last_coords` LONGTEXT NULL,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`identifier`),
-  KEY `idx_dpn_dispatch_unit_department` (`department`),
-  KEY `idx_dpn_dispatch_unit_status` (`status`)
+  KEY `idx_dpn_digital_dispatch_unit_department` (`department`),
+  KEY `idx_dpn_digital_dispatch_unit_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

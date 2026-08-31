@@ -2,7 +2,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 
 CreateThread(function()
     Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-ems','2.0.0',{'ems_actions','field_treatment','revive','triage','carry','pcr'})
+    exports['dpn-medical-core']:RegisterModule('dpn-medical-ems','14.0.0',{'ems_actions','field_treatment','revive','triage','carry','pcr'})
 end)
 
 local function notify(src,msg,kind) TriggerClientEvent('QBCore:Notify',src,msg,kind or 'primary',5000) end

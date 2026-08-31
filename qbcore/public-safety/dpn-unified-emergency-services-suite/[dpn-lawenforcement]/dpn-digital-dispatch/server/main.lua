@@ -117,7 +117,7 @@ local function webhook(title, description, color)
 end
 
 local function saveCall(call)
-    MySQL.insert('INSERT INTO dpn_dispatch_calls (call_id, call_type, title, description, priority, status, coords, created_by, caller_name, assigned_units, departments, metadata, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FROM_UNIXTIME(?))', {
+    MySQL.insert('INSERT INTO dpn_digital_dispatch_calls (call_id, call_type, title, description, priority, status, coords, created_by, caller_name, assigned_units, departments, metadata, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FROM_UNIXTIME(?))', {
         call.callId, call.type, call.title, call.description, call.priority, call.status,
         json.encode(call.coords), call.createdBy, call.callerName, json.encode(call.assigned),
         json.encode(call.departments), json.encode(call.metadata), call.createdAt
@@ -125,7 +125,7 @@ local function saveCall(call)
 end
 
 local function updateCall(call)
-    MySQL.update('UPDATE dpn_dispatch_calls SET description = ?, priority = ?, status = ?, assigned_units = ?, metadata = ?, closed_at = ? WHERE call_id = ?', {
+    MySQL.update('UPDATE dpn_digital_dispatch_calls SET description = ?, priority = ?, status = ?, assigned_units = ?, metadata = ?, closed_at = ? WHERE call_id = ?', {
         call.description, call.priority, call.status, json.encode(call.assigned or {}), json.encode(call.metadata or {}),
         call.status == 'closed' and os.date('%Y-%m-%d %H:%M:%S') or nil, call.callId
     })
@@ -344,7 +344,7 @@ local function updateUnit(sourceId, data, trusted)
     unit.updatedAt = os.time()
     Units[info.identifier] = unit
 
-    MySQL.query([[INSERT INTO dpn_dispatch_units (identifier, unit_number, name, job, department, status, last_coords, updated_at)
+    MySQL.query([[INSERT INTO dpn_digital_dispatch_units (identifier, unit_number, name, job, department, status, last_coords, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
         ON DUPLICATE KEY UPDATE unit_number=VALUES(unit_number), name=VALUES(name), job=VALUES(job), department=VALUES(department), status=VALUES(status), last_coords=VALUES(last_coords), updated_at=NOW()]], {
         info.identifier, unit.unit, unit.name, unit.job, unit.department, unit.status, json.encode(unit.coords)
@@ -367,7 +367,6 @@ end
 
 for _, eventName in ipairs({
     'dpn_dispatch:server:createCall',
-    'dpn-dispatch:server:createCall',
     'dpn-digital-dispatch:server:createCall'
 }) do
     RegisterNetEvent(eventName, handleCreate)
@@ -389,17 +388,14 @@ RegisterNetEvent('dpn-digital-dispatch:server:createTrainingCall', function(sess
 end)
 
 RegisterNetEvent('dpn_dispatch:server:assignSelf', function(callId) assignUnit(callId, source) end)
-RegisterNetEvent('dpn-dispatch:server:assignSelf', function(callId) assignUnit(callId, source) end)
 RegisterNetEvent('dpn_dispatch:server:closeCall', function(callId, disposition, notes)
     local ok, reason = closeCall(callId, source, disposition, notes)
     if not ok then DPNDispatch.Notify(source, reason == 'disposition_required' and 'A disposition is required to close this call.' or 'Supervisor permission required to close this call.', 'error') end
 end)
-RegisterNetEvent('dpn-dispatch:server:closeCall', function(callId, disposition, notes) closeCall(callId, source, disposition, notes) end)
 RegisterNetEvent('dpn_dispatch:server:addNote', function(callId, note) if not addCallNote(callId, source, note) then DPNDispatch.Notify(source, 'Unable to add call note.', 'error') end end)
 RegisterNetEvent('dpn_dispatch:server:setCallPriority', function(callId, priority, reason) if not setCallPriority(callId, source, priority, reason) then DPNDispatch.Notify(source, 'Supervisor permission required.', 'error') end end)
 RegisterNetEvent('dpn_dispatch:server:setCallStatus', function(callId, status) if not setCallStatus(callId, source, status) then DPNDispatch.Notify(source, 'You must be assigned to this call.', 'error') end end)
 RegisterNetEvent('dpn_dispatch:server:updateUnit', function(data) updateUnit(source, data, false) end)
-RegisterNetEvent('dpn-dispatch:server:updateUnit', function(data) updateUnit(source, data, false) end)
 
 RegisterNetEvent('dpn_dispatch:server:requestSync', function()
     local src = source
@@ -409,12 +405,6 @@ RegisterNetEvent('dpn_dispatch:server:requestSync', function()
         calls = visibleCallsFor(info), units = visibleUnitsFor(info), supervisor = isSupervisor(src), officer = info
     })
 end)
-RegisterNetEvent('dpn-dispatch:server:getCalls', function()
-    local src = source
-    local allowed, info = isAllowed(src, true)
-    if allowed then TriggerClientEvent('dpn_dispatch:client:sync', src, { calls = visibleCallsFor(info), units = visibleUnitsFor(info), supervisor = isSupervisor(src), officer = info }) end
-end)
-
 RegisterCommand(Config.Civilian911Command, function(src, args)
     if src <= 0 or not Config.EnableCivilian911 then return end
     local description = clean(table.concat(args, ' '), Config.Security.MaxDescriptionLength)
@@ -447,7 +437,7 @@ end)
 
 CreateThread(function()
     Wait(1000)
-    local rows = MySQL.query.await("SELECT * FROM dpn_dispatch_calls WHERE status <> 'closed' AND created_at >= DATE_SUB(NOW(), INTERVAL 2 HOUR)", {}) or {}
+    local rows = MySQL.query.await("SELECT * FROM dpn_digital_dispatch_calls WHERE status <> 'closed' AND created_at >= DATE_SUB(NOW(), INTERVAL 2 HOUR)", {}) or {}
     for _, row in ipairs(rows) do
         local call = {
             callId = row.call_id, id = row.call_id, type = row.call_type, title = row.title,

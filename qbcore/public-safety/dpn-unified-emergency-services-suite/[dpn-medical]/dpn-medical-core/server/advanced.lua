@@ -70,7 +70,7 @@ exports('SetCodeStatus',function(target,status) target=tonumber(target); local s
 exports('SetDevice',function(target,deviceId,data) target=tonumber(target); local s=DPNMedicalServer.EnsureState(target); if not s then return false end; deviceId=tostring(deviceId or ''):sub(1,64); if deviceId=='' then return false end; if data==false then s.devices[deviceId]=nil else s.devices[deviceId]=type(data)=='table' and data or {active=true}; s.devices[deviceId].updatedAt=os.time() end; return commit(target,s,'device_changed',{device=deviceId,data=data}) end)
 exports('GetSystemHealth',function() return { version='6.0.0', modules=moduleHealth, activeEpisodes=activeEpisodes, players=#GetPlayers(), time=os.time() } end)
 
-RegisterNetEvent(DPN_MED.Events.ModuleHeartbeat,function(name,version,metrics)
+AddEventHandler(DPN_MED.Events.ModuleHeartbeat,function(name,version,metrics)
     name=tostring(name or ''):sub(1,64); if name=='' then return end
     moduleHealth[name]={version=tostring(version or 'unknown'),metrics=type(metrics)=='table' and metrics or {},lastSeen=os.time(),state=GetResourceState(name)}
     pcall(function() MySQL.insert('INSERT INTO dpn_medical_module_health (resource_name,version,health_data,last_seen) VALUES (?,?,?,NOW()) ON DUPLICATE KEY UPDATE version=VALUES(version),health_data=VALUES(health_data),last_seen=NOW()',{name,tostring(version or 'unknown'),json.encode(metrics or {})}) end)

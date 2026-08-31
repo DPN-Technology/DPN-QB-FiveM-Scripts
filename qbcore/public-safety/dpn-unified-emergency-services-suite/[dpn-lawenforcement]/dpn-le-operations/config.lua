@@ -132,7 +132,7 @@ Config.ModuleLauncher = {
     smartcity={ label='Smart City', icon='city', command='smartcity', resource='dpn-smart-city', department='law' },
     drone={ label='Drone Command', icon='drone', command='drone', resource='dpn-drone-command', department='law' },
     academy={ label='Training Academy', icon='academy', command='academy', resource='dpn-training-academy', department='law' },
-    medical={ label='Medical System', icon='medical', command='medical', resource='dpn-medical-system', department='all' },
+    medical={ label='Medical System', icon='medical', command='medical', resource='dpn-medical-core', department='all' },
     fire={ label='Fire System', icon='fire', command='fire', resource='dpn-fire-system', department='all' },
     corrections={ label='Corrections System', icon='corrections', command='corrections', resource='dpn-corrections-system', department='law' },
     justice={ label='Justice System', icon='justice', command='justice', resource='dpn-justice-system', department='all' },

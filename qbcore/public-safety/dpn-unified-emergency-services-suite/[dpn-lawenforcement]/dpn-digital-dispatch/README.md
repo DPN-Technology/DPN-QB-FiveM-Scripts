@@ -7,11 +7,11 @@
 Advanced dispatch resource for FiveM, designed to plug into `dpn-le-core`.
 
 ## Features
-- /dispatch emergency operations UI
-- /911 civilian emergency calls
-- /panic officer panic button
-- F7 dispatch console keybind
-- F10 panic keybind
+- /digitaldispatch emergency operations UI (kept separate from the core DPN Dispatch /dispatch command)
+- /d911 civilian emergency calls for the Digital Dispatch layer
+- /digitalpanic officer panic command
+- F9 digital dispatch console keybind
+- Optional configurable digital-dispatch panic keybind
 - Active call creation, assignment, closeout
 - Unit status tracking
 - GPS call blips and waypoints
@@ -48,3 +48,10 @@ exports['dpn-digital-dispatch']:CreateDispatchCall({
 local calls = exports['dpn-digital-dispatch']:GetActiveCalls()
 local units = exports['dpn-digital-dispatch']:GetUnits()
 ```
+
+
+## Unified Suite Coexistence
+
+When this resource runs beside the core `dpn-dispatch` resource, Digital Dispatch intentionally uses its own command and event namespace. The core resource owns the canonical `/dispatch`, `/911`, `/panic`, and `dpn-dispatch:*` interfaces.
+
+Digital Dispatch persists to `dpn_digital_dispatch_calls` and `dpn_digital_dispatch_units` so its schema cannot collide with the core dispatch database tables.
