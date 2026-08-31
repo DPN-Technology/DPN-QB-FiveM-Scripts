@@ -78,9 +78,25 @@ Use [START_ORDER.cfg](START_ORDER.cfg) as the baseline and then adapt optional i
 
 Review [DATABASE_INSTALL.md](docs/DATABASE_INSTALL.md) before importing SQL into production. Back up your database first.
 
-## Architecture
+## Department Entry Points
 
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md) and [RESOURCE_MATRIX.md](docs/RESOURCE_MATRIX.md).
+- **[Law Enforcement Suite]([dpn-lawenforcement]/README.md)** — coordinated 12-resource law-enforcement stack.
+- **[Medical / EMS Suite]([dpn-medical]/README.md)** — coordinated 20-resource medical stack.
+- **[Fire & Rescue Integration](departments/fire-rescue/README.md)** — current fire/rescue role across the shared platform.
+- **[Dispatch / MDT Core](departments/dispatch-mdt/README.md)** — cross-agency dispatch, MDT and emergency-network backbone.
+
+## Deployment & Architecture
+
+Before production deployment, read these in order:
+
+1. **[Pre-Install Checklist](docs/PRE_INSTALL_CHECKLIST.md)**
+2. **[FiveM Deployment Topology](docs/DEPLOYMENT.md)**
+3. **[Database Installation Inventory](docs/DATABASE_INSTALL.md)**
+4. **[Architecture](docs/ARCHITECTURE.md)**
+5. **[Resource Matrix](docs/RESOURCE_MATRIX.md)**
+6. **[START_ORDER.cfg](START_ORDER.cfg)**
+
+The repository folder is a source-management container for many actual FiveM resources. It is not itself a single `fxmanifest.lua` resource; follow the deployment topology when copying the suite to a server.
 
 ## License
 
