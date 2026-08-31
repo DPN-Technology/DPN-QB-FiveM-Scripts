@@ -5,7 +5,7 @@
 
 ### Free QBCore & Standalone FiveM Resources by DPN Technology
 
-**Created by CEO Diesel — DPN Technology**
+**Created by Diesel — CEO of DPN Technology**
 
 Free scripts. Editable source. Community-focused development.  
 **Use them. Learn from them. Customize them. Improve them. Do not sell them without permission.**
@@ -30,6 +30,62 @@ Free scripts. Editable source. Community-focused development.
 > Because these terms restrict resale, this repository should be treated as **source-available software with custom DPN Technology usage terms**, not as OSI-approved open-source software.
 
 ---
+
+
+## 🟣 Official DPN Technology FiveM Project
+
+<table>
+<tr>
+<td><strong>Organization</strong></td>
+<td>DPN Technology</td>
+</tr>
+<tr>
+<td><strong>Original Creator</strong></td>
+<td>Diesel</td>
+</tr>
+<tr>
+<td><strong>Creator Title</strong></td>
+<td>CEO of DPN Technology</td>
+</tr>
+<tr>
+<td><strong>Project</strong></td>
+<td>DPN QB FiveM Scripts</td>
+</tr>
+<tr>
+<td><strong>Release Model</strong></td>
+<td>Free community source — commercial resale restricted</td>
+</tr>
+<tr>
+<td><strong>Primary Targets</strong></td>
+<td>QBCore and Standalone FiveM</td>
+</tr>
+</table>
+
+> **DPN Technology Mission:** *We Develop what doesn't exist. We Pioneer what comes next. We Navigate the future.*
+
+### DPN Project Documents
+
+| Document | Purpose |
+|---|---|
+| [LICENSE](LICENSE) | DPN Technology Community Source License and commercial-use rules |
+| [NOTICE.md](NOTICE.md) | Official creator, ownership, and project notice |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution and pull-request requirements |
+| [SECURITY.md](SECURITY.md) | Vulnerability reporting and server-authority security standard |
+| [SUPPORT.md](SUPPORT.md) | Support scope and required troubleshooting information |
+| [GOVERNANCE.md](GOVERNANCE.md) | DPN Technology project authority and decision structure |
+| [DPN_DEVELOPMENT_STANDARD.md](DPN_DEVELOPMENT_STANDARD.md) | Engineering standard for DPN FiveM releases |
+
+### Official Authorship
+
+This repository and its original DPN Technology resources are released under the direction of **Diesel, CEO of DPN Technology**. DPN Technology is the publisher and project identity for these community releases.
+
+The intent is simple: DPN Technology is giving the FiveM community useful source code that can be **used, studied, changed, improved, and shared for free under the license**. Public availability does not grant anyone the right to turn DPN Technology's free releases into an unauthorized paid product.
+
+> [!CAUTION]
+> **DPN Technology does not authorize resale by default.** Do not sell the original scripts, modified versions, framework conversions, rebranded versions, paid bundles, or source-code access unless **Diesel, CEO of DPN Technology**, has granted explicit commercial permission.
+
+---
+
 
 # Table of Contents
 
