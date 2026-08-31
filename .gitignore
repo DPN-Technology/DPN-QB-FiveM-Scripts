@@ -1,0 +1,60 @@
+# DPN Technology FiveM repository ignore rules
+
+# Operating systems
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+secrets.*
+credentials.*
+config.private.*
+
+# Logs
+*.log
+logs/
+
+# Node / NUI
+node_modules/
+dist/
+build/
+.cache/
+
+# Package managers
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Databases / local state
+*.sqlite
+*.sqlite3
+*.db
+
+# Archives
+*.zip
+*.rar
+*.7z
+
+# Temporary FiveM development artifacts
+cache/
+server-cache/
+server-cache-priv/
+
+# Never commit real credential files
+credentials.json
+service-account.json
