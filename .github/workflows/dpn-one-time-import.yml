@@ -23,8 +23,8 @@ jobs:
         id: ready
         shell: bash
         run: |
-          expected=56
-          actual=$(find _import -maxdepth 1 -type f -name 'chunk_*' 2>/dev/null | wc -l)
+          expected=25
+          actual=$(find _import_xz -maxdepth 1 -type f -name 'chunk_*' 2>/dev/null | wc -l)
           echo "Found $actual of $expected import chunks."
           if [ "$actual" -ne "$expected" ]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
@@ -36,10 +36,10 @@ jobs:
         if: steps.ready.outputs.ready == 'true'
         shell: bash
         run: |
-          cat _import/chunk_* | base64 -d > /tmp/dpn-resource-import.tar.gz
-          tar -tzf /tmp/dpn-resource-import.tar.gz >/dev/null
-          tar -xzf /tmp/dpn-resource-import.tar.gz -C .
-          rm -rf _import
+          cat _import_xz/chunk_* | base64 -d > /tmp/dpn-resource-import.tar.xz
+          tar -tJf /tmp/dpn-resource-import.tar.xz >/dev/null
+          tar -xJf /tmp/dpn-resource-import.tar.xz -C .
+          rm -rf _import _import_xz
           rm -f .github/workflows/dpn-one-time-import.yml
 
       - name: Commit organized resources
