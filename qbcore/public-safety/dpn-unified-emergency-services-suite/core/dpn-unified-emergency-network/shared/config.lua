@@ -1,6 +1,7 @@
 DPN_UNES = DPN_UNES or {}
 DPN_UNES.Config = {
     Command = 'unes',
+    DispatchCommand = 'dpndispatch',
     PanicCommand = 'panic',
     UnitRefreshMs = 10000,
     ClientLocationRefreshMs = 3500,
@@ -48,6 +49,23 @@ DPN_UNES.Config = {
         dispatcherGrades = {0,1,2,3,4,5,6,7,8,9,10},
         commandGrades = {4,5,6,7,8,9,10},
         adminAgencies = { admin = true }
+    },
+
+    AlertBlips = {
+        Enabled = true,
+        Sprite = 161,
+        Scale = 0.95,
+        TimeMs = 300000,
+        Colors = {
+            law = 3,
+            ems = 47,
+            fire = 1,
+            justice = 5,
+            corrections = 17,
+            bail = 5,
+            tow = 2,
+            admin = 40
+        }
     },
 
     LiveMap = {
