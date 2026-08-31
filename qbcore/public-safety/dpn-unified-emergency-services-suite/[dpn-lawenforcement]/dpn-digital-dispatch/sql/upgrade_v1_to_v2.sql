@@ -11,8 +11,8 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
-CALL `dpn_dispatch_add_column_if_missing`('dpn_dispatch_calls', 'caller_name', 'VARCHAR(128) NULL AFTER `created_by`');
-CALL `dpn_dispatch_add_column_if_missing`('dpn_dispatch_calls', 'departments', 'LONGTEXT NULL AFTER `assigned_units`');
-CALL `dpn_dispatch_add_column_if_missing`('dpn_dispatch_calls', 'metadata', 'LONGTEXT NULL AFTER `departments`');
-CALL `dpn_dispatch_add_column_if_missing`('dpn_dispatch_units', 'department', 'VARCHAR(32) NULL AFTER `job`');
+CALL `dpn_dispatch_add_column_if_missing`('dpn_digital_dispatch_calls', 'caller_name', 'VARCHAR(128) NULL AFTER `created_by`');
+CALL `dpn_dispatch_add_column_if_missing`('dpn_digital_dispatch_calls', 'departments', 'LONGTEXT NULL AFTER `assigned_units`');
+CALL `dpn_dispatch_add_column_if_missing`('dpn_digital_dispatch_calls', 'metadata', 'LONGTEXT NULL AFTER `departments`');
+CALL `dpn_dispatch_add_column_if_missing`('dpn_digital_dispatch_units', 'department', 'VARCHAR(32) NULL AFTER `job`');
 DROP PROCEDURE IF EXISTS `dpn_dispatch_add_column_if_missing`;
