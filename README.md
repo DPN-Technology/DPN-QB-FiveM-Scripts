@@ -93,6 +93,8 @@ Free scripts. Editable source. Community-focused development.
 | [Release Process](docs/RELEASE_PROCESS.md) | DPN development-to-release lifecycle |
 | [Automation Guide](docs/AUTOMATION.md) | Quality gates, automatic indexing, packaging, releases, PR summaries, weekly checks, and Dependabot |
 | [Public Repository Security Baseline](docs/PUBLIC_REPOSITORY_SECURITY.md) | Public-release rules, secret handling, workflow hardening, and GitHub settings required before publishing code |
+| [Uploaded Resource Catalog](docs/UPLOADED_RESOURCE_CATALOG.md) | Categorized record of the initial DPN FiveM resource library import |
+| [Automatic Script Index](SCRIPT_INDEX.md) | Auto-generated index of every DPN FiveM resource and its current metadata |
 
 ### Resource Catalogs
 
@@ -102,12 +104,48 @@ Free scripts. Editable source. Community-focused development.
 | [Standalone Resources](standalone/) | DPN scripts without a required core framework |
 | [Hybrid Resources](hybrid/) | DPN scripts supporting multiple framework modes |
 
+### Imported DPN Resource Library
+
+The repository now contains the first organized DPN Technology FiveM resource library.
+
+| Area | Status |
+|---|---|
+| **Total imported FiveM resources** | **45** |
+| **Unified Public Safety Suite** | Law Enforcement + EMS/Medical + Fire interoperability + Dispatch + MDT + Emergency Network |
+| **QBCore resources** | Public Safety, Law Enforcement, Administration, Civilian, World/Traffic |
+| **Hybrid resources** | Administration and Communications |
+| **Standalone resources** | Administration / Queue |
+| **Automatic catalog** | [SCRIPT_INDEX.md](SCRIPT_INDEX.md) |
+| **Import catalog** | [docs/UPLOADED_RESOURCE_CATALOG.md](docs/UPLOADED_RESOURCE_CATALOG.md) |
+
+#### DPN Unified Emergency Services Suite
+
+The integrated emergency-service system is kept together at:
+
+**[qbcore/public-safety/dpn-unified-emergency-services-suite/](qbcore/public-safety/dpn-unified-emergency-services-suite/)**
+
+This suite preserves the original coordinated structure of:
+
+- **DPN Law Enforcement** — the complete `[dpn-lawenforcement]` resource group.
+- **DPN Medical / EMS** — the complete `[dpn-medical]` resource group.
+- **DPN Dispatch** — central multi-agency dispatch.
+- **DPN MDT** — shared operational data terminal.
+- **DPN Unified Emergency Network** — cross-agency interoperability layer.
+- **Incident Command** — coordinated law-enforcement, fire, and EMS incident operations.
+- Supporting officer-safety, evidence, crime-intelligence, vehicle-computer, smart-city, training, hospital, ambulance, ICU, pharmacy, radiology, surgery, records, billing, insurance, coroner, rehabilitation, and medical systems.
+
+> [!IMPORTANT]
+> The bracketed law-enforcement and medical groups are intentionally **not split apart**. Their internal resources are designed to operate as coordinated suites, and the repository preserves that relationship while still exposing each individual FiveM resource through the automatic Script Index.
+
+The suite includes dedicated documentation for architecture, resource relationships, database installation, and recommended startup order.
+
 ### DPN Script Catalog & Automation
 
 The repository is organized by framework first, then by script department/category.
 
 #### QBCore Categories
 
+- [Unified Public Safety](qbcore/public-safety/)
 - [Law Enforcement](qbcore/law-enforcement/)
 - [EMS](qbcore/ems/)
 - [Fire & Rescue](qbcore/fire/)
