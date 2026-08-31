@@ -121,6 +121,69 @@ if workflow_dir.exists():
         if re.search(r"(?m)^\s*run:\s*.*(?:curl|wget).*\|\s*(?:ba)?sh\b", text):
             error(workflow, "download-and-execute shell pipeline is prohibited")
 
+# DPN Medical Phase 3A registry/version/heartbeat guardrails.
+medical_root = (
+    ROOT
+    / "qbcore"
+    / "public-safety"
+    / "dpn-unified-emergency-services-suite"
+    / "[dpn-medical]"
+)
+if medical_root.exists():
+    loose_capability_call = re.compile(
+        r"RegisterModule\s*\(\s*[^,\n]+\s*,\s*[^,\n]+\s*,\s*['\"]",
+        re.MULTILINE,
+    )
+    literal_registration_version = re.compile(
+        r"RegisterModule\s*\(\s*[^,\n]+\s*,\s*['\"]\d+(?:\.\d+){1,3}['\"]",
+        re.MULTILINE,
+    )
+    literal_heartbeat_version = re.compile(
+        r"moduleHeartbeat['\"]\s*,\s*[^,\n]+\s*,\s*['\"]\d+(?:\.\d+){1,3}['\"]",
+        re.MULTILINE,
+    )
+    hardcoded_version_assignment = re.compile(
+        r"(?m)^\s*local\s+(?:ADV_)?VERSION\s*=\s*['\"]\d+(?:\.\d+){1,3}['\"]"
+    )
+
+    for resource in sorted(p for p in medical_root.iterdir() if p.is_dir() and p.name.startswith("dpn-medical-")):
+        server_dir = resource / "server"
+        if not server_dir.exists():
+            continue
+
+        registration_owners: list[pathlib.Path] = []
+        heartbeat_owners: list[pathlib.Path] = []
+
+        for lua_file in sorted(server_dir.rglob("*.lua")):
+            text = lua_file.read_text(encoding="utf-8", errors="ignore")
+            produces_registration = "exports['dpn-medical-core']:RegisterModule(" in text or 'exports["dpn-medical-core"]:RegisterModule(' in text
+            produces_heartbeat = "TriggerEvent('dpn-medical-core:server:moduleHeartbeat'" in text or 'TriggerEvent("dpn-medical-core:server:moduleHeartbeat"' in text
+
+            if produces_registration:
+                registration_owners.append(lua_file)
+                if loose_capability_call.search(text):
+                    error(lua_file, "medical RegisterModule capabilities must be passed as a table, not loose string varargs")
+                if literal_registration_version.search(text):
+                    error(lua_file, "medical RegisterModule must not use a literal runtime version; derive it from the resource manifest")
+
+            if produces_heartbeat:
+                heartbeat_owners.append(lua_file)
+                if literal_heartbeat_version.search(text):
+                    error(lua_file, "medical heartbeat must not use a literal runtime version; derive it from the resource manifest")
+
+            if (produces_registration or produces_heartbeat) and hardcoded_version_assignment.search(text):
+                error(lua_file, "medical registration/heartbeat owner has a hard-coded VERSION; use GetResourceMetadata(..., 'version', 0)")
+
+        # Medical Core is the registry authority itself; its internal implementation
+        # is not a feature-resource producer and is therefore exempt from owner counts.
+        if resource.name != "dpn-medical-core":
+            if len(registration_owners) > 1:
+                owners = ", ".join(rel(p) for p in registration_owners)
+                error(resource, f"multiple medical registration owners detected ({owners}); Phase 3A allows one per physical resource")
+            if len(heartbeat_owners) > 1:
+                owners = ", ".join(rel(p) for p in heartbeat_owners)
+                error(resource, f"multiple medical heartbeat owners detected ({owners}); Phase 3A allows one per physical resource")
+
 resources: list[pathlib.Path] = []
 for framework in FRAMEWORKS:
     fw_root = ROOT / framework
