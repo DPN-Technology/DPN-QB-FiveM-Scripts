@@ -1,5 +1,5 @@
 local ADV_RESOURCE = 'dpn-medical-ems'
-local ADV_VERSION = '2.0.0'
+local ADV_VERSION = '14.0.0'
 CreateThread(function()
     Wait(1800)
     pcall(function() exports['dpn-medical-core']:RegisterModule(ADV_RESOURCE,ADV_VERSION,'advanced_assessment','protocols','care_episodes','handoff','response_metrics') end)
