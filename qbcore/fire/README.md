@@ -4,6 +4,16 @@ Official **DPN Technology** FiveM script category.
 
 **Created under the direction of Diesel, CEO of DPN Technology**
 
+## Current DPN Fire / Rescue Integration
+
+The uploaded collection does not contain a separate `[dpn-fire]` runtime bundle. Fire/Rescue is currently a first-class integration domain inside the shared emergency-services platform.
+
+➡️ **[Open Fire & Rescue Integration](../public-safety/dpn-unified-emergency-services-suite/departments/fire-rescue/)**
+
+Fire/Rescue currently uses the shared Dispatch, MDT, Emergency Network, Incident Command and EMS/Medical systems.
+
+---
+
 ## Scope
 
 Fire department, rescue, apparatus, firefighting, hazmat, rescue tools, station systems, incident response, and related resources.
