@@ -9,7 +9,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'dpn-crime-intelligence'
-author 'Diesel — CEO of DPN Technology'Diesel" Sherk'
+author 'Diesel — CEO of DPN Technology'
 description 'DPN Crime Intelligence v2 - searchable people, vehicles, reports, watchlists, links, risk scoring and dispatch alerts.'
 version '4.0.0'
 

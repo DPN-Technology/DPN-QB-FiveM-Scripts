@@ -9,7 +9,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'dpn-officer-safety'
-author 'Diesel — CEO of DPN Technology'Diesel" Sherk'
+author 'Diesel — CEO of DPN Technology'
 description 'Automated officer safety, panic, crash, welfare and pursuit monitoring'
 version '4.0.0'
 

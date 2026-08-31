@@ -7,7 +7,7 @@
 fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
-author 'Diesel — CEO of DPN Technology'Diesel" Sherk'
+author 'Diesel — CEO of DPN Technology'
 description 'Advanced FiveM RP Neuralizer with admin immunity, server validation, NUI flash effects, cooldowns, and model source.'
 version '2.0.0'
 
