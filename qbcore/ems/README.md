@@ -4,6 +4,16 @@ Official **DPN Technology** FiveM script category.
 
 **Created under the direction of Diesel, CEO of DPN Technology**
 
+## Integrated DPN Medical / EMS Platform
+
+The uploaded DPN Medical/EMS system is a coordinated multi-resource stack and is intentionally kept with the shared public-safety backbone rather than duplicated here.
+
+➡️ **[Open the DPN Medical / EMS Suite](../public-safety/dpn-unified-emergency-services-suite/[dpn-medical]/)**
+
+It integrates with DPN Dispatch, MDT, Law Enforcement, Fire/Rescue, Incident Command, and the Unified Emergency Network.
+
+---
+
 ## Scope
 
 EMS, ambulance, medical treatment, hospitals, patient care, revive systems, medical records, stretcher systems, and related resources.
