@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-icu','2.0.0',{'icu','continuous_monitoring','escalation'})
-end)
-
 local active={}
 local function admit(src,target)
     target=tonumber(target); local p=QBCore.Functions.GetPlayer(src); local patient=QBCore.Functions.GetPlayer(target); if not p or not patient or not Config.Jobs[(p.PlayerData.job or {}).name] then return false end
