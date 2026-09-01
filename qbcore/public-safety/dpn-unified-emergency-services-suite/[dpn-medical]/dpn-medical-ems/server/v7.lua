@@ -79,10 +79,5 @@ end)
 
 CreateThread(function()
     Wait(2500)
-    pcall(function()
-        exports['dpn-medical-core']:RegisterModule('dpn-medical-ems', '4.0.0', {
-            'advanced_ems', 'mci_command', 'dispatch_response_tracking', 'prehospital_handoff', 'destination_coordination'
-        })
-    end)
     print('[dpn-medical-ems] v4.0.0 dispatch response coordination active')
 end)
