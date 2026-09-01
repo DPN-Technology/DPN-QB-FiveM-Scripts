@@ -14,4 +14,4 @@ exports('CreateAppealPacketV13', function(claimId,reason,actor) local item={id=u
 
 exports('GetV13InsuranceBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-insurance', VERSION, {'EvaluateContinuumAuthorizationV13','EstimatePatientResponsibilityV13','CreateAppealPacketV13'}) end); print('[dpn-medical-insurance] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-insurance] v13 continuum-command operations active') end)
