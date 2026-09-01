@@ -1,4 +1,4 @@
-local VERSION = '9.0.0'
+local VERSION = GetResourceMetadata(GetCurrentResourceName(), 'version', 0) or 'unknown'
 local pathways, telemetry, trajectories, reconciliations = {}, {}, {}, {}
 local resilienceQueue, replayStats = {}, { queued = 0, replayed = 0, failed = 0, lastReplayAt = 0 }
 
@@ -154,7 +154,6 @@ end)
 
 CreateThread(function()
     Wait(4200)
-    pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-core-v9', VERSION, { 'adaptive_digital_twin', 'trajectory_prediction', 'electrolyte_modeling', 'medication_kinetics', 'safety_reconciliation', 'adaptive_pathways', 'device_telemetry', 'resilient_event_replay' }) end)
     print('[dpn-medical-core] v9.0.0 adaptive trajectory, medication kinetics, safety reconciliation and resilient network active')
     while true do
         Wait(30000)
