@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-surgery','2.0.0',{'surgery','procedures','complications','postop'})
-end)
-
 local function auth(src) local p=QBCore.Functions.GetPlayer(src); return p and p.PlayerData.job and Config.Jobs[p.PlayerData.job.name] and p.PlayerData.job.onduty~=false end
 local function notify(s,m,t) TriggerClientEvent('QBCore:Notify',s,m,t or 'primary',5000) end
 local function near(a,b) local x,y=GetPlayerPed(a),GetPlayerPed(b); return x>0 and y>0 and #(GetEntityCoords(x)-GetEntityCoords(y))<=6.0 end
