@@ -24,6 +24,40 @@ jobs:
       - name: Run DPN repository validator
         run: python3 tools/dpn_repo_validator.py
 
+      - name: Audit FiveM manifest integrity
+        run: |
+          python3 tools/audit_fxmanifest_integrity.py --json > fxmanifest-integrity-audit.json
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = json.loads(Path('fxmanifest-integrity-audit.json').read_text(encoding='utf-8'))
+          summary = Path(os.environ['GITHUB_STEP_SUMMARY'])
+          lines = [
+              '## DPN FiveM Manifest Integrity Audit',
+              '',
+              f"- Manifests scanned: **{report.get('manifestsScanned', 0)}**",
+              f"- Local/external references scanned: **{report.get('referencesScanned', 0)}**",
+              f"- Missing local references observed: **{report.get('missingReferenceCount', 0)}**",
+              f"- External resource references observed: **{report.get('externalReferenceCount', 0)}**",
+              '',
+              '> This stage is audit-only until existing findings are reviewed and a deliberate regression baseline is approved. It does not weaken the repository validator or Lua syntax checks.',
+              '',
+          ]
+          missing = report.get('missingReferences', [])
+          if missing:
+              lines.append('### Missing local references observed')
+              lines.append('')
+              for item in missing[:50]:
+                  lines.append(f"- `{item.get('manifest')}`: `{item.get('directive')}` -> `{item.get('reference')}`")
+              if len(missing) > 50:
+                  lines.append(f"- ...and {len(missing) - 50} additional finding(s).")
+              lines.append('')
+          with summary.open('a', encoding='utf-8') as handle:
+              handle.write('\n'.join(lines))
+          PY
+
       - name: Audit emergency command and event surface
         run: |
           python3 tools/audit_emergency_surface.py \
