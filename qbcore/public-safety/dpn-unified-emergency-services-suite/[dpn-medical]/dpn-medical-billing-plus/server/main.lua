@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-billing-plus','2.0.0',{'billing','invoices','payments','insurance_bridge'})
-end)
-
 local function create(target,amount,reason,category,issuer)
     target=tonumber(target); amount=math.max(0,math.floor(tonumber(amount) or 0)); local p=QBCore.Functions.GetPlayer(target); if not p or amount<=0 then return false end
     local covered,patientAmount=0,amount; local invoiceId=MySQL.insert.await('INSERT INTO dpn_medical_invoices (patient_cid,issuer_cid,category,reason,total_amount,covered_amount,patient_amount,status) VALUES (?,?,?,?,?,?,?,?)',{p.PlayerData.citizenid,issuer,category or 'medical',reason or 'Medical services',amount,0,amount,'unpaid'})
