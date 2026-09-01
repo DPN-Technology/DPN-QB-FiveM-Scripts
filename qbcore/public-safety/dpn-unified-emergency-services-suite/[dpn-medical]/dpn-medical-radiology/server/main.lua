@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-radiology','2.0.0',{'xray','ct','mri','ultrasound','diagnostics'})
-end)
-
 local function auth(src) local p=QBCore.Functions.GetPlayer(src); return p and p.PlayerData.job and Config.Jobs[p.PlayerData.job.name] and p.PlayerData.job.onduty~=false end
 local function findings(state,study,part)
     local rows={}; local function scan(name,p)
