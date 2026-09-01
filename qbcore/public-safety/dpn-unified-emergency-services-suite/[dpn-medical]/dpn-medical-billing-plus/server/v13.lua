@@ -14,4 +14,4 @@ exports('PredictDenialRiskV13', function(claim) local risk=0;if not claim.author
 
 exports('GetV13BillingBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-billing-plus', VERSION, {'EstimateContinuumEpisodeCostV13','ValidateClinicalCodingV13','PredictDenialRiskV13'}) end); print('[dpn-medical-billing-plus] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-billing-plus] v13 continuum-command operations active') end)
