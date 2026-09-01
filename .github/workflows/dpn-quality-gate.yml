@@ -25,7 +25,32 @@ jobs:
         run: python3 tools/dpn_repo_validator.py
 
       - name: Audit emergency command and event surface
-        run: python3 tools/audit_emergency_surface.py
+        run: |
+          python3 tools/audit_emergency_surface.py
+          python3 tools/audit_emergency_surface.py --json > emergency-surface-audit.json
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = json.loads(Path('emergency-surface-audit.json').read_text(encoding='utf-8'))
+          summary = Path(os.environ['GITHUB_STEP_SUMMARY'])
+          readiness = report.get('correlationReadiness', {})
+          ready = sum(1 for fields in readiness.values() if 'eventId' in fields)
+          lines = [
+              '## DPN Emergency Surface Audit',
+              '',
+              f"- Lua files scanned: **{report.get('luaFilesScanned', 0)}**",
+              f"- Emergency declarations/usages: **{report.get('declarationsAndUsages', 0)}**",
+              f"- Duplicate command names: **{report.get('duplicateCommandCount', 0)}**",
+              f"- Resources with lexical `eventId` readiness: **{ready}/{len(readiness)}**",
+              '',
+              '> Duplicate command findings remain audit-only until compatibility ownership has been deliberately migrated and baselined.',
+              '',
+          ]
+          with summary.open('a', encoding='utf-8') as handle:
+              handle.write('\n'.join(lines))
+          PY
 
       - name: Install Lua syntax checker
         run: |
