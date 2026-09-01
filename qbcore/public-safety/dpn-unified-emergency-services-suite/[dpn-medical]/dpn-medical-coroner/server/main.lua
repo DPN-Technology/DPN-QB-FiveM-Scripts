@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-coroner','2.0.0',{'death_cases','pronouncement','autopsy','body_release'})
-end)
-
 local function auth(src) local p=QBCore.Functions.GetPlayer(src); return p and p.PlayerData.job and Config.Jobs[p.PlayerData.job.name] end
 AddEventHandler('dpn-medical:server:lifeStateChanged',function(src,cid,fromState,toState,state,details)
     if toState~='dead' then return end
