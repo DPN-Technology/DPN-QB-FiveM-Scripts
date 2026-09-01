@@ -1,4 +1,4 @@
-local VERSION = '11.0.0'
+local VERSION = GetResourceMetadata(GetCurrentResourceName(), 'version', 0) or 'unknown'
 local plans, reassessments, checkpoints, networkEvents = {}, {}, {}, {}
 
 local function now() return os.time() end
@@ -315,13 +315,6 @@ end)
 
 CreateThread(function()
     Wait(4800)
-    pcall(function()
-        exports['dpn-medical-core']:RegisterModule('dpn-medical-core-v11', VERSION, {
-            'autonomous_care_twin', 'intervention_forecasting', 'continuous_reassessment',
-            'patient_specific_protocols', 'device_medication_reconciliation', 'waveform_synthesis',
-            'decision_checkpoints', 'human_approval_guardrails', 'network_operations_dashboard'
-        })
-    end)
     print('[dpn-medical-core] v11.0.0 autonomous-care network, intervention forecasting and continuous reassessment active')
 end)
 
