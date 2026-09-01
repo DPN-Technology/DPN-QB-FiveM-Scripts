@@ -59,4 +59,4 @@ exports('CreateRegionalClinicalHandoffV12', function(target, fromUnit, toFacilit
 end)
 
 exports('GetV12EMSBoard', function() return {version=VERSION,missions=missions,pediatric=pediatric,obstetric=obstetric,handoffs=handoffs,generatedAt=os.time()} end)
-CreateThread(function() Wait(7000); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-ems',VERSION,{'integrated_transport','pediatric_resuscitation','obstetric_handoff','regional_clinical_handoff'}) end); print('[dpn-medical-ems] v12 integrated transport and special-population response active') end)
+CreateThread(function() Wait(7000); print('[dpn-medical-ems] v12 integrated transport and special-population response active') end)
