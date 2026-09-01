@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-records','2.0.1',{'records','timeline','patient_history','legacy_schema_migration'})
-end)
-
 local function resolve(target)
     if type(target) == 'string' then return target end
     local player = QBCore.Functions.GetPlayer(tonumber(target))
