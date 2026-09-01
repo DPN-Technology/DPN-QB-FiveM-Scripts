@@ -58,4 +58,4 @@ exports('CreateRegionalTransferV12', function(target, fromFacility, toFacility, 
 end)
 
 exports('GetV12HospitalBoard',function()return{version=VERSION,beds=beds,regionalCapacity=regionalCapacity,pathways=pathways,transfers=transfers,generatedAt=os.time()}end)
-CreateThread(function()Wait(7100);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-hospital',VERSION,{'critical_bed_matching','regional_capacity_command','special_population_pathways','regional_transfer_center'})end);print('[dpn-medical-hospital] v12 regional capacity and integrated bed command active')end)
+CreateThread(function()Wait(7100);print('[dpn-medical-hospital] v12 regional capacity and integrated bed command active')end)
