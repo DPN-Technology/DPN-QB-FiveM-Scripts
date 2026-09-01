@@ -32,15 +32,25 @@ jobs:
           python3 tools/audit_emergency_surface.py \
             --baseline tools/emergency-surface-baseline.json \
             --json > emergency-surface-audit.json
+          python3 tools/check_emergency_correlation_readiness.py \
+            --audit emergency-surface-audit.json \
+            --baseline tools/emergency-correlation-readiness-baseline.json
           python3 - <<'PY'
           import json
           import os
           from pathlib import Path
 
           report = json.loads(Path('emergency-surface-audit.json').read_text(encoding='utf-8'))
+          baseline = json.loads(Path('tools/emergency-correlation-readiness-baseline.json').read_text(encoding='utf-8'))
           summary = Path(os.environ['GITHUB_STEP_SUMMARY'])
           readiness = report.get('correlationReadiness', {})
+          reviewed = baseline.get('resources', {})
           ready = sum(1 for fields in readiness.values() if 'eventId' in fields)
+          reviewed_ready = sum(1 for fields in reviewed.values() if 'eventId' in fields)
+          readiness_improvements = sum(
+              len(set(fields) - set(reviewed.get(resource, [])))
+              for resource, fields in readiness.items()
+          )
           comparison = report.get('baselineComparison', {})
           lines = [
               '## DPN Emergency Surface Audit',
@@ -50,9 +60,10 @@ jobs:
               f"- Duplicate command names: **{report.get('duplicateCommandCount', 0)}**",
               f"- Duplicate-command regressions vs reviewed baseline: **{comparison.get('regressionCount', 0)}**",
               f"- Duplicate-command improvements vs reviewed baseline: **{comparison.get('improvementCount', 0)}**",
-              f"- Resources with lexical `eventId` readiness: **{ready}/{len(readiness)}**",
+              f"- Resources with lexical `eventId` readiness: **{ready}/{len(readiness)}** (reviewed baseline: {reviewed_ready}/{len(reviewed)})",
+              f"- New correlation-field observations vs readiness baseline: **{readiness_improvements}**",
               '',
-              '> Existing reviewed ownership is baselined; CI now fails only new duplicate command names or newly added duplicate owners.',
+              '> CI blocks duplicate-command ownership expansion and loss of previously reviewed correlation-field readiness. New correlation fields are treated as forward progress and do not auto-rewrite either baseline.',
               '',
           ]
           with summary.open('a', encoding='utf-8') as handle:
