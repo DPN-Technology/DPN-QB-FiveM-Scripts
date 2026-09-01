@@ -23,4 +23,4 @@ exports('CalculateCrewClinicalReadiness',function(crew)
     local item={crewId=crew.id or'unknown',score=score,status=score>=80 and'ready'or score>=55 and'limited'or'out_of_service',calculatedAt=os.time()};crewReadiness[item.crewId]=item;return item
 end)
 exports('GetV9EMSBoard',function()return{version=VERSION,transportPlans=transportPlans,communications=communications,crewReadiness=crewReadiness,generatedAt=os.time()}end)
-CreateThread(function()Wait(5000);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-ems',VERSION,{'adaptive_transport','closed_loop_communication','crew_readiness','trajectory_handoff'})end);print('[dpn-medical-ems] v9 adaptive transport and closed-loop EMS coordination active')end)
+CreateThread(function()Wait(5000);print('[dpn-medical-ems] v9 adaptive transport and closed-loop EMS coordination active')end)
