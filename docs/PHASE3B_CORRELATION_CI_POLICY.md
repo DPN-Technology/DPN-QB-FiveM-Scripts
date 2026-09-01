@@ -19,8 +19,16 @@ The Phase 3B migration centers on a root immutable `eventId` that correlates dis
 - duplicate command ownership across files
 - lexical presence of correlation fields by resource
 - a stable JSON schema for later automation
+- reviewed-baseline comparisons for duplicate command ownership
 
 Existing duplicate command registrations are intentionally informational by default. Some are compatibility aliases and cannot be removed safely without an owner-by-owner migration.
+
+The auditor now supports two distinct enforcement modes:
+
+- `--strict` fails on every duplicate command and is intentionally too aggressive for the current compatibility surface.
+- `--baseline <file> --fail-on-regression` fails only when a new duplicate command appears or an existing duplicate gains a new owner relative to an explicitly reviewed baseline.
+
+It also supports `--write-baseline <file>` as a maintainer convenience. That command must never be run automatically in CI because doing so would silently redefine expected behavior instead of detecting drift.
 
 ## Enforcement stages
 
@@ -30,21 +38,24 @@ Current state.
 
 - Human-readable audit is available.
 - JSON output is available.
+- DPN Quality Gate also writes a concise emergency-surface summary to the GitHub Actions job summary.
 - Duplicate commands do not fail CI.
 - Correlation-field presence does not imply correctness.
 - No runtime behavior is changed by the audit.
 
 ### Stage 1 — approved ownership baseline
 
-Before strict enforcement, create an explicit baseline file that lists known intentional duplicate commands and their owners. New duplicate command registrations not present in that baseline should fail CI.
+Before regression enforcement, create an explicit baseline file containing the currently reviewed duplicate command names and owning file paths. New duplicate command registrations or newly added owners not present in that baseline should fail CI.
 
 Requirements:
 
-- every baseline exception must include a reason;
-- every exception must name a canonical owner;
-- every exception should identify a planned removal or compatibility strategy;
-- the baseline must never be automatically expanded by CI;
-- unknown duplicates are errors rather than silently accepted drift.
+- generate a candidate with `python3 tools/audit_emergency_surface.py --write-baseline <path>`;
+- review every generated command and owner before committing it;
+- document the canonical resource, compatibility purpose, and planned migration for each accepted overlap in the Phase 3B ownership documentation;
+- never automatically refresh or expand the baseline in CI;
+- treat unknown duplicate commands and newly added owners as regressions;
+- allow resolved duplicate commands or reduced owner sets to pass and report as improvements;
+- never restore an owner merely to make the repository match an older baseline.
 
 ### Stage 2 — correlation contract enforcement
 
@@ -87,25 +98,36 @@ The following are prohibited as cleanup shortcuts:
 - adding broad exclusions that hide future regressions;
 - deleting loaded historical layers that still provide unique functionality.
 
-## Proposed machine-readable baseline
+## Machine-readable ownership fingerprint
 
-When runtime Phase 3B begins, add a JSON file similar to:
+The implemented baseline is intentionally small and mechanical. It records only the duplicate command name and the exact owning source-file paths:
 
 ```json
 {
   "schemaVersion": 1,
+  "description": "Reviewed duplicate command ownership baseline. Entries are command -> owning file paths.",
   "duplicateCommands": {
-    "panic": {
-      "canonicalResource": "dpn-dispatch",
-      "compatibilityOwners": ["dpn-officer-safety"],
-      "reason": "Legacy compatibility during dispatch consolidation",
-      "targetPhase": "3C"
-    }
+    "panic": [
+      "qbcore/public-safety/dpn-unified-emergency-services-suite/core/dpn-dispatch/server/main.lua",
+      "qbcore/public-safety/dpn-unified-emergency-services-suite/[dpn-lawenforcement]/dpn-officer-safety/server/main.lua"
+    ]
   }
 }
 ```
 
-The audit tool can then compare discovered duplicates with approved exceptions. Unknown duplicates fail CI while documented compatibility remains visible.
+This fingerprint is not itself justification for an overlap. Human-readable architecture documentation remains authoritative for the canonical owner, compatibility reason, migration target, and rollback strategy. Keeping those concerns separate lets the audit compare source ownership deterministically while still requiring explicit architectural review.
+
+A regression is one of the following:
+
+- a duplicate command name that did not exist in the reviewed baseline;
+- a new owning source path added to a duplicate that already existed.
+
+An improvement is one of the following:
+
+- a previously duplicated command is no longer duplicated;
+- an existing duplicate has fewer owning source paths.
+
+Improvements are reported but do not fail the audit.
 
 ## Promotion criteria
 
@@ -115,7 +137,8 @@ Phase 3B audit enforcement may move beyond Stage 0 only when:
 2. The Phase 3B preparation branch is rebased onto that hardened foundation.
 3. Canonical ownership is documented for dispatch, medical dispatch, incident command, and MDT creation flows.
 4. Compatibility aliases are mapped to known callers.
-5. Rollback behavior is documented for the first runtime correlation changes.
+5. A candidate duplicate-ownership fingerprint is generated and reviewed command-by-command.
+6. Rollback behavior is documented for the first runtime correlation changes.
 
 ## Current blocker
 
