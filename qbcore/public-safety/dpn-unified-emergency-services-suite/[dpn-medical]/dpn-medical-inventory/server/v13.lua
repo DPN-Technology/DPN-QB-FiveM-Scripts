@@ -14,4 +14,4 @@ exports('CreateRecallActionV13', function(lot,item,locations,actor) local row={i
 
 exports('GetV13InventoryBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-inventory', VERSION, {'ReserveContinuumKitV13','ForecastSupplyBurnV13','CreateRecallActionV13'}) end); print('[dpn-medical-inventory] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-inventory] v13 continuum-command operations active') end)
