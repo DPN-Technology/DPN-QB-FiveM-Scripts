@@ -14,4 +14,4 @@ exports('EscalateRegionalSurgeV13', function(region,level,reason,actor) local it
 
 exports('GetV13DispatchBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-dispatch', VERSION, {'CreateContinuumCommandCallV13','RecommendContinuumAssetsV13','EscalateRegionalSurgeV13'}) end); print('[dpn-medical-dispatch] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-dispatch] v13 continuum-command operations active') end)
