@@ -1,5 +1,5 @@
 local RESOURCE = GetCurrentResourceName()
-local VERSION = '14.0.0'
+local VERSION = GetResourceMetadata(RESOURCE, 'version', 0) or 'unknown'
 local snapshots, testRuns = {}, {}
 
 local function deepCopy(value)
@@ -457,6 +457,5 @@ end)
 
 CreateThread(function()
     Wait(2200)
-    pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,{'medical_test_lab','scenario_snapshots','injury_matrix','physiology_validation','critical_command_v10_scenarios','test_audit'}) end)
-    print('[dpn-medical-core] v14.0.0 medical test laboratory with trauma-command scenarios active')
+    print(('[dpn-medical-core] %s medical test laboratory with trauma-command scenarios active'):format(VERSION))
 end)
