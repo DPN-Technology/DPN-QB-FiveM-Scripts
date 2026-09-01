@@ -1,0 +1,5 @@
+{
+  "description": "Reviewed duplicate command ownership baseline. Entries are command -> owning file paths.",
+  "duplicateCommands": {},
+  "schemaVersion": 1
+}
