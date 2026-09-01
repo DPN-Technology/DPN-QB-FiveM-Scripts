@@ -14,4 +14,4 @@ exports('CloseCriticalResultLoopV13', function(resultId,recipient,readBack) loca
 
 exports('GetV13RadiologyBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-radiology', VERSION, {'BuildDiagnosticSequenceV13','ScoreContrastSafetyV13','CloseCriticalResultLoopV13'}) end); print('[dpn-medical-radiology] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-radiology] v13 continuum-command operations active') end)
