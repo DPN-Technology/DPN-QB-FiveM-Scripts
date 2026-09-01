@@ -14,4 +14,4 @@ exports('CreateConsentDirectiveV13', function(patientCid,scope,status,actor) loc
 
 exports('GetV13RecordsBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-records', VERSION, {'CreateContinuumSummaryV13','SealClinicalEpisodeV13','CreateConsentDirectiveV13'}) end); print('[dpn-medical-records] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-records] v13 continuum-command operations active') end)
