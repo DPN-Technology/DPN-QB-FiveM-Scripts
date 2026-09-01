@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-rehab','2.0.0',{'rehab','care_plans','mobility_recovery'})
-end)
-
 AddEventHandler('dpn-medical-rehab:server:createAutomaticPlan',function(target,part,reason)
     local p=QBCore.Functions.GetPlayer(tonumber(target)); if not p then return end
     MySQL.insert('INSERT INTO dpn_medical_rehab_plans (patient_cid,body_part,reason,sessions_required,sessions_completed,status) VALUES (?,?,?,?,?,?)',{p.PlayerData.citizenid,part,reason,5,0,'active'})
