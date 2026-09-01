@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-insurance','2.0.0',{'policies','coverage','claims'})
-end)
-
 local function cid(target) if type(target)=='string' then return target end local p=QBCore.Functions.GetPlayer(tonumber(target)); return p and p.PlayerData.citizenid end
 local function policy(target)
     local id=cid(target); if not id then return nil end
