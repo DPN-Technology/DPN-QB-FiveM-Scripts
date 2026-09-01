@@ -29,4 +29,4 @@ exports('GetV14InventoryBoard',function()
  return{passed=true,version=VERSION,resource=RESOURCE,active=#rows,criticalPatients=critical,cases=rows}
 end)
 exports('GetV14Cases',function()return cases end)
-CreateThread(function()Wait(7000+math.random(0,2200));pcall(function()exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,{'mtp_pack', 'trauma_kit', 'supply_forecast','v14_board','trauma_command_integration'})end);print(('[%s] v14.0.0 trauma-command workflows active'):format(RESOURCE))end)
+CreateThread(function()Wait(7000+math.random(0,2200));print(('[%s] v14.0.0 trauma-command workflows active'):format(RESOURCE))end)

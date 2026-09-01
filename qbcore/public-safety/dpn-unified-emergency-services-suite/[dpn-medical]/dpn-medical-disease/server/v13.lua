@@ -14,4 +14,4 @@ exports('AuditIsolationV13', function(patientCid,observations) local score=100;f
 
 exports('GetV13DiseaseBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-disease', VERSION, {'BuildSourceControlPlanV13','CreateExposureClusterV13','AuditIsolationV13'}) end); print('[dpn-medical-disease] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-disease] v13 continuum-command operations active') end)

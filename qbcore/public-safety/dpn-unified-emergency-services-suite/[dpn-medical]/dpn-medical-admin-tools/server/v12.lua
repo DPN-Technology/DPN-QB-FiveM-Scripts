@@ -82,15 +82,3 @@ RegisterCommand('medv12systemtest', function(src)
     local message = ('v12 integrated network test: %s passed, %s failed, success=%s'):format(report.passed, report.failed, tostring(report.success))
     if src == 0 then print(message) else TriggerClientEvent('chat:addMessage', src, { args = { 'DPN Medical v12', message } }) end
 end, false)
-
-CreateThread(function()
-    Wait(9300)
-    pcall(function()
-        exports['dpn-medical-core']:RegisterModule('dpn-medical-admin-tools', VERSION, {
-            'native_admin_dashboard','native_mouse_controls','v12_integrated_network_dashboard',
-            'special_population_testing','organ_support_testing','v12_system_test',
-            'protocol_orchestration','critical_care_session_controls','network_reconciliation','audit'
-        })
-    end)
-    print('[dpn-medical-admin-tools] v12 integrated critical-care network dashboard active')
-end)

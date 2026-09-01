@@ -20,4 +20,3 @@ end,false)
 RegisterCommand('medsystemaudit',function(src)
     if not permitted(src)then return end;local data=exports['dpn-medical-admin-tools']:RunMedicalSystemAudit();local message=('Medical modules healthy: %s/%s'):format(data.healthy,data.total);if src==0 then print(message)else TriggerClientEvent('chat:addMessage',src,{args={'DPN Medical Audit',message}})end
 end,false)
-CreateThread(function()Wait(2500);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-admin-tools',VERSION,{'native_mouse_dashboard','secured_actions','clinical_command_center','system_audit','quality_metrics'})end);print('[dpn-medical-admin-tools] v4.0.0 clinical command-center and v6 secured actions active')end)

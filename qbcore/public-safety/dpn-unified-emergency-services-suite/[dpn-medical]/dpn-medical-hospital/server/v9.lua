@@ -31,4 +31,4 @@ exports('CreateInterfacilityTransferV9',function(target,origin,destination,requi
     local item={id=uid('IFT'),target=tonumber(target),origin=origin,destination=destination,requirements=requirements or{},status='requested',createdAt=os.time()};transfers[item.id]=item;return item.id,item
 end)
 exports('GetV9HospitalBoard',function()return{version=VERSION,placements=placements,rapidResponses=rapidResponses,forecasts=forecasts,transfers=transfers,generatedAt=os.time()}end)
-CreateThread(function()Wait(5100);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-hospital',VERSION,{'adaptive_bed_placement','rapid_response','capacity_forecasting','interfacility_transfer'})end);print('[dpn-medical-hospital] v9 adaptive patient flow and rapid-response command active')end)
+CreateThread(function()Wait(5100);print('[dpn-medical-hospital] v9 adaptive patient flow and rapid-response command active')end)

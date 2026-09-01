@@ -14,4 +14,4 @@ exports('AuditEvidenceChainV13', function(caseId,evidence) local item={id=uid('E
 
 exports('GetV13CoronerBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-coroner', VERSION, {'CreateCausalMortalityReviewV13','EstimateDeathWindowV13','AuditEvidenceChainV13'}) end); print('[dpn-medical-coroner] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-coroner] v13 continuum-command operations active') end)

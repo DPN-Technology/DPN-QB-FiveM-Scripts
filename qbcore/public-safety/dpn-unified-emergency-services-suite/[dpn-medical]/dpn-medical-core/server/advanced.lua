@@ -1,5 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local activeEpisodes, lastRisk, lastAlerts, moduleHealth = {}, {}, {}, {}
+local activeEpisodes, lastRisk, lastAlerts = {}, {}, {}
+local CORE_RESOURCE = GetCurrentResourceName()
+local CORE_VERSION = GetResourceMetadata(CORE_RESOURCE, 'version', 0) or 'unknown'
 
 local function player(target) return QBCore.Functions.GetPlayer(tonumber(target)) end
 local function cid(target)
@@ -68,12 +70,20 @@ exports('RemoveAllergy',function(target,allergy) target=tonumber(target); local 
 exports('SetBloodType',function(target,bloodType) target=tonumber(target); local s=DPNMedicalServer.EnsureState(target); if not s then return false end; local valid={['A+']=true,['A-']=true,['B+']=true,['B-']=true,['AB+']=true,['AB-']=true,['O+']=true,['O-']=true,UNKNOWN=true}; bloodType=tostring(bloodType or 'unknown'):upper(); if not valid[bloodType] then return false end; s.profile.bloodType=bloodType; return commit(target,s,'blood_type',{bloodType=bloodType}) end)
 exports('SetCodeStatus',function(target,status) target=tonumber(target); local s=DPNMedicalServer.EnsureState(target); if not s then return false end; status=tostring(status or 'full_code'); if status~='full_code' and status~='dnr' and status~='limited' then return false end; s.profile.codeStatus=status; return commit(target,s,'code_status',{status=status}) end)
 exports('SetDevice',function(target,deviceId,data) target=tonumber(target); local s=DPNMedicalServer.EnsureState(target); if not s then return false end; deviceId=tostring(deviceId or ''):sub(1,64); if deviceId=='' then return false end; if data==false then s.devices[deviceId]=nil else s.devices[deviceId]=type(data)=='table' and data or {active=true}; s.devices[deviceId].updatedAt=os.time() end; return commit(target,s,'device_changed',{device=deviceId,data=data}) end)
-exports('GetSystemHealth',function() return { version='6.0.0', modules=moduleHealth, activeEpisodes=activeEpisodes, players=#GetPlayers(), time=os.time() } end)
+exports('GetSystemHealth',function()
+    return {
+        version = CORE_VERSION,
+        modules = DPNMedicalServer.GetModules and DPNMedicalServer.GetModules() or {},
+        activeEpisodes = activeEpisodes,
+        players = #GetPlayers(),
+        time = os.time()
+    }
+end)
 
 AddEventHandler(DPN_MED.Events.ModuleHeartbeat,function(name,version,metrics)
-    name=tostring(name or ''):sub(1,64); if name=='' then return end
-    moduleHealth[name]={version=tostring(version or 'unknown'),metrics=type(metrics)=='table' and metrics or {},lastSeen=os.time(),state=GetResourceState(name)}
-    pcall(function() MySQL.insert('INSERT INTO dpn_medical_module_health (resource_name,version,health_data,last_seen) VALUES (?,?,?,NOW()) ON DUPLICATE KEY UPDATE version=VALUES(version),health_data=VALUES(health_data),last_seen=NOW()',{name,tostring(version or 'unknown'),json.encode(metrics or {})}) end)
+    if DPNMedicalServer.ModuleHeartbeat then
+        DPNMedicalServer.ModuleHeartbeat(name, version, metrics)
+    end
 end)
 
 AddEventHandler(DPN_MED.Events.StateChanged,function(target,patientCid,state,eventType,data)
@@ -82,7 +92,7 @@ end)
 
 CreateThread(function()
     Wait(2500)
-    print('[dpn-medical-core] v6.0.0 advanced physiology, care episodes, protocols, care plans and clinical event bus active')
+    print(('[dpn-medical-core] v%s advanced physiology, care episodes, protocols, care plans and clinical event bus active'):format(CORE_VERSION))
     while true do
         Wait(math.max(5,tonumber(Config.Advanced.physiologyTickSeconds) or 5)*1000)
         local current=os.time()

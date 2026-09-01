@@ -14,13 +14,6 @@ local function core(method,...)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
 end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
-end
 
 local reports, screenings = {}, {}
 exports('ScreenContrastRisk',function(target,study,sourceValue)
@@ -35,4 +28,3 @@ exports('CreateStructuredRadiologyReport',function(sourceValue,target,study,body
 end)
 exports('AcknowledgeCriticalResult',function(reportId,sourceValue,note) local item=reports[tostring(reportId)];if not item then return false end;item.acknowledged=true;item.acknowledgedBy=actor(sourceValue);item.acknowledgedAt=os.time();item.acknowledgmentNote=note;asyncUpdate('UPDATE dpn_medical_v6_radiology_reports SET acknowledged_by=?,acknowledged_at=NOW(),report_data=? WHERE report_id=?',{item.acknowledgedBy,encode(item),item.id});return true,item end)
 exports('GetRadiologyReports',function(target)local out={};for _,item in pairs(reports)do if not target or item.target==tonumber(target)then out[#out+1]=item end end;table.sort(out,function(a,b)return a.finalizedAt>b.finalizedAt end);return out end)
-heartbeat({'contrast_safety','structured_reporting','critical_result_acknowledgment','radiology_worklist','diagnostic_timeline'})

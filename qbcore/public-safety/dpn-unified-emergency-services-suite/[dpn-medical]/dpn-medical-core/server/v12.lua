@@ -1,4 +1,4 @@
-local VERSION = '12.0.0'
+local VERSION = GetResourceMetadata(GetCurrentResourceName(), 'version', 0) or 'unknown'
 local protocols, sessions, trends, transactions, circuitBreakers = {}, {}, {}, {}, {}
 
 local function now() return os.time() end
@@ -388,13 +388,6 @@ end)
 
 CreateThread(function()
     Wait(5200)
-    pcall(function()
-        exports['dpn-medical-core']:RegisterModule('dpn-medical-core-v12', VERSION, {
-            'special_population_physiology','cardiopulmonary_support_model','organ_support_candidacy',
-            'integrated_protocol_orchestration','critical_care_sessions','clinical_trend_engine',
-            'network_transactions','module_circuit_breakers','data_confidence','regional_command_dashboard'
-        })
-    end)
     print('[dpn-medical-core] v12.0.0 integrated critical-care, special populations and network resilience active')
 end)
 

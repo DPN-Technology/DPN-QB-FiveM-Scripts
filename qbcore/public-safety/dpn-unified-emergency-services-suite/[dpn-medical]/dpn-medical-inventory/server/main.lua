@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-inventory','2.0.0',{'medical_inventory','item_bridge','supply_tracking'})
-end)
-
 local function player(target) return QBCore.Functions.GetPlayer(tonumber(target)) end
 exports('HasMedicalItem',function(target,item,amount)
     local p=player(target); if not p or not Config.Items[item] then return false end; local found=p.Functions.GetItemByName(item); return found and (found.amount or 0)>=(tonumber(amount) or 1) or false

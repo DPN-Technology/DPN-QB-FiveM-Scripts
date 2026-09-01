@@ -1,4 +1,4 @@
-local VERSION='14.0.0'
+local VERSION=GetResourceMetadata(GetCurrentResourceName(),'version',0) or 'unknown'
 local reports={}
 local function permitted(src)if src==0 then return true end;if IsPlayerAceAllowed(src,'dpn.medical.admin')then return true end;local ok,c=pcall(function()return exports['qb-core']:GetCoreObject()end);return ok and c and c.Functions and c.Functions.HasPermission and(c.Functions.HasPermission(src,'admin')or c.Functions.HasPermission(src,'god'))or false end
 local function call(resource,name,...)local args=table.pack(...);local ok,a,b=pcall(function()local p=exports[resource];local fn=p and p[name];if type(fn)~='function'then error(('missing export %s:%s'):format(resource,name))end;return fn(p,table.unpack(args,1,args.n))end);return ok,a,b end
@@ -8,4 +8,4 @@ exports('RunTraumaNetworkTestV14',function(actor)local report={id=('V14TEST-%s-%
 exports('GetTraumaNetworkOperationsV14',function()local ok,data=call('dpn-medical-core','GetV14OperationalDashboard');return ok and type(data)=='table'and data or{version=VERSION,patients={},traumaOne=0,airwayThreat=0,occultBleed=0,compartmentRisk=0,activeMTP=0}end)
 exports('GetTraumaNetworkTestReportsV14',function()return reports end)
 RegisterCommand('medv14systemtest',function(src)if not permitted(src)then return end;local report=exports['dpn-medical-admin-tools']:RunTraumaNetworkTestV14(src);local msg=('v14 trauma network test: %s passed, %s failed, success=%s'):format(report.passed,report.failed,tostring(report.success));if src==0 then print(msg)else TriggerClientEvent('chat:addMessage',src,{args={'DPN Medical v14',msg}})end end,false)
-CreateThread(function()Wait(9800);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-admin-tools',VERSION,{'native_mouse_dashboard','v14_trauma_operations','trauma_evolution_controls','mtp_controls','procedure_checklists','destination_comparison','v14_network_test','medical_test_lab','audit'})end);print('[dpn-medical-admin-tools] v14 trauma-operations dashboard and validation center active')end)
+CreateThread(function()Wait(9800);print(('[dpn-medical-admin-tools] %s trauma-operations dashboard and validation center active'):format(VERSION))end)

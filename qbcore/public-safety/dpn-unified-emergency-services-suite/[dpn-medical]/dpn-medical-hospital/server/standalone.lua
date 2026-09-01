@@ -2,8 +2,6 @@ local QBCore = exports['qb-core']:GetCoreObject()
 
 CreateThread(function()
     print('[dpn-medical-hospital] v2.0.2 brown-screen repair active')
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-hospital','3.0.0',{'admissions','beds','recovery','emergency_respawn'})
 end)
 
 local function emergencyRespawn(src, reason)

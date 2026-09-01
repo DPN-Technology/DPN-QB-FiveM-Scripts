@@ -14,13 +14,6 @@ local function core(method,...)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
 end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
-end
 
 local medicationOrders, mar, reconciliations = {}, {}, {}
 exports('CreateMedicationOrder',function(sourceValue,target,drug,dose,route,frequency,durationHours,indication)
@@ -36,4 +29,3 @@ end)
 exports('ReconcileMedications',function(sourceValue,target,homeMedications,changes) local item={id=uid('REC',target),target=tonumber(target),patientCid=citizen(target),homeMedications=homeMedications or {},changes=changes or {},completedBy=actor(sourceValue),completedAt=os.time()};reconciliations[target]=item;asyncInsert('INSERT INTO dpn_medical_v6_med_reconciliation (reconciliation_id,patient_cid,completed_by,reconciliation_data) VALUES (?,?,?,?)',{item.id,item.patientCid,item.completedBy,encode(item)});core('AddClinicalEvent',target,'medication_reconciliation',item,item.completedBy);return item.id,item end)
 exports('GetMedicationOrders',function(target)local out={};for _,item in pairs(medicationOrders)do if not target or item.target==tonumber(target)then out[#out+1]=item end end;return out end)
 exports('GetMAR',function(target)return mar[tonumber(target)]or{}end)
-heartbeat({'computerized_provider_order_entry','pharmacist_verification','medication_administration_record','medication_reconciliation','interaction_safety','controlled_medication_audit'})

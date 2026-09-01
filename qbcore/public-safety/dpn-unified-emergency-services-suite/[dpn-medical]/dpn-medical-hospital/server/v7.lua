@@ -83,11 +83,5 @@ end)
 
 CreateThread(function()
     Wait(2700)
-    pcall(function()
-        exports['dpn-medical-core']:RegisterModule('dpn-medical-hospital', '5.0.0', {
-            'admissions', 'bed_management', 'ed_command', 'surge_capacity', 'transfer_center',
-            'dispatch_prealerts', 'incoming_patient_coordination'
-        })
-    end)
     print('[dpn-medical-hospital] v5.0.0 dispatch prealert and receiving-center coordination active')
 end)

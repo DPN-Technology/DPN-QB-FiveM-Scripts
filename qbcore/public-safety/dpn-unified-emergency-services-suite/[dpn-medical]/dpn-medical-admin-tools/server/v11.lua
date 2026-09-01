@@ -83,15 +83,3 @@ RegisterCommand('medv11systemtest', function(src)
     local message = ('v11 autonomous network test: %s passed, %s failed, success=%s'):format(report.passed, report.failed, tostring(report.success))
     if src == 0 then print(message) else TriggerClientEvent('chat:addMessage', src, { args = { 'DPN Medical v11', message } }) end
 end, false)
-
-CreateThread(function()
-    Wait(9000)
-    pcall(function()
-        exports['dpn-medical-core']:RegisterModule('dpn-medical-admin-tools', VERSION, {
-            'native_admin_dashboard', 'native_mouse_controls', 'autonomous_network_dashboard',
-            'v11_system_test', 'intervention_forecasting', 'continuous_reassessment_controls',
-            'medical_test_lab', 'secured_actions', 'audit'
-        })
-    end)
-    print('[dpn-medical-admin-tools] v11 autonomous network dashboard and system test active')
-end)

@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-ems','14.0.0',{'ems_actions','field_treatment','revive','triage','carry','pcr'})
-end)
-
 local function notify(src,msg,kind) TriggerClientEvent('QBCore:Notify',src,msg,kind or 'primary',5000) end
 local function authorized(src)
     local p=QBCore.Functions.GetPlayer(src); if not p then return false end
@@ -62,7 +57,6 @@ QBCore.Commands.Add('emscarry','Carry/release an incapacitated patient',{{name='
     if carrying then Player(target).state:set('dpnMedicalCarrier',nil,true); TriggerClientEvent('dpn-medical-ems:client:setCarried',target,nil)
     else Player(target).state:set('dpnMedicalCarrier',src,true); TriggerClientEvent('dpn-medical-ems:client:setCarried',target,src) end
 end)
-
 
 QBCore.Commands.Add('emsduty','Toggle DPN EMS duty status',{},false,function(src)
     local p=QBCore.Functions.GetPlayer(src); if not p then return end

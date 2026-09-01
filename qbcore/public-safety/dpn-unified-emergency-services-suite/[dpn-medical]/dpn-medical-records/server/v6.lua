@@ -1,5 +1,3 @@
-local VERSION = '3.0.0'
-local RESOURCE = GetCurrentResourceName()
 local QBCore = exports['qb-core']:GetCoreObject()
 local function encode(value) local ok,result=pcall(json.encode,value or {}); return ok and result or '{}' end
 local function targetPlayer(target) return QBCore.Functions.GetPlayer(tonumber(target)) end
@@ -13,13 +11,6 @@ local function core(method,...)
     local ok,a,b,c=pcall(function() local proxy=exports['dpn-medical-core']; local fn=proxy and proxy[method]; if type(fn)~='function' then error('missing core export '..tostring(method)) end; return fn(proxy,table.unpack(args,1,args.n)) end)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
-end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
 end
 
 local notes, locks = {}, {}
@@ -35,4 +26,3 @@ exports('GetEpisodeSummary',function(target)
     local ok,twin=core('GetDigitalTwin',target);if not ok then return nil end;local _,orders=core('GetClinicalOrders',target,true);local _,handoffs=core('GetHandoffs',target);local records=exports['dpn-medical-records']:GetRecords(target,100);return {patient=target,citizenid=citizen(target),digitalTwin=twin,orders=orders or{},handoffs=handoffs or{},records=records or{},generatedAt=os.time()}
 end)
 exports('GetSignedNotes',function(target)local out={};for _,item in pairs(notes)do if not target or item.target==tonumber(target)then out[#out+1]=item end end;table.sort(out,function(a,b)return a.signedAt>b.signedAt end);return out end)
-heartbeat({'signed_notes','addenda','chart_locking','episode_summary','longitudinal_timeline','schema_adaptation','access_audit'})

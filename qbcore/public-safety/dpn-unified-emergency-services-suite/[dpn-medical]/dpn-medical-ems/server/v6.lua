@@ -1,5 +1,3 @@
-local VERSION = '3.0.0'
-local RESOURCE = GetCurrentResourceName()
 local QBCore = exports['qb-core']:GetCoreObject()
 local function encode(value) local ok,result=pcall(json.encode,value or {}); return ok and result or '{}' end
 local function targetPlayer(target) return QBCore.Functions.GetPlayer(tonumber(target)) end
@@ -13,13 +11,6 @@ local function core(method,...)
     local ok,a,b,c=pcall(function() local proxy=exports['dpn-medical-core']; local fn=proxy and proxy[method]; if type(fn)~='function' then error('missing core export '..tostring(method)) end; return fn(proxy,table.unpack(args,1,args.n)) end)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
-end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
 end
 
 local incidents = {}
@@ -63,6 +54,5 @@ end)
 exports('GetMCI',function(id)return incidents[tostring(id)]end)
 exports('GetActiveMCIs',function()local out={};for _,v in pairs(incidents)do if v.status=='active'then out[#out+1]=v end end;return out end)
 exports('CloseMCI',function(id,sourceValue) local incident=incidents[tostring(id)];if not incident then return false end;incident.status='closed';incident.closedAt=os.time();incident.closedBy=actor(sourceValue);asyncUpdate('UPDATE dpn_medical_v6_mci_incidents SET status=?,closed_at=NOW(),incident_data=? WHERE incident_id=?',{'closed',encode(incident),incident.id});return true end)
-heartbeat({'mci_command','start_salt_triage','destination_balancing','prehospital_handoff','scene_accountability'})
 QBCore.Commands.Add('mci','Create a DPN medical MCI',{{name='label'}},false,function(src,args)local id=exports['dpn-medical-ems']:CreateMCI(src,table.concat(args,' '),{},1);TriggerClientEvent('QBCore:Notify',src,'MCI created: '..tostring(id),'success')end)
 QBCore.Commands.Add('mcitriage','Triage a patient in an MCI',{{name='incident'},{name='id'},{name='tag'}},true,function(src,args)local ok,msg=exports['dpn-medical-ems']:TriageMCIPatient(args[1],tonumber(args[2]),args[3],nil,src);TriggerClientEvent('QBCore:Notify',src,ok and 'MCI triage recorded.' or tostring(msg),ok and 'success' or 'error')end)

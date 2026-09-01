@@ -14,13 +14,6 @@ local function core(method,...)
     if not ok then return false,nil,tostring(a) end
     return true,a,b,c
 end
-local function heartbeat(capabilities)
-    CreateThread(function()
-        Wait(2500)
-        pcall(function() exports['dpn-medical-core']:RegisterModule(RESOURCE,VERSION,capabilities) end)
-        while true do Wait(60000); TriggerEvent('dpn-medical-core:server:moduleHeartbeat',RESOURCE,VERSION,{online=true,time=os.time()}) end
-    end)
-end
 
 local staffing, edBoard, transfers = {}, {}, {}
 local surgeMode = {active=false,level=0,reason=nil,updatedAt=0}
@@ -53,5 +46,4 @@ exports('GetHospitalCommandCenter',function()
 end)
 exports('GetEDBoard',function()return edBoard end)
 exports('GetTransfers',function()return transfers end)
-heartbeat({'ed_tracking_board','staffing_command','surge_capacity','transfer_center','boarding_risk','hospital_command_center'})
 QBCore.Commands.Add('hospitalcommand','Show hospital command-center status',{},false,function(src)local data=exports['dpn-medical-hospital']:GetHospitalCommandCenter();TriggerClientEvent('chat:addMessage',src,{args={'Hospital Command',('Waiting %s | Critical %s | Surge %s L%s'):format(data.waiting,data.critical,tostring(data.surge.active),data.surge.level)}})end)

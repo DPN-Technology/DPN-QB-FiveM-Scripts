@@ -1,4 +1,4 @@
-local VERSION = '10.0.0'
+local VERSION = GetResourceMetadata(GetCurrentResourceName(), 'version', 0) or 'unknown'
 local bundles, blackBox, commandIncidents, reconciliationHistory = {}, {}, {}, {}
 
 local function now() return os.time() end
@@ -193,7 +193,6 @@ end)
 
 CreateThread(function()
     Wait(4600)
-    pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-core-v10', VERSION, { 'critical_command_twin', 'dynamic_hemorrhage', 'arterial_blood_gas', 'toxicology_burden', 'organ_coupling', 'arrest_prediction', 'closed_loop_bundles', 'clinical_black_box', 'cross_module_reconciliation' }) end)
     print('[dpn-medical-core] v10.0.0 critical-care command, closed-loop safety and clinical black box active')
 end)
 

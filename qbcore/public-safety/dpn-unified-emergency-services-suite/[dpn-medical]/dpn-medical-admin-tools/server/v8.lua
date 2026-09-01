@@ -18,4 +18,3 @@ end)
 RegisterCommand('medv8test',function(src)
     if not permitted(src)then return end;local result=exports['dpn-medical-admin-tools']:RunPrecisionSystemTest(src);local message=('v8 test: %s module(s) passed, %s failed, core=%s'):format(result.passed,result.failed,tostring(result.coreSelfTest and result.coreSelfTest.passed));if src==0 then print(message)else TriggerClientEvent('chat:addMessage',src,{args={'DPN Medical v8',message}})end
 end,false)
-CreateThread(function()Wait(3500);pcall(function()exports['dpn-medical-core']:RegisterModule('dpn-medical-admin-tools',VERSION,{'native_mouse_dashboard','precision_operations','batch_self_test','simulation_control','quality_command'})end);print('[dpn-medical-admin-tools] v8 precision operations and full-system self-test active')end)

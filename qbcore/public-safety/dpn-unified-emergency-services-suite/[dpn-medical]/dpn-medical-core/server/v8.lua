@@ -1,4 +1,4 @@
-local VERSION = '8.0.0'
+local VERSION = GetResourceMetadata(GetCurrentResourceName(), 'version', 0) or 'unknown'
 local QBCore = exports['qb-core']:GetCoreObject()
 local plans, simulations, journal, circuit = {}, {}, {}, {}
 local sequence = 0
@@ -221,7 +221,6 @@ end)
 
 CreateThread(function()
     Wait(2500)
-    pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-core-v8', VERSION, { 'precision_digital_twin', 'hemodynamics', 'oxygen_delivery', 'dose_safety', 'care_bundles', 'simulation_control', 'event_journal', 'clinical_resilience' }) end)
     print('[dpn-medical-core] v8.0.0 precision physiology, care bundles, medication safety and simulation engine active')
     while true do
         Wait(1000)

@@ -14,4 +14,4 @@ exports('RecordMultidisciplinaryRoundV13', function(target,goals,actor) local it
 
 exports('GetV13ICUBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-icu', VERSION, {'BuildContinuumOrganSupportPlanV13','CreateDailyLiberationAssessmentV13','RecordMultidisciplinaryRoundV13'}) end); print('[dpn-medical-icu] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-icu] v13 continuum-command operations active') end)

@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-disease','2.0.0',{'disease','infection','symptoms','contagion'})
-end)
-
 local function infect(target,diseaseId,severity)
     target=tonumber(target); local d=Config.Diseases[diseaseId]; if not target or not d then return false end
     local p=QBCore.Functions.GetPlayer(target); if not p then return false end

@@ -14,4 +14,4 @@ exports('RecordFleetDefectV13', function(unit,defect,severity,actor) local item=
 
 exports('GetV13AmbulanceBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-ambulance', VERSION, {'ScoreContinuumTransportReadinessV13','CreateCriticalTransportMissionV13','RecordFleetDefectV13'}) end); print('[dpn-medical-ambulance] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-ambulance] v13 continuum-command operations active') end)

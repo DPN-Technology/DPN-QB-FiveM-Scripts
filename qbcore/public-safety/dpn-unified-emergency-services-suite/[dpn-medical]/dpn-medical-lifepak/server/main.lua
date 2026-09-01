@@ -1,10 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-CreateThread(function()
-    Wait(1000)
-    exports['dpn-medical-core']:RegisterModule('dpn-medical-lifepak','2.0.0',{'lifepak','monitor','defibrillator'})
-end)
-
 local sessions={}
 local function auth(src) local p=QBCore.Functions.GetPlayer(src); return p and Config.Jobs[(p.PlayerData.job or {}).name] and (p.PlayerData.job or {}).onduty~=false end
 QBCore.Commands.Add('lifepak','Start a live monitor session',{{name='id'}},true,function(src,args)
