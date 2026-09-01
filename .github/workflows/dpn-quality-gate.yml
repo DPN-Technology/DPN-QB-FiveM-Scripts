@@ -26,8 +26,12 @@ jobs:
 
       - name: Audit emergency command and event surface
         run: |
-          python3 tools/audit_emergency_surface.py
-          python3 tools/audit_emergency_surface.py --json > emergency-surface-audit.json
+          python3 tools/audit_emergency_surface.py \
+            --baseline tools/emergency-surface-baseline.json \
+            --fail-on-regression
+          python3 tools/audit_emergency_surface.py \
+            --baseline tools/emergency-surface-baseline.json \
+            --json > emergency-surface-audit.json
           python3 - <<'PY'
           import json
           import os
@@ -37,15 +41,18 @@ jobs:
           summary = Path(os.environ['GITHUB_STEP_SUMMARY'])
           readiness = report.get('correlationReadiness', {})
           ready = sum(1 for fields in readiness.values() if 'eventId' in fields)
+          comparison = report.get('baselineComparison', {})
           lines = [
               '## DPN Emergency Surface Audit',
               '',
               f"- Lua files scanned: **{report.get('luaFilesScanned', 0)}**",
               f"- Emergency declarations/usages: **{report.get('declarationsAndUsages', 0)}**",
               f"- Duplicate command names: **{report.get('duplicateCommandCount', 0)}**",
+              f"- Duplicate-command regressions vs reviewed baseline: **{comparison.get('regressionCount', 0)}**",
+              f"- Duplicate-command improvements vs reviewed baseline: **{comparison.get('improvementCount', 0)}**",
               f"- Resources with lexical `eventId` readiness: **{ready}/{len(readiness)}**",
               '',
-              '> Duplicate command findings remain audit-only until compatibility ownership has been deliberately migrated and baselined.',
+              '> Existing reviewed ownership is baselined; CI now fails only new duplicate command names or newly added duplicate owners.',
               '',
           ]
           with summary.open('a', encoding='utf-8') as handle:
