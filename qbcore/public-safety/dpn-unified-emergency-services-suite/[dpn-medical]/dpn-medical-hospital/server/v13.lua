@@ -14,4 +14,4 @@ exports('CreateVirtualWardV13', function(name,capacity,criteria) local item={id=
 
 exports('GetV13HospitalBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-hospital', VERSION, {'ForecastContinuumCapacityV13','MatchContinuumDestinationV13','CreateVirtualWardV13'}) end); print('[dpn-medical-hospital] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-hospital] v13 continuum-command operations active') end)
