@@ -4,16 +4,18 @@
 This is a read-only audit tool. It intentionally does not fail on existing
 ownership overlaps because Phase 3B begins with known compatibility aliases.
 Use --strict to return non-zero when duplicate command registrations are found.
+Use --json to emit a stable machine-readable report for CI and migration tools.
 """
 
 from __future__ import annotations
 
 import argparse
 import collections
+import json
 import pathlib
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SUITE = ROOT / "qbcore/public-safety/dpn-unified-emergency-services-suite"
@@ -27,7 +29,15 @@ PATTERNS = {
     "trigger_local": re.compile(r"TriggerEvent\s*\(\s*['\"]([^'\"]+)['\"]"),
 }
 
-CORRELATION_FIELDS = ("eventId", "medicalCallId", "dispatchCallId", "incidentId", "mdtCaseId", "sourceResource")
+CORRELATION_FIELDS = (
+    "eventId",
+    "medicalCallId",
+    "dispatchCallId",
+    "incidentId",
+    "mdtCaseId",
+    "sourceResource",
+)
+
 
 @dataclass(frozen=True)
 class Hit:
@@ -49,15 +59,22 @@ def resource_for(path: pathlib.Path) -> str:
     return parts[0]
 
 
-def scan() -> tuple[list[Hit], dict[str, set[str]]]:
-    hits: list[Hit] = []
-    correlation: dict[str, set[str]] = collections.defaultdict(set)
+def lua_files() -> list[pathlib.Path]:
     if not SUITE.exists():
         raise SystemExit(f"Unified emergency suite not found: {SUITE}")
+    return [
+        path
+        for path in sorted(SUITE.rglob("*.lua"))
+        if not any(part in {"vendor", "node_modules"} for part in path.parts)
+    ]
 
-    for path in sorted(SUITE.rglob("*.lua")):
-        if any(part in {"vendor", "node_modules"} for part in path.parts):
-            continue
+
+def scan() -> tuple[list[Hit], dict[str, set[str]], int]:
+    hits: list[Hit] = []
+    correlation: dict[str, set[str]] = collections.defaultdict(set)
+    files = lua_files()
+
+    for path in files:
         try:
             text = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -71,7 +88,7 @@ def scan() -> tuple[list[Hit], dict[str, set[str]]]:
             for field in CORRELATION_FIELDS:
                 if re.search(rf"\b{re.escape(field)}\b", line):
                     correlation[resource].add(field)
-    return hits, correlation
+    return hits, correlation, len(files)
 
 
 def duplicate_commands(hits: list[Hit]) -> dict[str, list[Hit]]:
@@ -79,47 +96,87 @@ def duplicate_commands(hits: list[Hit]) -> dict[str, list[Hit]]:
     for hit in hits:
         if hit.kind == "command":
             owners[hit.name.lower()].append(hit)
-    return {name: rows for name, rows in owners.items() if len({row.path for row in rows}) > 1}
+    return {
+        name: rows
+        for name, rows in owners.items()
+        if len({row.path for row in rows}) > 1
+    }
 
 
-def print_report(hits: list[Hit], correlation: dict[str, set[str]]) -> int:
+def build_report(hits: list[Hit], correlation: dict[str, set[str]], file_count: int) -> dict[str, object]:
     by_kind = collections.Counter(hit.kind for hit in hits)
     duplicates = duplicate_commands(hits)
+    resources = sorted({resource_for(path) for path in lua_files()})
 
+    return {
+        "schemaVersion": 1,
+        "suite": SUITE.relative_to(ROOT).as_posix(),
+        "luaFilesScanned": file_count,
+        "declarationsAndUsages": len(hits),
+        "countsByKind": {kind: by_kind[kind] for kind in PATTERNS},
+        "duplicateCommandCount": len(duplicates),
+        "duplicateCommands": {
+            name: [asdict(hit) for hit in rows]
+            for name, rows in sorted(duplicates.items())
+        },
+        "correlationFields": list(CORRELATION_FIELDS),
+        "correlationReadiness": {
+            resource: [field for field in CORRELATION_FIELDS if field in correlation.get(resource, set())]
+            for resource in resources
+        },
+        "notes": [
+            "Duplicate commands are audit findings, not automatically bugs; compatibility aliases may be intentional.",
+            "Correlation readiness is lexical presence only and does not prove end-to-end propagation or trust validation.",
+        ],
+    }
+
+
+def print_text_report(report: dict[str, object]) -> None:
     print("DPN Emergency Surface Audit")
-    print(f"Lua declarations/usages scanned: {len(hits)}")
+    print(f"Lua files scanned: {report['luaFilesScanned']}")
+    print(f"Lua declarations/usages scanned: {report['declarationsAndUsages']}")
+    counts = report["countsByKind"]
+    assert isinstance(counts, dict)
     for kind in PATTERNS:
-        print(f"  {kind}: {by_kind[kind]}")
+        print(f"  {kind}: {counts.get(kind, 0)}")
 
     print("\nDuplicate command registrations")
+    duplicates = report["duplicateCommands"]
+    assert isinstance(duplicates, dict)
     if not duplicates:
         print("  none")
     else:
-        for name in sorted(duplicates):
+        for name, rows in duplicates.items():
             print(f"  /{name}")
-            for hit in duplicates[name]:
-                print(f"    - {hit.path}:{hit.line}")
+            for row in rows:
+                print(f"    - {row['path']}:{row['line']}")
 
     print("\nCorrelation-field readiness by resource")
-    resources = sorted({resource_for(path) for path in SUITE.rglob("*.lua")})
-    for resource in resources:
-        fields = correlation.get(resource, set())
-        present = ", ".join(field for field in CORRELATION_FIELDS if field in fields) or "none"
+    readiness = report["correlationReadiness"]
+    assert isinstance(readiness, dict)
+    for resource, fields in readiness.items():
+        present = ", ".join(fields) or "none"
         print(f"  {resource}: {present}")
 
     print("\nNotes")
-    print("  - Duplicate commands are audit findings, not automatically bugs; compatibility aliases may be intentional.")
-    print("  - Correlation readiness is lexical presence only. It does not prove end-to-end propagation or trust validation.")
-    return len(duplicates)
+    for note in report["notes"]:
+        print(f"  - {note}")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--strict", action="store_true", help="fail if duplicate command registrations exist")
+    parser.add_argument("--json", action="store_true", dest="json_output", help="emit JSON instead of the human-readable report")
     args = parser.parse_args()
-    hits, correlation = scan()
-    duplicate_count = print_report(hits, correlation)
-    return 1 if args.strict and duplicate_count else 0
+
+    hits, correlation, file_count = scan()
+    report = build_report(hits, correlation, file_count)
+    if args.json_output:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    else:
+        print_text_report(report)
+
+    return 1 if args.strict and report["duplicateCommandCount"] else 0
 
 
 if __name__ == "__main__":
