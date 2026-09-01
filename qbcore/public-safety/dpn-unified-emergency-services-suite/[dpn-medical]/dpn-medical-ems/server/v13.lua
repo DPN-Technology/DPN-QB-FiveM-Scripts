@@ -14,4 +14,4 @@ exports('ScoreCrewReadinessV13', function(crew,equipment,fatigue) local score=cl
 
 exports('GetV13EMSBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-ems', VERSION, {'CreateProlongedFieldCarePlanV13','CreateContinuumHandoffV13','ScoreCrewReadinessV13'}) end); print('[dpn-medical-ems] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-ems] v13 continuum-command operations active') end)
