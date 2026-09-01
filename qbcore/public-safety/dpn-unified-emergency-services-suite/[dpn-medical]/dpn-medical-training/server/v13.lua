@@ -14,4 +14,4 @@ exports('CreateRemediationPlanV13', function(provider,deficits) local item={id=u
 
 exports('GetV13TrainingBoard', function() return { version=VERSION, passed=true, store=store, generatedAt=os.time() } end)
 
-CreateThread(function() Wait(7036); pcall(function() exports['dpn-medical-core']:RegisterModule('dpn-medical-training', VERSION, {'CreateDeterministicTrainingCaseV13','ScoreClinicalReasoningV13','CreateRemediationPlanV13'}) end); print('[dpn-medical-training] v13 continuum-command operations active') end)
+CreateThread(function() Wait(7036); print('[dpn-medical-training] v13 continuum-command operations active') end)
