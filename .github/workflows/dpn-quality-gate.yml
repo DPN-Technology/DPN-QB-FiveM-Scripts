@@ -24,6 +24,9 @@ jobs:
       - name: Run DPN repository validator
         run: python3 tools/dpn_repo_validator.py
 
+      - name: Validate FiveM manifest integrity
+        run: python3 tools/check_fivem_manifest_integrity.py
+
       - name: Validate medical registry ownership
         run: python3 tools/check_medical_registry_ownership.py
 
