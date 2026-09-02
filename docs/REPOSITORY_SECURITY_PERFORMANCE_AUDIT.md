@@ -36,6 +36,25 @@ The next runtime audit should classify every server mutation event into:
 
 No handler should be hardened by deleting a public event or compatibility alias unless equivalent behavior is proven and reviewed separately.
 
+#### Confirmed finding: MIB loadout rank is client-controlled
+
+`qbcore/admin/dpn-mib-system/server/main.lua` handles `dpn-mib:server:toolAction` and performs a general MIB access check before dispatching actions. For the `loadout` action, however, the server selects `Config.MIBLoadouts[payload.rank]` directly from the caller-supplied payload. The server does not independently derive or validate the requested loadout rank against the player's authoritative job grade or administrative permission.
+
+The configured `director` loadout is materially more privileged than the normal packages and currently includes `weapon_pistol_mk2`, additional heavy armor, and `advancedlockpick`. As a result, any player who passes the general MIB access check may be able to request the director package by submitting `rank = 'director'` even if their actual MIB grade is lower.
+
+Severity: **High** for servers that grant MIB access to non-director personnel.
+
+Required focused remediation:
+
+- derive the maximum permitted loadout rank exclusively from server-side player/job/permission data,
+- treat `payload.rank` as a request only, never authoritative identity,
+- deny or safely downgrade requests above the caller's authorized rank,
+- preserve the existing recruit/agent/director packages and public event compatibility,
+- log denied escalation attempts,
+- add a regression validator/test proving a normal MIB user cannot obtain a director loadout by changing the client payload.
+
+This should be fixed in a dedicated runtime PR from refreshed `main`; it should not be folded into Phase 3B–3G ownership changes.
+
 ### 2. Per-frame and zero-delay loops
 
 `Wait(0)` / `Citizen.Wait(0)` usage exists throughout the repository. Not all occurrences are defects. Several are justified by FiveM behavior, including:
