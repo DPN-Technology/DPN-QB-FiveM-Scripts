@@ -33,6 +33,9 @@ jobs:
       - name: Validate MIB loadout authorization
         run: python3 tools/check_mib_loadout_authorization.py
 
+      - name: Validate PD doorbell cooldown authority
+        run: python3 tools/check_pd_doorbell_cooldown_authority.py
+
       - name: Install Lua syntax checker
         run: |
           sudo apt-get update
