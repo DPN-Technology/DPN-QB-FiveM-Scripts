@@ -29,6 +29,15 @@ local function requireAccess(src, action, reason)
     return true
 end
 
+local function canUseDirectorLoadout(src)
+    if isAdmin(src) then return true end
+    local P = player(src)
+    if not P then return false end
+    local jobData = P.PlayerData.job or {}
+    local grade = jobData.grade or {}
+    return jobData.name == Config.MIBJobName and tostring(grade.name or ''):lower() == 'director'
+end
+
 local function cooled(src, key, seconds)
     cooldowns[src] = cooldowns[src] or {}
     local now = os.time()
@@ -92,7 +101,15 @@ RegisterNetEvent('dpn-mib:server:toolAction', function(action, target, payload)
         SendEmergencyPing(src, payload.message)
         MIBLog(src, 'EMERGENCY_SERVICE_PING', nil, payload.message)
     elseif action == 'loadout' then
-        local rank = payload.rank or 'agent'; local loadout = Config.MIBLoadouts[rank] or Config.MIBLoadouts.agent; local P = player(src)
+        local rank = tostring(payload.rank or 'agent'):lower()
+        if not Config.MIBLoadouts[rank] then rank = 'agent' end
+        if rank == 'director' and not canUseDirectorLoadout(src) then
+            MIBLog(src, 'LOADOUT_ESCALATION_DENIED', nil, 'Requested director loadout')
+            return DPN.Notify(src, 'Director clearance is required for that MIB loadout.', 'error')
+        end
+        local loadout = Config.MIBLoadouts[rank]
+        local P = player(src)
+        if not P then return end
         for _, item in pairs(loadout.items) do
             P.Functions.AddItem(item.name, item.amount)
             if QBCore.Shared.Items[item.name] then TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item.name], 'add') end
