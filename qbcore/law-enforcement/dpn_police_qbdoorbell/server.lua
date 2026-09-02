@@ -37,7 +37,7 @@ RegisterNetEvent('qb-pd-doorbell:ringBell', function()
     for _, playerId in ipairs(GetPlayers()) do
         playerId = tonumber(playerId)
         local PolicePlayer = QBCore.Functions.GetPlayer(playerId)
-        if PolicePlayer and PolicePlayer.PlayerData.job.name == Config.PoliceJob and 
+        if PolicePlayer and PolicePlayer.PlayerData.job.name == Config.PoliceJob and
            PolicePlayer.PlayerData.job.onduty and PolicePlayer.PlayerData.job.grade.level >= Config.RequiredGrade then
             TriggerClientEvent('QBCore:Notify', playerId, Config.PoliceNotifyMessage, 'primary', 5000)
             -- Optional: Add blip to reception for police
@@ -50,9 +50,15 @@ RegisterNetEvent('qb-pd-doorbell:ringBell', function()
     print(('PD Doorbell rung by %s (ID: %d). Notified %d officers.'):format(Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname, src, notifiedCount))
 end)
 
--- Clean up cooldowns on player disconnect
-RegisterNetEvent('QBCore:Server:OnPlayerUnload', function(source)
-    playerCooldowns[source] = nil
+-- Clean up cooldowns on player disconnect.
+-- QBCore emits this server-side with the disconnecting player's net source as the event source.
+-- Do not accept a caller-supplied source argument, which would let a client target another
+-- player's cooldown entry if the framework event were ever forwarded over the network.
+AddEventHandler('QBCore:Server:OnPlayerUnload', function()
+    local src = source
+    if type(src) == 'number' and src > 0 then
+        playerCooldowns[src] = nil
+    end
 end)
 
 -- Optional: Remove blip after 30s (client-side event)
