@@ -55,6 +55,8 @@ Required focused remediation:
 
 This should be fixed in a dedicated runtime PR from refreshed `main`; it should not be folded into Phase 3B–3G ownership changes.
 
+**Verified remediation status:** focused PR #16 (`Security: enforce server-side MIB director loadout authorization`) implements the server-authoritative director-loadout check and regression validator. Its exact tested head `672bc3583ac655af334a2cc7683958d48adec7b5` passed both DPN Quality Gate and DPN Pull Request Resource Summary. The PR is ready-for-review and mergeable, but no merge is considered complete until GitHub accepts an exact-head squash merge and the resulting `main` commit is reverified.
+
 ### 2. Per-frame and zero-delay loops
 
 `Wait(0)` / `Citizen.Wait(0)` usage exists throughout the repository. Not all occurrences are defects. Several are justified by FiveM behavior, including:
