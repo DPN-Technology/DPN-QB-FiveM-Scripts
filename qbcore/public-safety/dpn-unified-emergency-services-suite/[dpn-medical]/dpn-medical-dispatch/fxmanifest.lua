@@ -18,6 +18,7 @@ client_script 'client/main.lua'
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/main.lua',
+    'server/dedup.lua',
     'server/authority.lua',
     'server/advanced.lua',
     'server/v6.lua',
