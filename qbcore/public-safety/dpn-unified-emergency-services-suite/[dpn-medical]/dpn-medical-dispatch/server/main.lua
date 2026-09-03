@@ -80,8 +80,6 @@ local function bridgeCreate(call)
         end
         if #successes>0 and Config.ExternalDispatch.mode=='first_success' then break end
     end
-    -- Emit event fallbacks only when no export accepted the incident, unless the
-    -- server explicitly opts into both paths. This prevents duplicate CAD calls.
     if #successes == 0 or Config.ExternalDispatch.emitEventsAfterExport == true then
         for _, eventName in ipairs(Config.ExternalDispatch.events or {}) do
             TriggerEvent(eventName, payload)
@@ -178,15 +176,25 @@ end)
 RegisterNetEvent('dpn-medical-dispatch:server:respond',function(callId,status)
     local src=source;if not isResponder(src) then return end
     local call=activeCalls[tostring(callId)];if not call then return TriggerClientEvent('QBCore:Notify',src,'Medical call not found or expired.','error',5000) end
-    local allowed={accepted=true,enroute=true,onscene=true,transporting=true,clear=true,unavailable=true};status=tostring(status or 'accepted'):lower();if not allowed[status] then status='accepted' end
-    responders[src]=responders[src] or{};responders[src].status=status;responders[src].callId=call.id;responders[src].updatedAt=os.time()
-    call.responders[tostring(src)]={source=src,name=playerName(src),status=status,updatedAt=os.time()};call.timeline[#call.timeline+1]={event='unit_status',unit=src,status=status,at=os.time()}
+    responders[src]=responders[src] or{}
+    local currentStatus=responders[src].status or 'available'
+    local transitionOk,normalizedStatus,transitionReason=false,tostring(status or ''),'responder-authority-unavailable'
+    if DPNMedicalResponderAuthority and type(DPNMedicalResponderAuthority.ValidateTransition)=='function' then
+        transitionOk,normalizedStatus,transitionReason=DPNMedicalResponderAuthority.ValidateTransition(currentStatus,status)
+    end
+    if not transitionOk then
+        log(('rejected responder transition source=%s call=%s %s -> %s (%s)'):format(src,tostring(call.id),tostring(currentStatus),tostring(status),tostring(transitionReason)))
+        return TriggerClientEvent('QBCore:Notify',src,('Responder status change denied: %s.'):format(tostring(transitionReason or 'invalid-transition')),'error',5000)
+    end
+    status=normalizedStatus
+    responders[src].status=status;responders[src].callId=call.id;responders[src].updatedAt=os.time()
+    call.responders[tostring(src)]={source=src,name=playerName(src),status=status,updatedAt=os.time()};call.timeline[#call.timeline+1]={event='unit_status',unit=src,status=status,at=os.time(),previousStatus=currentStatus,transitionReason=transitionReason}
     if status=='accepted' or status=='enroute' then call.status='assigned';TriggerClientEvent('dpn-medical-dispatch:client:routeToCall',src,call) end
     if status=='onscene' then call.status='onscene' end
     if status=='transporting' then call.status='transporting' end
     if status=='clear' then call.status='closed' end
     if type(call.id)=='number' then pcall(function()MySQL.update.await('UPDATE dpn_medical_dispatch_calls SET status=? WHERE id=?',{call.status,call.id})end) end
-    bridgeUpdate(call,{unit=src,status=status})
+    bridgeUpdate(call,{unit=src,status=status,previousStatus=currentStatus,transitionReason=transitionReason})
     for _,sid in ipairs(GetPlayers())do local unit=tonumber(sid);if jobAllowed(player(unit))then TriggerClientEvent('dpn-medical-dispatch:client:callUpdated',unit,call)end end
     TriggerEvent('dpn-medical:dispatch:unitStatusChanged',call,src,status)
     TriggerClientEvent('QBCore:Notify',src,('Call #%s status set to %s.'):format(call.id,status),'success',5000)
