@@ -48,6 +48,9 @@ jobs:
       - name: Validate Medical Core authority
         run: python3 tools/check_medical_core_authority.py
 
+      - name: Validate Phase 3F medical dispatch ownership
+        run: python3 tools/check_phase_3f_medical_dispatch_ownership.py
+
       - name: Install Lua syntax checker
         run: |
           sudo apt-get update
