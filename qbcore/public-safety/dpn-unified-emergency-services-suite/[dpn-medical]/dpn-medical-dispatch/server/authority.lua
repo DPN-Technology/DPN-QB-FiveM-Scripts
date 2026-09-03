@@ -34,14 +34,23 @@ function Authority.GetInfo()
         callOwner = 'server/main.lua',
         responderOwner = 'server/main.lua',
         persistenceOwner = 'server/main.lua',
-        authorityLayer = 'server/authority.lua'
+        authorityLayer = 'server/authority.lua',
+        dedupLayer = 'server/dedup.lua'
     }
 end
 
-function Authority.CreateCall(data)
+local function createRaw(data)
     local ok, call, extra = dispatchExport('CreateMedicalCall', data)
     if not ok then return false, call end
     return call ~= false and call ~= nil, call, extra
+end
+
+function Authority.CreateCall(data)
+    data = type(data) == 'table' and data or {}
+    if DPNMedicalDispatchDedup and type(DPNMedicalDispatchDedup.Create) == 'function' then
+        return DPNMedicalDispatchDedup.Create(data, createRaw)
+    end
+    return createRaw(data)
 end
 
 function Authority.UpdateCall(callId, status, note)
@@ -65,6 +74,9 @@ end
 function Authority.GetBridgeHealth()
     local ok, health = dispatchExport('GetDispatchBridgeHealth')
     if not ok or type(health) ~= 'table' then return {} end
+    if DPNMedicalDispatchDedup and type(DPNMedicalDispatchDedup.GetStats) == 'function' then
+        health.dedup = DPNMedicalDispatchDedup.GetStats()
+    end
     return health
 end
 
