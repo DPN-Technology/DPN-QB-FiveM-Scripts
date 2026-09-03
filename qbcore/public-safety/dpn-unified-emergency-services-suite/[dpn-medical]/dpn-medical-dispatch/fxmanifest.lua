@@ -19,6 +19,7 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/main.lua',
     'server/dedup.lua',
+    'server/responder_authority.lua',
     'server/authority.lua',
     'server/advanced.lua',
     'server/v6.lua',
