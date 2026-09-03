@@ -36,6 +36,9 @@ jobs:
       - name: Validate PD doorbell cooldown authority
         run: python3 tools/check_pd_doorbell_cooldown_authority.py
 
+      - name: Validate emergency correlation contract
+        run: python3 tools/check_emergency_correlation_contract.py
+
       - name: Install Lua syntax checker
         run: |
           sudo apt-get update
