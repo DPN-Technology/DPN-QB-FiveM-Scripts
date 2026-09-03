@@ -42,6 +42,9 @@ jobs:
       - name: Validate dispatch correlation and deduplication
         run: python3 tools/check_dispatch_correlation_dedup.py
 
+      - name: Validate MDT correlation integration
+        run: python3 tools/check_mdt_correlation_integration.py
+
       - name: Install Lua syntax checker
         run: |
           sudo apt-get update
