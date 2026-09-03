@@ -28,6 +28,7 @@ server_scripts {
     'server/database.lua',
     'server/mdt_bridge.lua',
     'server/main.lua',
+    'server/correlation_bridge.lua',
     'server/exports.lua'
 }
 
