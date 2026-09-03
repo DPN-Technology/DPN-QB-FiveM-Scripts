@@ -57,6 +57,9 @@ jobs:
       - name: Validate Medical responder lifecycle authority
         run: python3 tools/check_medical_responder_lifecycle_authority.py
 
+      - name: Validate emergency network ownership
+        run: python3 tools/check_emergency_network_ownership.py
+
       - name: Install Lua syntax checker
         run: |
           sudo apt-get update
