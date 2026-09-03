@@ -35,7 +35,8 @@ function Authority.GetInfo()
         responderOwner = 'server/main.lua',
         persistenceOwner = 'server/main.lua',
         authorityLayer = 'server/authority.lua',
-        dedupLayer = 'server/dedup.lua'
+        dedupLayer = 'server/dedup.lua',
+        responderAuthorityLayer = 'server/responder_authority.lua'
     }
 end
 
@@ -71,11 +72,21 @@ function Authority.GetResponder(sourceId)
     return responder
 end
 
+function Authority.ValidateResponderTransition(currentStatus, nextStatus)
+    if DPNMedicalResponderAuthority and type(DPNMedicalResponderAuthority.ValidateTransition) == 'function' then
+        return DPNMedicalResponderAuthority.ValidateTransition(currentStatus, nextStatus)
+    end
+    return false, tostring(nextStatus or ''), 'responder-authority-unavailable'
+end
+
 function Authority.GetBridgeHealth()
     local ok, health = dispatchExport('GetDispatchBridgeHealth')
     if not ok or type(health) ~= 'table' then return {} end
     if DPNMedicalDispatchDedup and type(DPNMedicalDispatchDedup.GetStats) == 'function' then
         health.dedup = DPNMedicalDispatchDedup.GetStats()
+    end
+    if DPNMedicalResponderAuthority and type(DPNMedicalResponderAuthority.GetInfo) == 'function' then
+        health.responderAuthority = DPNMedicalResponderAuthority.GetInfo()
     end
     return health
 end
@@ -98,6 +109,10 @@ end)
 
 exports('GetCanonicalResponderStatus', function(sourceId)
     return Authority.GetResponder(sourceId)
+end)
+
+exports('ValidateCanonicalResponderLifecycle', function(currentStatus, nextStatus)
+    return Authority.ValidateResponderTransition(currentStatus, nextStatus)
 end)
 
 exports('GetCanonicalMedicalDispatchHealth', function()
