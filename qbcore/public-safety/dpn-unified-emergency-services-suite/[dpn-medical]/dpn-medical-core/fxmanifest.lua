@@ -56,6 +56,7 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/persistence.lua',
     'server/main.lua',
+    'server/authority.lua',
     'server/commands.lua',
     'server/advanced.lua',
     'server/v6.lua',
