@@ -21,6 +21,7 @@ server_scripts {
     'server/dedup.lua',
     'server/responder_authority.lua',
     'server/authority.lua',
+    'server/compat_bridge.lua',
     'server/advanced.lua',
     'server/v6.lua',
     'server/v8.lua',
