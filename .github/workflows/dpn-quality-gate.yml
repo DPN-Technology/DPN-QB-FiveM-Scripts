@@ -60,6 +60,9 @@ jobs:
       - name: Validate Medical responder runtime guard
         run: python3 tools/check_medical_responder_runtime_guard.py
 
+      - name: Validate emergency network ownership
+        run: python3 tools/check_emergency_network_ownership.py
+
       - name: Validate hospital staff admission proximity authority
         run: python3 tools/check_hospital_admission_distance_authority.py
 
