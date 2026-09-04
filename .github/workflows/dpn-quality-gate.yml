@@ -63,6 +63,9 @@ jobs:
       - name: Validate hospital staff admission proximity authority
         run: python3 tools/check_hospital_admission_distance_authority.py
 
+      - name: Validate hospital self-check-in proximity authority
+        run: python3 tools/check_hospital_selfcheckin_distance_authority.py
+
       - name: Install Lua syntax checker
         run: |
           sudo apt-get update
