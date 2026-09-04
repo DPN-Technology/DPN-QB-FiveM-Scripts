@@ -445,7 +445,13 @@ RegisterNetEvent('dpn-hospital:server:selfCheckIn', function(hospitalId)
     end
 
     local distance = GetDistanceFromCoords(src, hospital.checkIn)
-    if distance and distance > (Config.CheckInInteractionDistance or 6.0) then
+    if type(distance) ~= 'number' then
+        DPNHospital.Notify(src, 'Unable to verify hospital check-in proximity.', 'error')
+        return
+    end
+
+    local maxDistance = tonumber(Config.CheckInInteractionDistance) or 6.0
+    if distance > maxDistance then
         DPNHospital.Notify(src, 'You must be at the hospital check-in desk.', 'error')
         return
     end
