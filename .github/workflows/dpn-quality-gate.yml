@@ -69,6 +69,9 @@ jobs:
       - name: Validate Phase 3G emergency network ownership
         run: python3 tools/check_emergency_network_ownership.py
 
+      - name: Validate Phase 3G medical dispatch compatibility routing
+        run: python3 tools/check_medical_dispatch_compat_single_route.py
+
       - name: Install Lua syntax checker
         run: |
           sudo apt-get update
