@@ -416,7 +416,13 @@ RegisterNetEvent('dpn-hospital:server:admitNearest', function(targetId, ward, mi
 
     if not DPNHospital.IsAdmin(src) then
         local distance = GetPlayerDistance(src, targetId)
-        if distance and distance > (Config.StaffAdmissionDistance or 8.0) then
+        if type(distance) ~= 'number' then
+            DPNHospital.Notify(src, 'Unable to verify patient proximity.', 'error')
+            return
+        end
+
+        local maxDistance = tonumber(Config.StaffAdmissionDistance) or 8.0
+        if distance > maxDistance then
             DPNHospital.Notify(src, 'You are too far away from the patient.', 'error')
             return
         end
