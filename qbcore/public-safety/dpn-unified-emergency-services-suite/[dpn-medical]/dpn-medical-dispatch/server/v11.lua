@@ -7,7 +7,6 @@ local function bridge(event,payload)
         return DPNMedicalDispatchCompatBridge.Route(event,payload)
     end
     TriggerEvent('dpn-dispatch-system:server:'..event,payload)
-    TriggerEvent('dpn-dispatch:server:'..event,payload)
     return false,'legacy-fallback'
 end
 exports('CreatePredictiveMedicalCallV11',function(target,location,caller)local ok,twin=core('GetV11Twin',target);if not ok then return false,'Patient unavailable.'end;local item={id=uid('CALL11'),target=tonumber(target),location=location,caller=caller,priority=twin.v11.clinicalPriority,risk=twin.v11.autonomousRisk,levelOfCare=twin.v11.predictedLevelOfCare,capabilities={},status='pending',createdAt=os.time()};if twin.v11.predictedLevelOfCare=='resuscitation'then item.capabilities={'advanced_life_support','blood_products','critical_transport'}elseif twin.v11.predictedLevelOfCare=='intensive_care'then item.capabilities={'advanced_life_support','critical_transport'}else item.capabilities={'ems_response'}end;predictiveCalls[item.id]=item;bridge('medicalPredictiveCall',item);return true,item end)
