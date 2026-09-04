@@ -2,7 +2,14 @@ local VERSION='11.0.0'
 local predictiveCalls, recommendations, escalations, demandForecasts = {}, {}, {}, {}
 local function uid(p)return('%s-%s-%04d'):format(p,os.time(),math.random(0,9999))end
 local function core(name,...)local a=table.pack(...);local ok,x,y=pcall(function()local p=exports['dpn-medical-core'];return p[name](p,table.unpack(a,1,a.n))end);return ok,x,y end
-local function bridge(event,payload)TriggerEvent('dpn-dispatch-system:server:'..event,payload);TriggerEvent('dpn-dispatch:server:'..event,payload)end
+local function bridge(event,payload)
+    if DPNMedicalDispatchCompatBridge and type(DPNMedicalDispatchCompatBridge.Route)=='function' then
+        return DPNMedicalDispatchCompatBridge.Route(event,payload)
+    end
+    TriggerEvent('dpn-dispatch-system:server:'..event,payload)
+    TriggerEvent('dpn-dispatch:server:'..event,payload)
+    return false,'legacy-fallback'
+end
 exports('CreatePredictiveMedicalCallV11',function(target,location,caller)local ok,twin=core('GetV11Twin',target);if not ok then return false,'Patient unavailable.'end;local item={id=uid('CALL11'),target=tonumber(target),location=location,caller=caller,priority=twin.v11.clinicalPriority,risk=twin.v11.autonomousRisk,levelOfCare=twin.v11.predictedLevelOfCare,capabilities={},status='pending',createdAt=os.time()};if twin.v11.predictedLevelOfCare=='resuscitation'then item.capabilities={'advanced_life_support','blood_products','critical_transport'}elseif twin.v11.predictedLevelOfCare=='intensive_care'then item.capabilities={'advanced_life_support','critical_transport'}else item.capabilities={'ems_response'}end;predictiveCalls[item.id]=item;bridge('medicalPredictiveCall',item);return true,item end)
 exports('RecommendMedicalUnitsV11',function(callId,units)local call=predictiveCalls[tostring(callId)];if not call then return false,'Call not found.'end;local rows={};for _,u in ipairs(units or{})do local score=(tonumber(u.readiness)or 0)*.45+(100-(tonumber(u.etaMinutes)or 30)*3)*.35+(tonumber(u.capabilityMatch)or 0)*.2;rows[#rows+1]={unit=u.unit,score=math.floor(math.max(0,math.min(100,score))),etaMinutes=u.etaMinutes}end;table.sort(rows,function(a,b)return a.score>b.score end);local item={id=uid('UNIT11'),callId=callId,recommendations=rows,createdAt=os.time()};recommendations[item.id]=item;return true,item end)
 exports('EscalateNetworkIncidentV11',function(callId,reason,level,actor)local item={id=uid('ESC11'),callId=callId,reason=reason,level=level or'critical',actor=actor,status='active',createdAt=os.time()};escalations[item.id]=item;bridge('medicalNetworkEscalation',item);return true,item end)
