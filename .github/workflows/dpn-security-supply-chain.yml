@@ -67,7 +67,8 @@ jobs:
           for p in pathlib.Path(".github/workflows").glob("*.yml"):
               text=p.read_text(encoding="utf-8")
               for n,line in enumerate(text.splitlines(),1):
-                  m=re.search(r"uses:\s*([^\s#]+)",line)
+                  if not re.match(r"^\s*-?\s*uses:\s*", line): continue
+                  m=re.match(r"^\s*-?\s*uses:\s*([^\s#]+)",line)
                   if not m: continue
                   ref=m.group(1)
                   if ref.startswith("./"): continue
