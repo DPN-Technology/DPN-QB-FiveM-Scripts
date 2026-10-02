@@ -1,0 +1,80 @@
+name: DPN Security & Supply Chain
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "37 11 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dpn-security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secret-scan:
+    name: Full-history secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan repository history
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  repository-integrity:
+    name: FiveM repository integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Reject committed secrets and generated release payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad="$(git ls-files | grep -Ei '(^|/)(\.env($|\.)|server\.cfg$|.*\.(pem|p12|pfx|key)$|id_rsa|credentials?\.json$|secrets?\.json$|.*\.zip$)' || true)"
+          if [ -n "$bad" ]; then
+            echo "::error::Sensitive/generated files must not be committed:"
+            echo "$bad"
+            exit 1
+          fi
+      - name: Validate all FiveM manifests and Lua syntax
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.4
+          python3 tools/check_fivem_manifest_integrity.py
+          python3 tools/check_fivem_lua_syntax.py
+      - name: Validate workflow supply-chain policy
+        shell: python
+        run: |
+          import pathlib,re,sys
+          problems=[]
+          for p in pathlib.Path(".github/workflows").glob("*.yml"):
+              text=p.read_text(encoding="utf-8")
+              for n,line in enumerate(text.splitlines(),1):
+                  if not re.match(r"^\s*-?\s*uses:\s*", line): continue
+                  m=re.match(r"^\s*-?\s*uses:\s*([^\s#]+)",line)
+                  if not m: continue
+                  ref=m.group(1)
+                  if ref.startswith("./"): continue
+                  if "@" not in ref or not re.search(r"@[0-9a-fA-F]{40}$",ref):
+                      problems.append(f"{p}:{n}: action is not pinned to a full commit SHA: {ref}")
+          if problems:
+              print("\n".join(problems),file=sys.stderr)
+              raise SystemExit(1)
+          print("All external Actions are pinned to immutable commit SHAs.")
