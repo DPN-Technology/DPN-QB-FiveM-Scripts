@@ -38,19 +38,30 @@ Citizen.CreateThread(function()
         FreezeEntityPosition(bell, true)
         SetModelAsNoLongerNeeded(bellHash)
     else
-        -- Fallback: Proximity key press (F3)
+        -- Fallback: Proximity key press (F3).
+        -- Poll slowly while the player is far away and only use frame-level polling
+        -- while the interaction is actually available. This preserves responsive input
+        -- without keeping an unconditional Wait(0) loop active for every client.
         Citizen.CreateThread(function()
             while true do
-                Citizen.Wait(0)
                 local playerCoords = GetEntityCoords(PlayerPedId())
-                inRange = #(playerCoords - Config.PDReception) < Config.InteractDistance
+                local distance = #(playerCoords - Config.PDReception)
+                inRange = distance < Config.InteractDistance
+
+                local sleep = 500
+                if distance < math.max(Config.InteractDistance * 4.0, 15.0) then
+                    sleep = 100
+                end
 
                 if inRange then
+                    sleep = 0
                     QBCore.Functions.DrawText3D(Config.PDReception.x, Config.PDReception.y, Config.PDReception.z + 0.5, '[F3] ' .. Config.RingText)
                     if IsControlJustPressed(0, 170) then -- F3 key
                         TriggerServerEvent('qb-pd-doorbell:ringBell')
                     end
                 end
+
+                Citizen.Wait(sleep)
             end
         end)
     end
