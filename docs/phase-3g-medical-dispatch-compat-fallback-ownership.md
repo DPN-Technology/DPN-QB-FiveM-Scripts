@@ -50,4 +50,4 @@ The DPN Quality Gate guards must fail if:
 
 With PR #74 and PR #78 combined, medical dispatch v9-v13 now have a single-owner compatibility model: one selected active dispatch resource when available, otherwise one bounded historical fallback owner. v14 remains local-event-only and does not require compatibility-router insertion without new evidence.
 
-No force push, history rewrite, CI weakening, visibility change, secret change, licensing/ownership change, release change, branch-protection change, schema change, or permission change is part of this ownership cleanup.
+No force push, history rewrite, CI weakening, visibility change, credential-material change, license or ownership-metadata change, release change, branch-protection change, schema change, or permission change is part of this ownership cleanup.
