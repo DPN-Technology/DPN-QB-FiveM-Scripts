@@ -54,4 +54,4 @@ If those conditions remain true on current `main`, Phase 3G medical-dispatch com
 
 ## Non-goals
 
-This sequencing work does not change repository visibility, secrets, licensing or ownership terms, releases, branch protection, database schemas, permissions, or unrelated runtime behavior.
+This sequencing work does not change repository visibility, credential material, license or ownership metadata, releases, branch protection, database schemas, permissions, or unrelated runtime behavior.
