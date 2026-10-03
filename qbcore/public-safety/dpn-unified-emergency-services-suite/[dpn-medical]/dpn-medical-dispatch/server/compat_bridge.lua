@@ -5,6 +5,7 @@ local stats = {
     routed = 0,
     fallbackBroadcasts = 0,
     lastResource = nil,
+    lastFallbackResource = nil,
     lastEvent = nil,
 }
 
@@ -21,6 +22,15 @@ local function eventName(resource, event)
     return ('%s:server:%s'):format(resource, tostring(event))
 end
 
+local function fallbackResource(resources)
+    for _, resource in ipairs(resources or {}) do
+        if type(resource) == 'string' and resource ~= '' then
+            return resource
+        end
+    end
+    return 'dpn-dispatch-system'
+end
+
 function Bridge.Route(event, payload)
     local resources = configuredResources()
 
@@ -29,19 +39,20 @@ function Bridge.Route(event, payload)
             TriggerEvent(eventName(resource, event), payload)
             stats.routed = stats.routed + 1
             stats.lastResource = resource
+            stats.lastFallbackResource = nil
             stats.lastEvent = event
             return true, resource
         end
     end
 
-    -- Preserve legacy event-only compatibility when neither configured dispatch
-    -- resource is started. This retains historical listeners without broadcasting
-    -- into two active dispatch resources at the same time.
-    for _, resource in ipairs(resources) do
-        TriggerEvent(eventName(resource, event), payload)
-    end
+    -- Preserve legacy event-only compatibility with one deterministic owner.
+    -- Configuration order is the fallback priority, matching active routing order
+    -- and preventing one logical compatibility event from fan-out to two namespaces.
+    local fallback = fallbackResource(resources)
+    TriggerEvent(eventName(fallback, event), payload)
     stats.fallbackBroadcasts = stats.fallbackBroadcasts + 1
     stats.lastResource = nil
+    stats.lastFallbackResource = fallback
     stats.lastEvent = event
     return false, 'legacy-fallback'
 end
@@ -51,6 +62,7 @@ function Bridge.GetStats()
         routed = stats.routed,
         fallbackBroadcasts = stats.fallbackBroadcasts,
         lastResource = stats.lastResource,
+        lastFallbackResource = stats.lastFallbackResource,
         lastEvent = stats.lastEvent,
     }
 end
