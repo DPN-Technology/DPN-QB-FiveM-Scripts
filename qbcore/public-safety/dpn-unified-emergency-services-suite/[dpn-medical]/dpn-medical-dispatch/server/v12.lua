@@ -18,7 +18,6 @@ local function bridge(event,payload)
         return DPNMedicalDispatchCompatBridge.Route(event,payload)
     end
     TriggerEvent('dpn-dispatch-system:server:'..event,payload)
-    TriggerEvent('dpn-dispatch:server:'..event,payload)
     return false,'legacy-fallback'
 end
 exports('CreateRegionalMedicalIncidentV12',function(target,location,caller)local ok,twin=core('GetV12Twin',target);if not ok then return false,'Patient unavailable.'end;local item={id=uid('CAD12'),target=tonumber(target),location=location,caller=caller,priority=twin.v12.networkPriority,commandLevel=twin.v12.commandLevel,risk=twin.v12.integratedRisk,population=twin.populationV12.group,special=twin.populationV12.specialPopulations,requiredCapabilities=twin.organSupportV12.recommendedSupports,destination=twin.v12.recommendedDestination,status='pending',createdAt=os.time()};incidents[item.id]=item;bridge('regionalMedicalIncident',item);return true,item end)

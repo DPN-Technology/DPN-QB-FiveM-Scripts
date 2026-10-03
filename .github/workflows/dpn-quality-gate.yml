@@ -75,6 +75,18 @@ jobs:
       - name: Validate Phase 3G v13 medical dispatch compatibility routing
         run: python3 tools/check_medical_dispatch_v13_single_route.py
 
+      - name: Validate Phase 3G v9 medical dispatch compatibility routing
+        run: python3 tools/check_medical_dispatch_v9_single_route.py
+
+      - name: Validate Phase 3G v10 medical dispatch compatibility routing
+        run: python3 tools/check_medical_dispatch_v10_single_route.py
+
+      - name: Validate Phase 3G v11 medical dispatch compatibility routing
+        run: python3 tools/check_medical_dispatch_v11_single_route.py
+
+      - name: Validate Phase 3G v12 medical dispatch compatibility routing
+        run: python3 tools/check_medical_dispatch_v12_single_route.py
+
       - name: Install Lua syntax checker
         run: |
           sudo apt-get update
