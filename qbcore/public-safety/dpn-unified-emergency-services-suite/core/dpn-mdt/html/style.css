@@ -677,3 +677,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 ::-webkit-scrollbar-track{background:rgba(255,255,255,.035)}
 @keyframes mdtBrandSweep{0%,72%,100%{transform:translateX(-70%) rotate(20deg);opacity:0}78%{opacity:1}88%{transform:translateX(70%) rotate(20deg);opacity:0}}
 @media(prefers-reduced-motion:reduce){.brand-mark::after{animation:none!important;display:none}}
+
+
+/* ==========================================================================
+   DPN VISUAL FABRIC PHASE 2 — MDT / TACTICAL FABRIC
+   ========================================================================== */
+.tactical-fabric{display:grid;grid-template-columns:repeat(3,minmax(110px,1fr)) 76px;gap:6px;align-items:center;padding:6px 12px;border-bottom:1px solid rgba(var(--accent-rgb),.20);background:linear-gradient(90deg,rgba(var(--accent-rgb),.07),rgba(0,0,0,.28),rgba(var(--accent-rgb),.035))}
+.tactical-fabric>div:not(.tactical-scope){display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:5px 8px;border:1px solid rgba(var(--accent-rgb),.13);border-radius:6px;background:rgba(0,0,0,.18)}
+.tactical-fabric span{font:800 8px ui-monospace,Consolas,monospace;letter-spacing:.11em;color:var(--muted)}.tactical-fabric b{font:800 8px ui-monospace,Consolas,monospace;color:var(--text)}.tactical-fabric i{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 9px var(--ok)}
+.tactical-scope{position:relative;width:42px;height:42px;margin:auto;border:1px solid rgba(var(--accent-rgb),.38);border-radius:50%;background:radial-gradient(circle,rgba(var(--accent-rgb),.11),transparent 62%)}.tactical-scope:before,.tactical-scope:after{content:"";position:absolute;background:rgba(var(--accent-rgb),.18)}.tactical-scope:before{width:1px;left:50%;top:5px;bottom:5px}.tactical-scope:after{height:1px;top:50%;left:5px;right:5px}.tactical-scope strong{position:absolute;left:50%;top:50%;width:17px;height:1px;background:var(--accent);box-shadow:0 0 7px rgba(var(--accent-rgb),.7);transform-origin:left;animation:mdtSweep 2.6s linear infinite}.tactical-scope em{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px var(--ok)}.tactical-scope em:first-child{left:11px;top:12px}.tactical-scope em:nth-child(2){right:8px;bottom:11px}
+@keyframes mdtSweep{to{transform:rotate(360deg)}}@media(max-width:850px){.tactical-fabric{grid-template-columns:1fr 1fr}.tactical-scope{display:none}.tactical-fabric>div:nth-child(3){grid-column:1/-1}}@media(prefers-reduced-motion:reduce){.tactical-scope strong{animation:none!important}}
