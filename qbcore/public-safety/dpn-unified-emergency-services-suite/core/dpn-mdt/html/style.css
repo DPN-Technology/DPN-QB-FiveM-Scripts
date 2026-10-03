@@ -637,3 +637,43 @@ button.danger { background: #3a141c !important; }
 .penal-summary .summary-tile b { display:block; margin-top:4px; font-size: 18px; overflow-wrap:anywhere; }
 .code-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:5px; }
 @media (max-width: 920px) { .charge-filter-grid, .penal-summary { grid-template-columns: 1fr; } }
+
+
+/* ==========================================================================
+   DPN VISUAL FABRIC v1 — MDT / PUBLIC SAFETY NUI
+   Department accent remains authoritative through --accent-rgb.
+   ========================================================================== */
+#app::before{
+  content:"";position:absolute;inset:0;z-index:80;pointer-events:none;border-radius:inherit;
+  background:
+    repeating-linear-gradient(180deg,rgba(255,255,255,.014) 0 1px,transparent 1px 4px),
+    linear-gradient(118deg,transparent 0 64%,rgba(var(--accent-rgb),.055) 64.12%,transparent 64.38%);
+  box-shadow:inset 0 0 0 1px rgba(var(--accent-rgb),.08),inset 0 0 90px rgba(var(--accent-rgb),.04)
+}
+#app::after{
+  content:"DPN // SECURE TERMINAL // LIVE";
+  position:absolute;z-index:81;pointer-events:none;right:18px;bottom:10px;
+  color:rgba(var(--accent-rgb),.28);font:800 8px/1 ui-monospace,Consolas,monospace;letter-spacing:.18em
+}
+.sidebar{box-shadow:16px 0 42px rgba(0,0,0,.20)}
+.brand-mark{position:relative;overflow:hidden}
+.brand-mark::after{
+  content:"";position:absolute;inset:-40% -120%;transform:rotate(20deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.26),transparent);
+  animation:mdtBrandSweep 5.8s ease-in-out infinite
+}
+nav button,[data-tab],.card,.panel,.metric,.stat,.toolbar,.modal,.list-card{
+  transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease,background-color .16s ease
+}
+nav button:hover,[data-tab]:hover,.card:hover,.panel:hover,.metric:hover,.stat:hover,.list-card:hover{
+  border-color:rgba(var(--accent-rgb),.48)!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.24),0 0 22px rgba(var(--accent-rgb),.10)
+}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid rgba(var(--accent-rgb),.90);outline-offset:2px
+}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(var(--accent-rgb),.54);border-radius:999px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.035)}
+@keyframes mdtBrandSweep{0%,72%,100%{transform:translateX(-70%) rotate(20deg);opacity:0}78%{opacity:1}88%{transform:translateX(70%) rotate(20deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){.brand-mark::after{animation:none!important;display:none}}
