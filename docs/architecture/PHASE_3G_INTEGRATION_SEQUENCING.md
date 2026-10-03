@@ -1,57 +1,57 @@
 # Phase 3G Integration Sequencing
 
-Baseline: `main` at `71c3f27dab3a9311d7482654f801277ea7735ae3`.
+Baseline: `main` at `2c170fb4cf6d6a5a4e1ced69ec14122319aa5090`.
 
-This document records the current low-debt integration order for Phase 3G medical-dispatch compatibility work. It does not authorize merges and does not change runtime behavior.
+This document records the Phase 3G medical-dispatch compatibility integration sequence and its closeout conditions.
 
-## Completed integration
+## Integrated sequence
 
-PR #74 is integrated into `main`. It consolidated the stale v9-v12 routing PRs #62-#65 into one current-main runtime change and added dedicated v9-v12 single-route regression checks.
+### PR #74 — v9-v12 routing consolidation
 
-Current v9-v12 behavior is now:
+PR #74 consolidated the stale v9-v12 routing work and established dedicated v9-v12 single-route guards.
+
+v9-v12 now:
 
 - prefer `DPNMedicalDispatchCompatBridge`;
-- preserve one bounded direct `dpn-dispatch-system` fallback when the shared bridge itself is unavailable;
+- retain one bounded direct `dpn-dispatch-system` fallback if the bridge object is unavailable;
 - preserve existing exports, payloads, boards, state, and unique medical-dispatch behavior.
 
-## Current focused queue
+### PR #78 — deterministic fallback ownership
 
-1. Shared compatibility fallback ownership — repository-wide proof before reducing the shared bridge's no-started-resource fan-out.
-2. v13 bridge-unavailable fallback — current source still emits both historical dispatch namespaces when the shared bridge object is unavailable.
-3. v14 ownership proof — no runtime rewrite unless current source shows direct external dispatch ownership.
-4. Emergency-dispatch ownership coverage — keep every cross-resource publisher classified against current `main`.
+PR #78 closes the remaining shared-bridge/v13 fan-out condition.
 
-## Safe integration rule
+The resulting routing contract is:
 
-Before merging any future Phase 3G runtime slice:
+- first started configured dispatch resource wins;
+- no-started-resource fallback selects one configured historical owner;
+- v13 bridge-unavailable fallback follows the same configured priority;
+- one logical compatibility event cannot intentionally fan out to both historical dispatch namespaces;
+- shared bridge stats expose `lastFallbackResource` while retaining existing fields.
 
-- fetch fresh PR metadata and verify the exact head SHA has not changed since successful validation;
-- require every current required workflow/check to be successful on that exact head;
-- require GitHub to report the PR mergeable and non-draft;
-- do not merge a red, pending, stale, conflicted, or unexpectedly changed PR;
-- never force-push `main`, rewrite history, or weaken CI to make a PR pass.
+## Validation rule
 
-After each runtime merge:
+Every Phase 3G runtime slice must:
 
-- verify the exact new `main` commit and its workflows;
-- revalidate every remaining ownership finding against that new `main`;
-- replace stale integration candidates with fresh current-main branches rather than rewriting branch history;
-- preserve all unique historical functionality and compatibility surfaces unless separate evidence proves they are redundant and safe to retire.
+- start from fresh `main`;
+- prove the exact publisher, target, and duplication/ownership hazard;
+- preserve unique compatibility surfaces;
+- add deterministic regression coverage;
+- pass the exact-head DPN Quality Gate, Security Baseline, Security & Supply Chain, and PR Resource Summary;
+- be mergeable and non-draft immediately before merge;
+- never require force-pushing, history rewriting, or CI weakening.
 
-## Remaining fallback ownership
+## Closeout review
 
-The no-target fallback in `compat_bridge.lua` still fans out to each configured historical dispatch namespace when no configured resource is started. Separately, v13 retains a two-name direct fallback when the shared bridge object is unavailable.
+After PR #78 is integrated, Phase 3G runtime closeout should verify:
 
-The next runtime slice should only proceed after proof covers:
+1. v9-v13 all route through one active target or one historical fallback owner.
+2. v14 remains local-event-only with no direct external dispatch namespace.
+3. `core/dpn-dispatch` remains the canonical `dpn-dispatch:*` owner.
+4. Other emergency-network publishers are intentional integration edges rather than duplicate canonical owners.
+5. Quality-gate coverage prevents regression to multi-target medical compatibility fan-out.
 
-- configured historical dispatch resource names and their event consumers;
-- resource load/start ordering;
-- event payload compatibility;
-- behavior when the preferred dispatch resource is stopped or absent;
-- behavior when the compatibility bridge object is unavailable;
-- explicit regression coverage for exactly one historical fallback owner;
-- preservation of exports, boards, commands, state, statistics, and emergency-network behavior.
+If those conditions remain true on current `main`, Phase 3G medical-dispatch compatibility ownership can be treated as closed and further hardening can move to the separately documented security-authority findings.
 
 ## Non-goals
 
-This sequencing document does not change repository visibility, secrets, licensing or ownership terms, releases, branch protection, runtime code, resource manifests, database schemas, permissions, or CI requirements.
+This sequencing work does not change repository visibility, secrets, licensing or ownership terms, releases, branch protection, database schemas, permissions, or unrelated runtime behavior.
