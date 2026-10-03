@@ -1,0 +1,28 @@
+# DPN Gitleaks historical false-positive fingerprints
+#
+# Keep this file finding-specific. Do not add broad rule, path, or commit exemptions.
+# Each entry below was manually classified from redacted Gitleaks metadata.
+#
+# Documentation prose misclassified by the generic-api-key rule:
+fdfad12eb43329ee5bad7e75b2d19af78b44d7b5:docs/audits/PERFORMANCE_WAIT0_TRIAGE_2026-09-04.md:generic-api-key:57
+94fad7cd855c739c050aac1515d3853742c08606:docs/security/MIB_TARGET_PROXIMITY_AUTHORITY_V2.md:generic-api-key:38
+be9a705c2a1dc84365a22a8295658753fde804da:docs/phase-3g-medical-dispatch-compat-fallback-ownership.md:generic-api-key:41
+c9b23785cea697285fcf0ef8be2351fc2efca80d:docs/security/hospital-selfcheckin-current-main-revalidation.md:generic-api-key:24
+94168d0083565bd71b376803a7c732472b6b75ac:docs/phase-3g-medical-dispatch-compat-fallback-ownership.md:generic-api-key:45
+fbe808e409d26a26eea373e0f2e7090075bdbc67:docs/security/hospital-selfcheckin-distance-authority.md:generic-api-key:79
+5c8e6880ae0ad9122e5995e6ce53991adde7e28b:docs/architecture/phase-3e-medical-core-consolidation.md:generic-api-key:200
+
+# Discord numeric identifier examples (public identifiers, not credentials).
+# The matched value is the literal documentation placeholder 123456789012345678.
+f1ad2090a8bdafa694badd6bb3b3fcff526177e2:hybrid/admin/dpn_neuralizer/config.lua:discord-client-id:45
+f1ad2090a8bdafa694badd6bb3b3fcff526177e2:hybrid/admin/dpn-pg-7x/config.lua:discord-client-id:14
+f1ad2090a8bdafa694badd6bb3b3fcff526177e2:standalone/admin/dpn-queue/README.md:discord-client-id:92
+f1ad2090a8bdafa694badd6bb3b3fcff526177e2:standalone/admin/dpn-queue/README.md:discord-client-id:103
+f1ad2090a8bdafa694badd6bb3b3fcff526177e2:standalone/admin/dpn-queue/config.lua:discord-client-id:38
+f1ad2090a8bdafa694badd6bb3b3fcff526177e2:standalone/admin/dpn-queue/config.lua:discord-client-id:60
+99d0218c88f098305c936e85a94efd46bcba974b:hybrid/admin/dpn-pg-7x/config.lua:discord-client-id:14
+99d0218c88f098305c936e85a94efd46bcba974b:hybrid/admin/dpn_neuralizer/config.lua:discord-client-id:45
+99d0218c88f098305c936e85a94efd46bcba974b:standalone/admin/dpn-queue/README.md:discord-client-id:92
+99d0218c88f098305c936e85a94efd46bcba974b:standalone/admin/dpn-queue/README.md:discord-client-id:103
+99d0218c88f098305c936e85a94efd46bcba974b:standalone/admin/dpn-queue/config.lua:discord-client-id:38
+99d0218c88f098305c936e85a94efd46bcba974b:standalone/admin/dpn-queue/config.lua:discord-client-id:60
