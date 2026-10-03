@@ -1,0 +1,82 @@
+name: DPN Security Baseline
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dpn-security-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  governance-and-secret-hygiene:
+    name: DPN governance and secret hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate DPN governance files
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            "SECURITY.md"
+            "THIRD_PARTY_LICENSES.md"
+            ".github/CODEOWNERS"
+            ".github/dependabot.yml"
+          )
+          missing=0
+          for file in "${required[@]}"; do
+            if [[ ! -f "$file" ]]; then
+              echo "::error file=$file::Required DPN governance file is missing."
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Reject tracked environment-secret files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t bad_env < <(
+            git ls-files |
+            grep -E '(^|/)\.env($|\.)' |
+            grep -Ev '(\.example|\.sample|\.template|\.dist)$' || true
+          )
+          if (( ${#bad_env[@]} > 0 )); then
+            printf '%s\n' "${bad_env[@]}"
+            echo "::error::Tracked .env files are prohibited. Commit templates/examples only."
+            exit 1
+          fi
+
+      - name: Reject committed private keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -nEI --             '-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'             -- ':!*.md' ':!*.txt' ':!*.example' ':!*.sample'; then
+            echo "::error::Private-key material appears to be committed."
+            exit 1
+          fi
+
+      - name: Inventory dependency sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "### DPN dependency/source inventory"
+            echo
+            for file in package.json package-lock.json npm-shrinkwrap.json pnpm-lock.yaml yarn.lock requirements.txt pyproject.toml poetry.lock Pipfile Pipfile.lock pom.xml build.gradle build.gradle.kts Cargo.toml Cargo.lock go.mod go.sum composer.json composer.lock; do
+              [[ -f "$file" ]] && echo "- $file"
+            done
+            echo
+            echo "Third-party ownership boundary: THIRD_PARTY_LICENSES.md"
+          } >> "$GITHUB_STEP_SUMMARY"
