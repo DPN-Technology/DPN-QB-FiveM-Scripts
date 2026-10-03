@@ -1,6 +1,6 @@
 # Phase 3G — Emergency Dispatch Ownership Coverage
 
-Baseline: `main` commit `6bea5b82dd09764584e9e6ea9664c23a15b580e4`.
+Baseline: `main` commit `71c3f27dab3a9311d7482654f801277ea7735ae3`.
 
 This document coordinates the Phase 3 emergency-network ownership cleanup. It does not change runtime behavior.
 
@@ -14,12 +14,13 @@ This document coordinates the Phase 3 emergency-network ownership cleanup. It do
 | --- | --- | --- | --- |
 | `core/dpn-dispatch/server/main.lua` | Owns canonical `dpn-dispatch:*` server/client behavior. | Canonical dispatch owner. | Preserve as the ownership target. |
 | `dpn-digital-dispatch/server/main.lua` | Publishes an internal assignment notification into `dpn-dispatch:server:unitAssignedInternal`. | Explicit integration edge. | Keep under ownership review; change only with duplicate/payload evidence. |
-| `dpn-medical-dispatch/server/v9.lua` | Current `main` still directly emits legacy `dpn-dispatch-system` events. | Legacy direct external publisher. | Current-main remediation is consolidated in PR #74. |
-| `dpn-medical-dispatch/server/v10.lua` | Current `main` still directly emits legacy `dpn-dispatch-system` events. | Legacy direct external publisher. | Current-main remediation is consolidated in PR #74. |
-| `dpn-medical-dispatch/server/v11.lua` | Uses the medical compatibility bridge with two-name legacy fallback. | Compatibility-routed publisher with fallback fan-out. | Current-main remediation is consolidated in PR #74. |
-| `dpn-medical-dispatch/server/v12.lua` | Uses the medical compatibility bridge with two-name legacy fallback. | Compatibility-routed publisher with fallback fan-out. | Current-main remediation is consolidated in PR #74. |
-| `dpn-medical-dispatch/server/v13.lua` | Uses compatibility routing and has dedicated Quality Gate coverage. | Single-route migration surface. | Evidence-driven follow-up only. |
-| `dpn-medical-dispatch/server/v14.lua` | Uses local `dpn-medical:v14:*` events; no direct external dispatch namespace was found on current `main`. | Local-only medical dispatch layer. | No compatibility-router rewrite required. |
+| `dpn-medical-dispatch/server/compat_bridge.lua` | Routes to the first started configured dispatch resource, but when none is started it emits to every configured historical namespace. | Canonical medical compatibility router with legacy no-target fan-out. | Next evidence-gated fallback-ownership target. |
+| `dpn-medical-dispatch/server/v9.lua` | Prefers `DPNMedicalDispatchCompatBridge`; bridge-unavailable fallback emits only `dpn-dispatch-system`. | Compatibility-routed publisher with one bounded historical fallback. | Integrated by PR #74; preserve and guard. |
+| `dpn-medical-dispatch/server/v10.lua` | Prefers `DPNMedicalDispatchCompatBridge`; bridge-unavailable fallback emits only `dpn-dispatch-system`. | Compatibility-routed publisher with one bounded historical fallback. | Integrated by PR #74; preserve and guard. |
+| `dpn-medical-dispatch/server/v11.lua` | Prefers `DPNMedicalDispatchCompatBridge`; bridge-unavailable fallback emits only `dpn-dispatch-system`. | Compatibility-routed publisher with one bounded historical fallback. | Integrated by PR #74; preserve and guard. |
+| `dpn-medical-dispatch/server/v12.lua` | Prefers `DPNMedicalDispatchCompatBridge`; bridge-unavailable fallback emits only `dpn-dispatch-system`. | Compatibility-routed publisher with one bounded historical fallback. | Integrated by PR #74; preserve and guard. |
+| `dpn-medical-dispatch/server/v13.lua` | Prefers the compatibility bridge, but its bridge-unavailable fallback still emits both `dpn-dispatch-system` and `dpn-dispatch`. | Compatibility-routed publisher with two-name direct fallback. | Remaining focused runtime ownership target after compatibility proof. |
+| `dpn-medical-dispatch/server/v14.lua` | Uses local `dpn-medical:v14:*` events; no direct external dispatch namespace is published. | Local-only medical dispatch layer. | No compatibility-router rewrite required. |
 | `dpn-medical-admin-tools/server/main.lua` | Exercises medical-to-dispatch health/test paths. | Diagnostic surface. | Retain as validation; runtime ownership claims require source evidence. |
 
 ## Guardrails
@@ -31,6 +32,10 @@ This document coordinates the Phase 3 emergency-network ownership cleanup. It do
 5. Keep legacy fallback only where compatibility requires it and verify it cannot double-publish when the router succeeds.
 6. Add deterministic repository checks for every ownership invariant.
 7. Treat documentation as coordination evidence, not runtime proof.
+
+## Next evidence-driven target
+
+The next focused Phase 3G runtime review should treat the shared bridge no-started-resource fan-out and v13's bridge-unavailable two-name fallback as one ownership problem. Do not change either independently without proving the final deterministic historical target and preserving all current payloads and compatibility behavior.
 
 ## Completion criterion
 
