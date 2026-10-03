@@ -1,12 +1,12 @@
 # Phase 3G — v14 Medical Dispatch Ownership Proof
 
-Baseline: `main` at `6bea5b82dd09764584e9e6ea9664c23a15b580e4`.
+Baseline: `main` at `71c3f27dab3a9311d7482654f801277ea7735ae3`.
 
 ## Purpose
 
-This proof records a current-main Phase 3G audit of `dpn-medical-dispatch/server/v14.lua` before any attempt to apply the v9-v13 compatibility-routing pattern to v14.
+This proof records a current-main Phase 3G audit of `dpn-medical-dispatch/server/v14.lua` after the v9-v12 compatibility-routing integration.
 
-The current result remains conservative: **v14 does not require the same compatibility-router rewrite as v9-v13.** The v14 layer emits local medical events and does not directly select or broadcast into an external dispatch namespace.
+The result remains conservative: **v14 does not require the compatibility-router rewrite used by v9-v13.** The v14 layer emits local medical events and does not directly select or broadcast into an external dispatch namespace.
 
 ## Audited v14 surfaces
 
