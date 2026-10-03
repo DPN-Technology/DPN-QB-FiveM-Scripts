@@ -1,0 +1,42 @@
+# Phase 3G — Emergency Dispatch Ownership Coverage
+
+Baseline: `main` commit `71c3f27dab3a9311d7482654f801277ea7735ae3`.
+
+This document coordinates the Phase 3 emergency-network ownership cleanup. It does not change runtime behavior.
+
+## Ownership rule
+
+`core/dpn-dispatch` is the canonical owner of the `dpn-dispatch:*` server namespace. Other emergency/medical resources may request dispatch behavior through an intentional bridge/router or integration event, but should not independently become a second canonical owner or fan the same logical event into multiple dispatch backends.
+
+## Current-main coverage matrix
+
+| Surface | Current-main evidence | Ownership classification | Phase 3G disposition |
+| --- | --- | --- | --- |
+| `core/dpn-dispatch/server/main.lua` | Owns canonical `dpn-dispatch:*` server/client behavior. | Canonical dispatch owner. | Preserve as the ownership target. |
+| `dpn-digital-dispatch/server/main.lua` | Publishes an internal assignment notification into `dpn-dispatch:server:unitAssignedInternal`. | Explicit integration edge. | Keep under ownership review; change only with duplicate/payload evidence. |
+| `dpn-medical-dispatch/server/compat_bridge.lua` | Routes to the first started configured dispatch resource, but when none is started it emits to every configured historical namespace. | Canonical medical compatibility router with legacy no-target fan-out. | Next evidence-gated fallback-ownership target. |
+| `dpn-medical-dispatch/server/v9.lua` | Prefers `DPNMedicalDispatchCompatBridge`; bridge-unavailable fallback emits only `dpn-dispatch-system`. | Compatibility-routed publisher with one bounded historical fallback. | Integrated by PR #74; preserve and guard. |
+| `dpn-medical-dispatch/server/v10.lua` | Prefers `DPNMedicalDispatchCompatBridge`; bridge-unavailable fallback emits only `dpn-dispatch-system`. | Compatibility-routed publisher with one bounded historical fallback. | Integrated by PR #74; preserve and guard. |
+| `dpn-medical-dispatch/server/v11.lua` | Prefers `DPNMedicalDispatchCompatBridge`; bridge-unavailable fallback emits only `dpn-dispatch-system`. | Compatibility-routed publisher with one bounded historical fallback. | Integrated by PR #74; preserve and guard. |
+| `dpn-medical-dispatch/server/v12.lua` | Prefers `DPNMedicalDispatchCompatBridge`; bridge-unavailable fallback emits only `dpn-dispatch-system`. | Compatibility-routed publisher with one bounded historical fallback. | Integrated by PR #74; preserve and guard. |
+| `dpn-medical-dispatch/server/v13.lua` | Prefers the compatibility bridge, but its bridge-unavailable fallback still emits both `dpn-dispatch-system` and `dpn-dispatch`. | Compatibility-routed publisher with two-name direct fallback. | Remaining focused runtime ownership target after compatibility proof. |
+| `dpn-medical-dispatch/server/v14.lua` | Uses local `dpn-medical:v14:*` events; no direct external dispatch namespace is published. | Local-only medical dispatch layer. | No compatibility-router rewrite required. |
+| `dpn-medical-admin-tools/server/main.lua` | Exercises medical-to-dispatch health/test paths. | Diagnostic surface. | Retain as validation; runtime ownership claims require source evidence. |
+
+## Guardrails
+
+1. Start runtime slices from fresh `main`.
+2. Prove the exact publisher, target event, and duplicate/ownership hazard before changing runtime code.
+3. Prefer one compatibility/router boundary over per-version fan-out.
+4. Preserve unique medical, EMS, law-enforcement, MDT, and dispatch behavior.
+5. Keep legacy fallback only where compatibility requires it and verify it cannot double-publish when the router succeeds.
+6. Add deterministic repository checks for every ownership invariant.
+7. Treat documentation as coordination evidence, not runtime proof.
+
+## Next evidence-driven target
+
+The next focused Phase 3G runtime review should treat the shared bridge no-started-resource fan-out and v13's bridge-unavailable two-name fallback as one ownership problem. Do not change either independently without proving the final deterministic historical target and preserving all current payloads and compatibility behavior.
+
+## Completion criterion
+
+Phase 3G is ready to close when every cross-resource dispatch publisher on current `main` is classified as canonical ownership, a deliberate single integration edge, a compatibility fallback proven not to double-publish, or an obsolete duplicate removed only after its unique behavior is preserved and regression checks prove the consolidation.
