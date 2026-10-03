@@ -687,3 +687,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .tactical-fabric span{font:800 8px ui-monospace,Consolas,monospace;letter-spacing:.11em;color:var(--muted)}.tactical-fabric b{font:800 8px ui-monospace,Consolas,monospace;color:var(--text)}.tactical-fabric i{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 9px var(--ok)}
 .tactical-scope{position:relative;width:42px;height:42px;margin:auto;border:1px solid rgba(var(--accent-rgb),.38);border-radius:50%;background:radial-gradient(circle,rgba(var(--accent-rgb),.11),transparent 62%)}.tactical-scope:before,.tactical-scope:after{content:"";position:absolute;background:rgba(var(--accent-rgb),.18)}.tactical-scope:before{width:1px;left:50%;top:5px;bottom:5px}.tactical-scope:after{height:1px;top:50%;left:5px;right:5px}.tactical-scope strong{position:absolute;left:50%;top:50%;width:17px;height:1px;background:var(--accent);box-shadow:0 0 7px rgba(var(--accent-rgb),.7);transform-origin:left;animation:mdtSweep 2.6s linear infinite}.tactical-scope em{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px var(--ok)}.tactical-scope em:first-child{left:11px;top:12px}.tactical-scope em:nth-child(2){right:8px;bottom:11px}
 @keyframes mdtSweep{to{transform:rotate(360deg)}}@media(max-width:850px){.tactical-fabric{grid-template-columns:1fr 1fr}.tactical-scope{display:none}.tactical-fabric>div:nth-child(3){grid-column:1/-1}}@media(prefers-reduced-motion:reduce){.tactical-scope strong{animation:none!important}}
+
+
+/* ==========================================================================
+   DPN VISUAL FABRIC PHASE 3 — MDT / TACTICAL INTERACTION
+   ========================================================================== */
+.content>*{animation:mdtViewIn .24s cubic-bezier(.2,.76,.2,1) both}
+.sidebar nav button.active{position:relative;overflow:hidden}.sidebar nav button.active::after{content:"";position:absolute;left:8px;right:8px;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:mdtNavSweep 2.5s ease-in-out infinite}
+.alert,.dispatch-card,.unit-card{transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.alert:hover,.dispatch-card:hover,.unit-card:hover{transform:translateY(-2px)}
+.alert.critical,.priority-high,.priority-urgent{animation:mdtCritical 1.75s ease-in-out infinite}
+.operator-card{animation:mdtOperator 3.2s ease-in-out infinite}
+@keyframes mdtViewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes mdtNavSweep{0%,100%{opacity:.25;transform:scaleX(.55)}50%{opacity:1;transform:scaleX(1)}}
+@keyframes mdtCritical{50%{box-shadow:0 0 28px rgba(var(--accent-rgb),.18),inset 3px 0 rgba(var(--accent-rgb),.75)}}
+@keyframes mdtOperator{50%{box-shadow:0 0 26px rgba(var(--accent-rgb),.08)}}
+@media(prefers-reduced-motion:reduce){.content>*,.sidebar nav button.active::after,.alert.critical,.priority-high,.priority-urgent,.operator-card{animation:none!important}}
+
