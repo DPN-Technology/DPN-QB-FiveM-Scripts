@@ -1,3 +1,8 @@
+<!-- DPN-REPO-HERO:START -->
+<p align="center"><img src=".github/readme-hero.svg" alt="DPN FiveM Resource Library" width="100%"></p>
+<p align="center"><img alt="DPN Technology" src="https://img.shields.io/badge/DPN-Technology-111111?style=flat-square&logo=github"> <img alt="Development" src="https://img.shields.io/badge/Development-Active-4DA3FF?style=flat-square"> <img alt="Organization" src="https://img.shields.io/badge/Organization-DPN--Technology-4DA3FF?style=flat-square"></p>
+<!-- DPN-REPO-HERO:END -->
+
 <div align="center">
 
 # DPN QB FiveM Scripts
@@ -16,7 +21,7 @@ Free FiveM resources for **QBCore**, **Standalone**, and compatible hybrid setup
 ![Resources](https://img.shields.io/badge/Resources-45-success?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-DPN--CSL-red?style=for-the-badge)
 
-[![DPN Quality Gate](https://github.com/directordiesel/DPN-QB-FiveM-Scripts/actions/workflows/dpn-quality-gate.yml/badge.svg)](https://github.com/directordiesel/DPN-QB-FiveM-Scripts/actions/workflows/dpn-quality-gate.yml)
+[![DPN Quality Gate](https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/actions/workflows/dpn-quality-gate.yml/badge.svg)](https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/actions/workflows/dpn-quality-gate.yml)
 
 </div>
 
