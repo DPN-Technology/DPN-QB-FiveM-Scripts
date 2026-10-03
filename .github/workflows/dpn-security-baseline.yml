@@ -67,6 +67,17 @@ jobs:
             exit 1
           fi
 
+      - name: Reject floating GitHub Actions refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$(grep -RInE --include='*.yml' --include='*.yaml'             'uses:[[:space:]]*[^[:space:]]+@(main|master|HEAD|latest)([[:space:]]|$)'             .github/workflows || true)"
+          if [[ -n "$matches" ]]; then
+            printf '%s\n' "$matches"
+            echo "::error::Floating GitHub Actions refs are prohibited. Use a version tag or immutable commit SHA."
+            exit 1
+          fi
+
       - name: Inventory dependency sources
         shell: bash
         run: |
