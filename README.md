@@ -8,6 +8,61 @@
 <p align="center"><a href="https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/releases"><strong>Releases</strong></a>&nbsp;•&nbsp;<a href="https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/issues"><strong>Issues</strong></a>&nbsp;•&nbsp;<a href="https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/pulls"><strong>Pull Requests</strong></a></p>
 <!-- DPN-REPO-SHOWCASE:END -->
 
+<!-- DPN-REPO-DETAILS:START -->
+
+## Product Architecture
+
+```mermaid
+flowchart LR
+  F[FiveM / QBCore Server] --> C[Unified Emergency Core]
+  C --> D[Dispatch / MDT]
+  C --> L[Law Enforcement Stack]
+  C --> M[Medical / EMS Stack]
+  F --> H[Hybrid Resources]
+  F --> S[Standalone Resources]
+  C --> DB[(Server Data / SQL)]
+```
+
+## Feature Matrix
+
+| Area | What this repository covers |
+| --- | --- |
+| **Unified Emergency Suite** | Coordinated police, fire, EMS, dispatch and MDT resources |
+| **Law Enforcement** | Operations, evidence, safety, intelligence, training and smart-city systems |
+| **Medical** | EMS, hospital, records, pharmacy, radiology, surgery and administration |
+| **Independent Resources** | QBCore, hybrid and standalone resources outside the suite |
+
+## Visual Evidence
+
+<table>
+<tr>
+<td align="center"><img src=".github/repo-showcase.svg" alt="Repository visual" width="100%"><br><sub>Repository visual</sub></td>
+<td align="center"><img src="hybrid/admin/dpn_neuralizer/items/neuralizer.png" alt="Example resource asset" width="100%"><br><sub>Example resource asset</sub></td>
+</tr>
+</table>
+
+> Visuals above are repository-native assets or verified project captures already committed within the DPN organization. No synthetic runtime screenshot is presented as a real capture.
+
+## Install & Run
+
+| | |
+| --- | --- |
+| **Primary target** | FiveM / QBCore |
+| **Fast path** | Install resources individually; the unified emergency suite includes component-specific SQL and documentation. |
+| **Setup reference** | [Open setup documentation](qbcore/public-safety/dpn-unified-emergency-services-suite/docs/ARCHITECTURE.md) |
+
+## Security, Architecture & Release
+
+| Resource | Purpose |
+| --- | --- |
+| [Security policy](SECURITY.md) | Vulnerability reporting, protected-data guidance and security expectations |
+| [Architecture](qbcore/public-safety/dpn-unified-emergency-services-suite/docs/ARCHITECTURE.md) | System boundaries, major components and engineering model |
+| [GitHub Releases](https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/releases) | Published versions and downloadable release artifacts |
+
+> **Repository presentation rule:** status, release and security claims in this README should stay tied to repository evidence. Visual polish must not imply a capability is production-ready when the underlying project documentation says otherwise.
+
+<!-- DPN-REPO-DETAILS:END -->
+
 <div align="center">
 
 # DPN QB FiveM Scripts
