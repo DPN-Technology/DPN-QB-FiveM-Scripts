@@ -41,7 +41,7 @@ jobs:
           echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum -c -
           tar -xzf "${archive}" -C /tmp gitleaks
           sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
-          gitleaks git --no-banner --redact --log-opts="--all" .
+          gitleaks git --no-banner --redact --verbose --log-opts="--all" .
 
   repository-integrity:
     name: FiveM repository integrity
