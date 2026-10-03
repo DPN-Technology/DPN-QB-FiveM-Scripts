@@ -11,6 +11,8 @@ c9b23785cea697285fcf0ef8be2351fc2efca80d:docs/security/hospital-selfcheckin-curr
 94168d0083565bd71b376803a7c732472b6b75ac:docs/phase-3g-medical-dispatch-compat-fallback-ownership.md:generic-api-key:45
 fbe808e409d26a26eea373e0f2e7090075bdbc67:docs/security/hospital-selfcheckin-distance-authority.md:generic-api-key:79
 5c8e6880ae0ad9122e5995e6ce53991adde7e28b:docs/architecture/phase-3e-medical-core-consolidation.md:generic-api-key:200
+2c170fb4cf6d6a5a4e1ced69ec14122319aa5090:docs/phase-3g-medical-dispatch-compat-fallback-ownership.md:generic-api-key:50
+7149301fb052817fab3edcdf5484d45c97684fd4:docs/phase-3g-medical-dispatch-compat-fallback-ownership.md:generic-api-key:53
 
 # Discord numeric identifier examples (public identifiers, not credentials).
 # The matched value is the literal documentation placeholder 123456789012345678.

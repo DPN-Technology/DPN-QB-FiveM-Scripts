@@ -20,12 +20,21 @@ if BRIDGE.exists():
     for needle in [
         'DPNMedicalDispatchCompatBridge',
         'GetResourceState(resource)',
+        'local function fallbackResource(resources)',
+        'local fallback = fallbackResource(resources)',
+        'TriggerEvent(eventName(fallback, event), payload)',
+        'stats.lastFallbackResource = fallback',
         "exports('RouteMedicalDispatchCompatEvent'",
         "exports('GetMedicalDispatchCompatBridgeStats'",
         "return false, 'legacy-fallback'",
     ]:
         if needle not in text:
             errors.append(f'compat bridge missing marker: {needle}')
+
+    if text.count('TriggerEvent(eventName(') != 2:
+        errors.append('compat bridge must contain exactly one active-route emit and one fallback emit')
+    if "for _, resource in ipairs(resources) do\n        TriggerEvent(eventName(resource, event), payload)" in text:
+        errors.append('compat bridge still fans one fallback event out to every configured resource')
 
 if MANIFEST.exists():
     text = MANIFEST.read_text(encoding='utf-8')
@@ -50,4 +59,4 @@ if errors:
         print(f' - {error}')
     sys.exit(1)
 
-print('Medical dispatch compatibility single-route check PASS: v11/v12 use one active dispatch target while retaining legacy fallback behavior.')
+print('Medical dispatch compatibility single-route check PASS: active and legacy fallback routing each select exactly one configured dispatch owner.')

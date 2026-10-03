@@ -4,13 +4,25 @@ local function clamp(v,lo,hi)v=tonumber(v)or lo;if v<lo then return lo elseif v>
 local function core(name, ...)
     local args=table.pack(...);local ok,a,b=pcall(function()local p=exports['dpn-medical-core'];local fn=p and p[name];if type(fn)~='function'then error(('missing core export %s'):format(name))end;return fn(p,table.unpack(args,1,args.n))end);return ok,a,b
 end
+local function fallbackDispatchResource()
+    local external = Config and Config.ExternalDispatch or nil
+    local resources = external and external.resources or nil
+    if type(resources) == 'table' then
+        for _, resource in ipairs(resources) do
+            if type(resource) == 'string' and resource ~= '' then
+                return resource
+            end
+        end
+    end
+    return 'dpn-dispatch-system'
+end
 local function bridge(event,payload)
     local router = DPNMedicalDispatchCompatBridge
     if router and type(router.Route) == 'function' then
         return router.Route(event, payload)
     end
-    TriggerEvent('dpn-dispatch-system:server:'..event,payload)
-    TriggerEvent('dpn-dispatch:server:'..event,payload)
+    local fallback = fallbackDispatchResource()
+    TriggerEvent(('%s:server:%s'):format(fallback, tostring(event)), payload)
     return false, 'legacy-fallback'
 end
 local store = { plans={}, handoffs={}, readiness={}, capacity={}, destinations={}, virtualWards={}, sequences={}, checkpoints={}, reviews={}, controlled={}, summaries={}, seals={}, consents={}, evidence={}, authorizations={}, appeals={}, cases={}, scores={}, remediation={}, sourceControl={}, clusters={}, isolation={}, missions={}, defects={}, recommendations={}, bias={}, calls={}, assets={}, surges={}, liberation={}, rounds={}, milestones={}, sessions={}, cpr={}, kits={}, forecasts={}, recalls={}, estimates={}, coding={} }

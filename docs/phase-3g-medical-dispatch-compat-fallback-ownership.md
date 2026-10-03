@@ -1,50 +1,53 @@
 # Phase 3G — Medical Dispatch Compatibility Fallback Ownership
 
-Baseline: `main` at `71c3f27dab3a9311d7482654f801277ea7735ae3`.
+Baseline: `main` at `2c170fb4cf6d6a5a4e1ced69ec14122319aa5090`.
 
-## Current state
+## Ownership decision
 
-PR #74 is integrated into current `main`. Medical Dispatch v9 through v12 now prefer `DPNMedicalDispatchCompatBridge.Route(...)` and retain one bounded direct historical fallback to the `dpn-dispatch-system` namespace when the shared bridge is unavailable.
+PR #78 establishes one deterministic historical fallback owner for the remaining Phase 3G compatibility paths.
 
-Two fallback-ownership surfaces remain distinct:
+The ownership rule is now:
 
-1. `dpn-medical-dispatch/server/compat_bridge.lua` selects the first configured dispatch resource whose FiveM resource state is `started` and returns immediately after live routing. When no configured resource is started, however, the bridge still emits the compatibility event once for every configured historical resource name before returning `false, 'legacy-fallback'`.
-2. `dpn-medical-dispatch/server/v13.lua` uses the shared bridge when available, but its direct bridge-unavailable fallback still emits both `dpn-dispatch-system:server:<event>` and `dpn-dispatch:server:<event>`.
+1. When a configured dispatch resource is `started`, `DPNMedicalDispatchCompatBridge.Route(...)` selects the first started resource in `Config.ExternalDispatch.resources` and returns immediately after one emit.
+2. When no configured dispatch resource is started, the shared bridge emits to exactly one fallback resource: the first valid configured resource.
+3. When v13 cannot access the shared bridge object, v13 applies the same configuration-order fallback rule and emits exactly once.
+4. The default configuration remains `{ 'dpn-dispatch-system', 'dpn-dispatch' }`, so the deterministic historical fallback is `dpn-dispatch-system` unless the operator intentionally changes resource priority.
+5. v9 through v12 retain their previously integrated bounded `dpn-dispatch-system` bridge-unavailable fallback.
 
-The fallback behavior is preserved for compatibility until repository-wide evidence supports a single deterministic historical owner.
+## Compatibility evidence
 
-## Target ownership contract
+Repository-wide source search on the baseline found no in-repo consumers for the v13 `medicalContinuumCall` or `medicalSurge` legacy dispatch events outside the v13 runtime and its regression checker.
 
-A later runtime change may reduce fallback fan-out only after all of the following are demonstrated:
+The repository already defines dispatch compatibility priority through `Config.ExternalDispatch.resources`, with `dpn-dispatch-system` first. Using that order for fallback ownership therefore aligns fallback routing with the existing active-resource selection model instead of inventing a second priority system.
 
-1. Exactly one compatibility target is selected for every logical routing attempt.
-2. A started configured dispatch resource remains preferred in configured priority order.
-3. When no configured resource is started, the historical fallback target is deterministic and documented rather than broadcast to multiple namespaces.
-4. Existing event names and payload structures remain unchanged for the selected target.
-5. The bridge continues returning an explicit success/fallback result that callers can observe.
-6. Bridge statistics distinguish successful live-resource routing from fallback routing.
-7. No historical layer, export, board, command surface, medical-call payload, or dispatch-call payload is removed as part of this ownership cleanup.
-8. v9 through v13 preserve their unique medical-dispatch behavior while sharing one ownership rule for compatibility routing.
+## Preserved surfaces
 
-## Completed remediation
+The Phase 3G fallback-owner change preserves:
 
-PR #74 consolidated the v9-v12 compatibility-routing work and added dedicated v9, v10, v11, and v12 regression guards to the DPN Quality Gate. Those layers no longer carry the previous two-name direct fallback pattern.
+- compatibility event names for the selected target;
+- payload objects passed by v9 through v13;
+- `RouteMedicalDispatchCompatEvent`;
+- `GetMedicalDispatchCompatBridgeStats`;
+- the existing `fallbackBroadcasts` statistic for compatibility;
+- the existing `lastResource` live-route semantic;
+- the `false, 'legacy-fallback'` return contract;
+- v13 exports, board state, calls, assets, surges, scoring, and escalation behavior.
 
-## Compatibility proof required before the next runtime change
+The shared bridge adds `lastFallbackResource` to its stats snapshot so fallback ownership can be observed without changing the meaning of `lastResource`.
 
-Before reducing the remaining fallback fan-out, verify repository-wide that:
+## Regression contract
 
-- no loaded resource depends exclusively on the non-selected historical fallback namespace while the corresponding dispatch resource is stopped;
-- no external compatibility adapter documented in this repository requires both fallback events;
-- configuration order is the accepted source of dispatch target priority;
-- v13 can move to the same deterministic fallback ownership rule without changing payloads, boards, exports, or escalation behavior;
-- the shared bridge can preserve its statistics and explicit return contract with one fallback owner;
-- the DPN Quality Gate gains regression coverage preventing a return to unconditional multi-target fallback fan-out.
+The DPN Quality Gate guards must fail if:
 
-If any of those checks cannot be proven, retain the current fallback behavior and document the dependency instead of deleting it.
+- the shared bridge contains more than one active-route emit plus one fallback emit;
+- the shared bridge returns to looping across every configured resource in the no-started-resource fallback;
+- v13 reintroduces direct dual-target `dpn-dispatch-system` + `dpn-dispatch` fallback emits;
+- v13 stops preferring `DPNMedicalDispatchCompatBridge`;
+- configured-resource ordering stops driving the fallback owner;
+- the existing compatibility exports or v13 public exports disappear.
 
-## Regression acceptance criteria
+## Phase 3G result
 
-The eventual runtime PR should fail if one logical compatibility call can target more than one historical dispatch namespace in the same fallback execution path. The guard should also verify configured-resource priority, resource-state checks, exported bridge APIs, statistics, payload forwarding, explicit fallback results, and the existing v9-v13 medical-dispatch surfaces.
+With PR #74 and PR #78 combined, medical dispatch v9-v13 now have a single-owner compatibility model: one selected active dispatch resource when available, otherwise one bounded historical fallback owner. v14 remains local-event-only and does not require compatibility-router insertion without new evidence.
 
-No force push, history rewrite, CI weakening, visibility change, secret change, licensing/ownership change, release change, or branch-protection change is part of this work.
+No force push, history rewrite, CI weakening, visibility change, credential-material change, license or ownership-metadata change, release change, branch-protection change, schema change, or permission change is part of this ownership cleanup.

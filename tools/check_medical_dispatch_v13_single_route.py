@@ -18,6 +18,9 @@ if not errors:
 
     required_v13 = [
         'DPNMedicalDispatchCompatBridge',
+        'local function fallbackDispatchResource()',
+        'local fallback = fallbackDispatchResource()',
+        "TriggerEvent(('%s:server:%s'):format(fallback, tostring(event)), payload)",
         "bridge('medicalContinuumCall',item)",
         "bridge('medicalSurge',item)",
         "exports('CreateContinuumCommandCallV13'",
@@ -30,6 +33,8 @@ if not errors:
             errors.append(f'v13 missing compatibility marker: {needle}')
 
     forbidden_direct_pairs = [
+        "TriggerEvent('dpn-dispatch-system:server:'..event,payload)",
+        "TriggerEvent('dpn-dispatch:server:'..event,payload)",
         "TriggerEvent('dpn-dispatch-system:server:medicalContinuumCall'",
         "TriggerEvent('dpn-dispatch:server:medicalContinuumCall'",
         "TriggerEvent('dpn-dispatch-system:server:medicalSurge'",
@@ -39,7 +44,16 @@ if not errors:
         if needle in v13:
             errors.append(f'v13 still bypasses compatibility router via: {needle}')
 
-    for needle in ['function Bridge.Route', 'GetResourceState(resource)', 'return true, resource']:
+    if v13.count('TriggerEvent(') != 1:
+        errors.append('v13 compatibility helper must emit at most one legacy fallback event')
+
+    for needle in [
+        'function Bridge.Route',
+        'GetResourceState(resource)',
+        'local fallback = fallbackResource(resources)',
+        'TriggerEvent(eventName(fallback, event), payload)',
+        'return true, resource',
+    ]:
         if needle not in bridge:
             errors.append(f'compatibility bridge missing routing marker: {needle}')
 
@@ -49,4 +63,4 @@ if errors:
         print(f' - {error}')
     sys.exit(1)
 
-print('Medical Dispatch v13 single-route check PASS: v13 compatibility events route through the shared active-target bridge while exports and local state surfaces remain present.')
+print('Medical Dispatch v13 single-route check PASS: v13 and the shared bridge each retain exactly one deterministic compatibility fallback owner.')
