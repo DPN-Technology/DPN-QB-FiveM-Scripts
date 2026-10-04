@@ -1,4 +1,32 @@
 local QBCore = exports[Config.Framework.resource]:GetCoreObject()
+local requestRate = {}
+
+local function allowRequest(src, bucket, cooldownMs)
+    if src <= 0 then return true end
+    local nowMs = GetGameTimer()
+    local cooldown = math.max(0, math.floor(tonumber(cooldownMs) or 0))
+    if cooldown <= 0 then return true end
+
+    local playerRate = requestRate[src]
+    if not playerRate then
+        playerRate = {}
+        requestRate[src] = playerRate
+    end
+
+    local last = playerRate[bucket] or 0
+    if nowMs - last < cooldown then return false end
+    playerRate[bucket] = nowMs
+    return true
+end
+
+local function callbackCooldown(name)
+    local limits = Config.RateLimits or {}
+    if limits.Enabled == false then return 0 end
+    if limits.HeavyCallbacks and limits.HeavyCallbacks[name] then
+        return tonumber(limits.HeavyCallbackMs) or 600
+    end
+    return tonumber(limits.DefaultCallbackMs) or 200
+end
 
 local function dbg(...)
     if Config.Debug then
@@ -580,6 +608,15 @@ end
 
 local function callback(name, cb)
     QBCore.Functions.CreateCallback('dpn-mdt:server:' .. name, function(source, callbackFn, payload)
+        local cooldown = callbackCooldown(name)
+        if not allowRequest(source, 'callback:' .. name, cooldown) then
+            callbackFn({
+                ok = false,
+                error = 'MDT request throttled. Please wait a moment and try again.'
+            })
+            return
+        end
+
         local ok, result = pcall(cb, source, payload or {})
         if not ok then
             print(('^1[dpn-mdt] callback %s failed: %s^7'):format(name, tostring(result)))
@@ -1142,17 +1179,35 @@ AddEventHandler('dpn-uen:server:SendIncidentToMDT', receiveUnifiedIncident)
 
 RegisterNetEvent('dpn-mdt:server:SetUnitStatus', function(status, callId)
     local src = source
+    local limits = Config.RateLimits or {}
+    if limits.Enabled ~= false and not allowRequest(src, 'event:SetUnitStatus', tonumber(limits.UnitStatusMs) or 500) then
+        return
+    end
+
     local ctx = getContext(src)
     if not ctx then return end
+
+    status = tostring(status or ''):lower():gsub('[^%w_%-]', ''):sub(1, 32)
+    if not (Config.UnitStatuses and Config.UnitStatuses[status]) then
+        audit(src, 'unit_status', 'reject_status', status, {})
+        return
+    end
+
+    callId = tostring(callId or ''):gsub('[%c]', ''):sub(1, 64)
+
     dbInsert([[
         INSERT INTO dpn_mdt_unit_status (citizenid, name, department, status, call_id, updated_at)
         VALUES (?, ?, ?, ?, ?, NOW())
         ON DUPLICATE KEY UPDATE status = VALUES(status), call_id = VALUES(call_id), updated_at = NOW()
-    ]], { ctx.citizenid, ctx.name, ctx.department, status, callId or '' })
+    ]], { ctx.citizenid, ctx.name, ctx.department, status, callId })
     if Config.UnifiedNetwork.enabled then
         TriggerEvent(Config.UnifiedNetwork.unitStatusEvent, { citizenid = ctx.citizenid, name = ctx.name, department = ctx.department, status = status, call_id = callId })
     end
     audit(src, 'unit_status', 'set_status', status, { call_id = callId })
+end)
+
+AddEventHandler('playerDropped', function()
+    requestRate[source] = nil
 end)
 
 exports('IsAuthorized', function(source)
