@@ -2,7 +2,7 @@
 
 ## Baseline
 
-**Repository release line:** `1.0.1`
+**Repository release line:** `1.0.2`
 
 This repository is the official DPN Technology FiveM resource library for QBCore, hybrid, and standalone resources.
 
