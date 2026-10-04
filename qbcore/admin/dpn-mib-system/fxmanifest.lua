@@ -9,7 +9,7 @@ game 'gta5'
 lua54 'yes'
 author 'Diesel — CEO of DPN Technology'
 description 'DPN MIB System V4 - Admin + Developer Operations Suite with PG7X and Advanced Neuralizer'
-version '4.0.0-admin-dev-pg7x'
+version '4.1.0-admin-dev-pg7x'
 
 ui_page 'html/index.html'
 
