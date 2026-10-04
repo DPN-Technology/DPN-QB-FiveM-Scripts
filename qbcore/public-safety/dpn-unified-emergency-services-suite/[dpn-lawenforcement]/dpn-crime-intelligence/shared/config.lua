@@ -6,6 +6,15 @@ Config.RequireDuty = true
 Config.MaxSearchResults = 25
 Config.MaxReportLength = 6000
 Config.MaxTitleLength = 160
+
+-- Server-side abuse resistance for network-facing intelligence actions.
+-- Source 0/server-side integrations are not throttled.
+Config.RateLimits = {
+    OpenMs = 500,
+    SearchMs = 900,
+    MutationMs = 650,
+    AlertMs = 1000
+}
 Config.DispatchResource = 'dpn-digital-dispatch'
 Config.AllowedJobs = { police=true, sheriff=true, state=true, trooper=true, ranger=true, corrections=true }
 Config.SupervisorGrades = { police=4, sheriff=4, state=4, trooper=4, ranger=4, corrections=4 }
