@@ -15,6 +15,14 @@ Advanced Men in Black admin/developer command center for QBCore/FiveM.
 - Force NUI test: `/mibforce`
 - PG7X command: `/pg7x 1` through `/pg7x 5`
 
+## V4.1 Security Authority Upgrade
+- Split normal MIB ACE access from full administrative authority.
+- Added server-derived MIB / Director / Admin action policy tiers.
+- Added explicit `dpn.mib.admin` ACE for administrative MIB operations.
+- Added per-mode neuralizer privilege policy.
+- Added routing-bucket integer/range validation and denied-escalation audit evidence.
+- Added deterministic CI regression coverage for the privilege boundary.
+
 ## Major V4 Upgrades
 
 ### Full Admin Suite
@@ -71,16 +79,23 @@ Advanced Men in Black admin/developer command center for QBCore/FiveM.
 - Diagnostics panel
 - Better scaling and usability
 
-## Permissions
-Access is granted by:
-- QBCore `admin` / `god`
-- ACE permissions: `dpn.mib`, `command.mib`
-- Developer permissions: `dpn.dev`, `command.dpn-dev`, or QBCore `god`
-- Job names configured in `Config.AllowedJobs`
+## Permissions and action tiers
+Authority is derived server-side. Client payloads never select their own role, grade, clearance, or admin state.
+
+- **MIB:** configured jobs or ACE `dpn.mib` / `command.mib`.
+- **Director:** MIB job with server-side grade name `director`.
+- **Admin:** QBCore `admin` / `god`, or an explicit ACE in `Config.AdminAcePermissions` (default `dpn.mib.admin`).
+- **Developer:** `dpn.dev`, `command.dpn-dev`, or QBCore `god`.
+
+Sensitive defaults are config-driven through `Config.MIBActionPolicy`: scene wipes, revive, lockdown, remote movement/observation, and threat controls require Director; kick and routing-bucket controls require Admin. Gamma/Omega neuralizer protocols and Advanced Area mode require Director.
+
+> **Migration note:** `dpn.mib` no longer implicitly grants full admin authority. Grant `dpn.mib.admin` only to principals that should keep kick/routing-bucket powers.
 
 Example server.cfg:
 ```cfg
+add_ace group.mib dpn.mib allow
 add_ace group.admin dpn.mib allow
+add_ace group.admin dpn.mib.admin allow
 add_ace group.admin dpn.dev allow
 add_ace group.admin command.mib allow
 add_ace group.admin command.dpn-dev allow

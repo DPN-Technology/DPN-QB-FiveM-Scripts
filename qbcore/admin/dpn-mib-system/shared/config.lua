@@ -10,6 +10,22 @@ Config.MIBJobName = 'mib'
 Config.AllowedJobs = { mib = true, admin = true }
 Config.RequireDuty = false
 Config.AcePermissions = { 'dpn.mib', 'command.mib' }
+Config.AdminAcePermissions = { 'dpn.mib.admin' }
+
+-- Server-owned privilege policy. Client payloads never select a clearance tier.
+-- mib = normal MIB access, director = server-side MIB director grade, admin = QBCore admin/god or explicit admin ACE.
+Config.MIBActionPolicy = {
+    wipe_scene='director', mass_wipe='director', revive='director', lockdown='director',
+    goto_player='director', bring='director', spectate='director', threat='director',
+    kick='admin', set_bucket='admin'
+}
+Config.NeuralizerPolicy = {
+    alpha='mib', beta='mib', gamma='director', omega='director'
+}
+Config.AdvancedNeuralizerPolicy = {
+    alpha='mib', beta='mib', gamma='director', omega='director', area='director'
+}
+Config.RoutingBucketBounds = { min = 0, max = 9999 }
 
 Config.DepartmentColors = {
     mib = '#050505', admin = '#050505', law = '#0b3d91', ems = '#ff7a00', fire = '#d71920', justice = '#777777', corrections = '#7a4b24'
@@ -81,7 +97,7 @@ Config.CommandCenter = {
 }
 
 -- V4 Expansion: Admin + Developer Operations + PG7X
-Config.Version = '4.0.0-admin-dev-pg7x'
+Config.Version = '4.1.0-admin-dev-pg7x'
 Config.DevMode = true
 Config.DeveloperAcePermissions = { 'dpn.dev', 'command.dpn-dev', 'god' }
 Config.PG7X = {

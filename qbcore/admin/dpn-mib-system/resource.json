@@ -1,7 +1,7 @@
 {
   "name": "dpn-mib-system",
   "display_name": "Dpn MIB System",
-  "version": "4.0.0-admin-dev-pg7x",
+  "version": "4.1.0-admin-dev-pg7x",
   "framework": "qbcore",
   "category": "admin",
   "status": "imported",
