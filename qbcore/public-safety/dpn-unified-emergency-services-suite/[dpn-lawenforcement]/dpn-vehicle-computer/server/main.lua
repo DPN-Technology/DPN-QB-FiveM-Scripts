@@ -1,5 +1,27 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local hotlist = {}
+local requestRate = {}
+
+local function allowRequest(src, bucket, cooldownMs)
+    if src <= 0 then return true end
+    local nowMs = GetGameTimer()
+    local cooldown = math.max(100, math.floor(tonumber(cooldownMs) or 500))
+    local playerRate = requestRate[src]
+    if not playerRate then
+        playerRate = {}
+        requestRate[src] = playerRate
+    end
+    local last = playerRate[bucket] or 0
+    if nowMs - last < cooldown then return false end
+    playerRate[bucket] = nowMs
+    return true
+end
+
+local function rateLimited(src, bucket, cooldownMs)
+    if allowRequest(src, bucket, cooldownMs) then return false end
+    TriggerClientEvent('dpn-vehicle-computer:client:notify', src, 'Please wait before repeating that action.', 'error')
+    return true
+end
 
 local function clean(value, maxLength)
     local text = tostring(value or ''):gsub('[%z\1-\8\11\12\14-\31]', '')
@@ -114,6 +136,7 @@ end)
 
 RegisterNetEvent('dpn-vehicle-computer:server:open', function()
     local src = source
+    if rateLimited(src, 'open', Config.RateLimits.OpenMs) then return end
     local allowed, data = isAllowed(src)
     if not allowed then return notify(src, 'You must be on duty to access the vehicle computer.', 'error') end
     local vehicle = verifiedVehicle(src)
@@ -127,6 +150,7 @@ end)
 
 RegisterNetEvent('dpn-vehicle-computer:server:setStatus', function(status)
     local src = source
+    if rateLimited(src, 'setStatus', Config.RateLimits.StatusMs) then return end
     local allowed = isAllowed(src)
     if not allowed or not Config.Statuses[status] then return end
     local ok = GetResourceState('dpn-le-core') == 'started' and exports['dpn-le-core']:SetOfficerStatus(src, status)
@@ -138,6 +162,7 @@ end)
 
 RegisterNetEvent('dpn-vehicle-computer:server:createCall', function(call)
     local src = source
+    if rateLimited(src, 'createCall', Config.RateLimits.CreateCallMs) then return end
     local allowed, data = isAllowed(src)
     if not allowed then return end
     call = type(call) == 'table' and call or {}
@@ -158,6 +183,7 @@ end)
 
 RegisterNetEvent('dpn-vehicle-computer:server:panic', function()
     local src = source
+    if rateLimited(src, 'panic', Config.RateLimits.PanicMs) then return end
     local allowed, data = isAllowed(src)
     if not allowed then return end
     local coords = verifiedCoords(src)
@@ -177,6 +203,7 @@ end)
 
 RegisterNetEvent('dpn-vehicle-computer:server:plateCheck', function(plate)
     local src = source
+    if rateLimited(src, 'plateCheck', Config.RateLimits.PlateCheckMs) then return end
     if not isAllowed(src) then return end
     plate = trimPlate(plate)
     if plate == '' then return end
@@ -198,6 +225,7 @@ end)
 
 RegisterNetEvent('dpn-vehicle-computer:server:addHotlist', function(plate, reason)
     local src = source
+    if rateLimited(src, 'addHotlist', Config.RateLimits.HotlistMs) then return end
     local allowed, data = isAllowed(src)
     if not allowed then return end
     plate = trimPlate(plate)
@@ -215,6 +243,7 @@ end)
 
 RegisterNetEvent('dpn-vehicle-computer:server:saveNote', function(text)
     local src = source
+    if rateLimited(src, 'saveNote', Config.RateLimits.SaveNoteMs) then return end
     local allowed, data = isAllowed(src)
     if not allowed then return end
     text = clean(text, 4000)
@@ -233,4 +262,9 @@ exports('AddHotlistPlate', function(plate, reason)
         ON DUPLICATE KEY UPDATE reason=VALUES(reason), active=1]], { plate, reason })
     hotlist[plate] = { plate = plate, flagged = true, reason = reason, added_by = 'DPN System' }
     return true
+end)
+
+
+AddEventHandler('playerDropped', function()
+    requestRate[source] = nil
 end)
