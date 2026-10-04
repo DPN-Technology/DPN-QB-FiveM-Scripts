@@ -37,25 +37,18 @@ local function IsVehicleStationary(vehicle)
     return speed < 2.0
 end
 
-local function GetVehiclesInArea(coords, radius)
+local function GetVehiclesInArea(coords, radius, vehiclePool)
     local vehicles = {}
-    local handle, vehicle = FindFirstVehicle()
-    local finished = false
-    
-    repeat
+    for _, vehicle in ipairs(vehiclePool) do
         if DoesEntityExist(vehicle) then
             local vehicleCoords = GetEntityCoords(vehicle)
             local distance = #(coords - vehicleCoords)
-            
+
             if distance <= radius then
-                table.insert(vehicles, vehicle)
+                vehicles[#vehicles + 1] = vehicle
             end
         end
-        
-        finished, vehicle = FindNextVehicle(handle)
-    until not finished
-    
-    EndFindVehicle(handle)
+    end
     return vehicles
 end
 
@@ -276,11 +269,15 @@ end
 local function CheckSpikeCollisions()
     local playerPed = PlayerPedId()
     local playerVehicle = GetVehiclePedIsIn(playerPed, false)
-    
+    -- Enumerate the world vehicle pool once per scan and reuse it for every
+    -- active spike. This avoids a full FindFirstVehicle/FindNextVehicle pass
+    -- for each deployed spike.
+    local vehiclePool = GetGamePool('CVehicle')
+
     for spikeId, spikeData in pairs(deployedSpikes) do
         if DoesEntityExist(spikeData.object) then
             local spikeCoords = GetEntityCoords(spikeData.object)
-            local vehicles = GetVehiclesInArea(spikeCoords, Config.DamageSettings.damageRadius)
+            local vehicles = GetVehiclesInArea(spikeCoords, Config.DamageSettings.damageRadius, vehiclePool)
             
             for _, vehicle in ipairs(vehicles) do
                 if vehicle ~= playerVehicle and vehicle ~= spikeData.vehicle then
