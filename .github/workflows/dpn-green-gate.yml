@@ -16,6 +16,7 @@ jobs:
     with:
       lifecycle: development
       enterprise_mode: audit
+      governance_tier: standard
       require_security_policy: true
       require_dependency_record: false
       require_runbook: false
