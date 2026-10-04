@@ -1,6 +1,6 @@
 const app = document.getElementById('app');
 const content = document.getElementById('content');
-let state = { courses:{}, certs:{}, scenarios:{}, profile:{ certs:[], records:[] }, instructor:false, sessions:{} };
+let state = { courses:{}, certs:{}, scenarios:{}, profile:{ certs:[], records:[] }, instructor:false, academyAdmin:false, viewerSource:null, sessions:{} };
 let tab = 'courses';
 
 function post(name, data = {}) {
@@ -39,7 +39,12 @@ function renderScenarios(){
 function renderInstructor(){
   if (!state.instructor) return content.innerHTML = '<div class="card"><h3>Instructor Access Required</h3><p>You need supervisor/instructor permission.</p></div>';
   const presets = Object.entries(state.scenarios || {}).map(([id,s]) => `<option value="${id}">${esc(s.label)}</option>`).join('');
-  const sessions = Object.values(state.sessions || {}).filter(s => s.type === 'scenario' && s.status !== 'closed' && s.status !== 'abandoned');
+  const sessions = Object.values(state.sessions || {}).filter(s =>
+    s.type === 'scenario' &&
+    s.status !== 'closed' &&
+    s.status !== 'abandoned' &&
+    (Number(s.instructor) === Number(state.viewerSource) || (Number(s.instructor) === 0 && state.academyAdmin === true))
+  );
   const sessionOptions = sessions.map(s => `<option value="${esc(s.id)}">${esc(s.label)} · ${esc(s.id)} · ${Object.keys(s.trainees || {}).length} enrolled</option>`).join('');
   const disabled = sessionOptions ? '' : 'disabled';
   content.innerHTML = `<div class="grid">
