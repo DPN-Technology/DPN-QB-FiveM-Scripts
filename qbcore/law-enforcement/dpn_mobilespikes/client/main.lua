@@ -353,16 +353,19 @@ end
 -- Main control thread
 CreateThread(function()
     while true do
-        Wait(0)
-        
+        local sleep = 500
+
         if isLoggedIn then
             local ped = PlayerPedId()
             local inVehicle = IsPedInAnyVehicle(ped, false)
-            
+
             if inVehicle then
                 local vehicle = GetVehiclePedIsIn(ped, false)
-                
+
                 if IsAuthorizedVehicle(vehicle) and HasAuthorization() then
+                    -- Keep input polling frame-level only while an authorized
+                    -- driver can actually use the deployment controls.
+                    sleep = 0
                     -- Deploy spikes
                     if IsControlJustReleased(0, Config.Controls.deploy.key) and not isDeploying then
                         CreateSpikeStrip(vehicle)
@@ -393,6 +396,8 @@ CreateThread(function()
                 end
             end
         end
+
+        Wait(sleep)
     end
 end)
 
@@ -411,18 +416,19 @@ end)
 -- Visual effects thread
 CreateThread(function()
     while true do
-        Wait(0)
-        
+        local sleep = 750
         local playerCoords = GetEntityCoords(PlayerPedId())
         local hasNearbySpikes = false
-        
+
         for _, spikeData in pairs(deployedSpikes) do
             if DoesEntityExist(spikeData.object) then
                 local distance = #(playerCoords - spikeData.coords)
                 
                 if distance <= 50.0 then
                     hasNearbySpikes = true
-                    
+                    -- Rendering must stay frame-level only while a spike is nearby.
+                    sleep = 0
+
                     -- Draw marker
                     if Config.Visual.drawMarker and distance <= 25.0 then
                         local marker = Config.Visual.marker
@@ -462,9 +468,7 @@ CreateThread(function()
             end
         end
         
-        if not hasNearbySpikes then
-            Wait(500)
-        end
+        Wait(sleep)
     end
 end)
 
