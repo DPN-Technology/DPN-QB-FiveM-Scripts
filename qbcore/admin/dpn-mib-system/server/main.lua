@@ -46,6 +46,26 @@ local function cooled(src, key, seconds)
     return true, 0
 end
 
+local function validTargetInRange(src, target, maxDistance, rejectSelf)
+    target = tonumber(target)
+    if not target or not GetPlayerName(target) then return false, 'No valid target in range.' end
+    if rejectSelf and target == src then return false, 'You cannot target yourself with this action.' end
+
+    local sourcePed = GetPlayerPed(src)
+    local targetPed = GetPlayerPed(target)
+    if not sourcePed or sourcePed <= 0 or not DoesEntityExist(sourcePed) then return false, 'Your player entity is unavailable.' end
+    if not targetPed or targetPed <= 0 or not DoesEntityExist(targetPed) then return false, 'Target player entity is unavailable.' end
+
+    local sourceCoords = GetEntityCoords(sourcePed)
+    local targetCoords = GetEntityCoords(targetPed)
+    local range = tonumber(maxDistance) or 10.0
+    if #(sourceCoords - targetCoords) > range + 1.0 then
+        return false, 'Target is outside the authorized interaction range.'
+    end
+
+    return true, nil, target
+end
+
 QBCore.Functions.CreateCallback('dpn-mib:server:hasAccess', function(src, cb)
     cb(isMIB(src), isAdmin(src))
 end)
@@ -68,8 +88,9 @@ RegisterNetEvent('dpn-mib:server:neuralize', function(target, class, reason)
     local cfg = Config.Neuralizer.Classes[class] or Config.Neuralizer.Classes.beta
     local ok, wait = cooled(src, 'neuralizer_'..class, cfg.cooldown)
     if not ok then return DPN.Notify(src, ('Neuralizer recharging: %ss'):format(wait), 'error') end
-    target = tonumber(target)
-    if not target or not GetPlayerName(target) then return DPN.Notify(src, 'No valid target.', 'error') end
+    local targetOk, targetErr, resolvedTarget = validTargetInRange(src, target, Config.Neuralizer.Range, true)
+    if not targetOk then return DPN.Notify(src, targetErr, 'error') end
+    target = resolvedTarget
     TriggerClientEvent('dpn-mib:client:blackout', target, cfg.blackout, cfg.label)
     TriggerClientEvent('dpn-mib:client:clearShortMemory', target, cfg.wipeMinutes)
     if Config.Neuralizer.BodycamInterference then TriggerClientEvent('dpn-mib:client:bodycamStatic', -1, GetEntityCoords(GetPlayerPed(src)), 18.0) end
@@ -82,13 +103,17 @@ RegisterNetEvent('dpn-mib:server:toolAction', function(action, target, payload)
     local src = source; payload = payload or {}
     if not requireAccess(src, action, payload.reason) then return end
     if action == 'freeze' then
-        target = tonumber(target)
-        if not target or not GetPlayerName(target) then return DPN.Notify(src, 'No valid target in range.', 'error') end
+        local targetOk, targetErr, resolvedTarget = validTargetInRange(src, target, Config.Tools.freeze.range, false)
+        if not targetOk then return DPN.Notify(src, targetErr, 'error') end
+        target = resolvedTarget
         local ok, wait = cooled(src, 'freeze', Config.Tools.freeze.cooldown); if not ok then return DPN.Notify(src, ('Containment cooldown: %ss'):format(wait), 'error') end
         TriggerClientEvent('dpn-mib:client:freezeTarget', target, Config.Tools.freeze.duration)
         MIBLog(src, 'CONTAINMENT_FREEZE', target, payload.reason)
     elseif action == 'scan' then
-        local T = player(tonumber(target)); if not T then return DPN.Notify(src, 'No valid target to scan.', 'error') end
+        local targetOk, targetErr, resolvedTarget = validTargetInRange(src, target, Config.Tools.scan.range, false)
+        if not targetOk then return DPN.Notify(src, targetErr, 'error') end
+        local T = player(resolvedTarget); if not T then return DPN.Notify(src, 'No valid target to scan.', 'error') end
+        target = resolvedTarget
         local md = T.PlayerData.metadata or {}
         TriggerClientEvent('dpn-mib:client:scanResult', src, {
             name=(T.PlayerData.charinfo.firstname or 'Unknown')..' '..(T.PlayerData.charinfo.lastname or ''), cid=T.PlayerData.citizenid,
@@ -226,8 +251,9 @@ RegisterNetEvent('dpn-mib:server:advancedNeuralizer', function(mode, target, rea
         TriggerClientEvent('dpn-mib:client:advancedNeuralizeArea', -1, srcCoords, cfg)
         MIBLog(src, 'ADVANCED_NEURALIZER_AREA', nil, reason or cfg.label)
     else
-        target = tonumber(target)
-        if not target or not GetPlayerName(target) then return DPN.Notify(src, 'Invalid neuralizer target.', 'error') end
+        local targetOk, targetErr, resolvedTarget = validTargetInRange(src, target, cfg.radius, true)
+        if not targetOk then return DPN.Notify(src, targetErr, 'error') end
+        target = resolvedTarget
         TriggerClientEvent('dpn-mib:client:advancedNeuralizeTarget', target, cfg)
         MIBMemoryLog(src, target, cfg.wipeMinutes or 15, reason or cfg.label)
         MIBLog(src, 'ADVANCED_NEURALIZER_'..string.upper(mode), target, reason or cfg.label)
