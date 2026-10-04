@@ -50,6 +50,9 @@ jobs:
       - name: Validate hardening wave 1 controls
         run: python3 tools/check_hardening_wave1.py
 
+      - name: Validate hardening wave 2 controls
+        run: python3 tools/check_hardening_wave2.py
+
       - name: Dry-run Release Factory v2
         shell: bash
         run: |
