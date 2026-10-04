@@ -679,11 +679,14 @@ local function vehicleSnapshot(entity)
     if not entity or entity <= 0 then return nil end
     local coords = GetEntityCoords(entity)
     local plate, model, speed = 'UNKNOWN', tostring(GetEntityModel(entity)), GetEntitySpeed(entity) * 2.236936
+    local fuel = 100.0
     pcall(function() plate = trim(GetVehicleNumberPlateText(entity)):upper() end)
+    pcall(function() fuel = GetVehicleFuelLevel(entity) end)
     return {
         netId=NetworkGetNetworkIdFromEntity(entity), plate=plate ~= '' and plate or 'UNKNOWN', model=model,
         speed=math.floor(speed * 10) / 10, coords={ x=coords.x, y=coords.y, z=coords.z },
-        body=GetVehicleBodyHealth(entity), engine=GetVehicleEngineHealth(entity)
+        body=GetVehicleBodyHealth(entity), engine=GetVehicleEngineHealth(entity),
+        fuel=math.max(0, math.min(100, tonumber(fuel) or 100))
     }
 end
 
@@ -988,10 +991,9 @@ RegisterNetEvent('dpn-le-operations:server:checkoutVehicle', function(data)
     if distance(playerCoords(src), snapshot.coords) > Config.Fleet.CheckoutDistance then return notify(src, 'Fleet vehicle is too far away.', 'error') end
     if Config.Fleet.RequireEmergencyClass and not Config.Fleet.AllowedVehicleClasses[GetVehicleClass(entity)] then return notify(src, 'This is not an authorized fleet vehicle.', 'error') end
     local checkoutId = makeId('FLEET')
-    local fuel = clamp(data.fuel, 0, 100)
     MySQL.insert([[INSERT INTO dpn_le_fleet_checkouts (checkout_id, officer_cid, officer_name, vehicle_plate, vehicle_model, vehicle_net_id,
         starting_body, starting_engine, starting_fuel, status, checked_out_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW())]], {
-        checkoutId, info.citizenid, info.name, snapshot.plate, snapshot.model, snapshot.netId, snapshot.body, snapshot.engine, fuel
+        checkoutId, info.citizenid, info.name, snapshot.plate, snapshot.model, snapshot.netId, snapshot.body, snapshot.engine, snapshot.fuel
     })
     audit(src, 'FLEET_CHECKOUT', checkoutId, snapshot)
     networkPublish('fleet_checkout', { title='Fleet Vehicle Checked Out', message=('%s checked out %s.'):format(info.name, snapshot.plate), severity=5, checkoutId=checkoutId, plate=snapshot.plate, model=snapshot.model, suppressRouting=true })
@@ -1008,9 +1010,29 @@ RegisterNetEvent('dpn-le-operations:server:returnVehicle', function(data)
     local row = MySQL.single.await("SELECT * FROM dpn_le_fleet_checkouts WHERE checkout_id = ? AND status = 'active'", { checkoutId })
     if not row or (row.officer_cid ~= info.citizenid and not isSupervisor(src)) then return notify(src, 'Active fleet checkout not found.', 'error') end
     local entity = getNetworkVehicle(data.vehicleNetId)
-    local snapshot = entity and vehicleSnapshot(entity) or { plate=row.vehicle_plate, body=clamp(data.body, 0, 1000), engine=clamp(data.engine, -4000, 1000) }
-    if snapshot.plate ~= row.vehicle_plate and not isSupervisor(src) then return notify(src, 'Return the same vehicle that was checked out.', 'error') end
-    local fuel = clamp(data.fuel, 0, 100)
+    local supervisor = isSupervisor(src)
+    local snapshot
+    if entity then
+        snapshot = vehicleSnapshot(entity)
+        if distance(playerCoords(src), snapshot.coords) > Config.Fleet.CheckoutDistance + 3.0 and not supervisor then
+            return notify(src, 'Fleet vehicle is too far away.', 'error')
+        end
+    elseif supervisor then
+        snapshot = {
+            plate = row.vehicle_plate,
+            body = tonumber(row.starting_body) or 1000,
+            engine = tonumber(row.starting_engine) or 1000,
+            fuel = tonumber(row.starting_fuel) or 100
+        }
+    else
+        return notify(src, 'The checked-out vehicle must be networked for an authoritative return inspection.', 'error')
+    end
+
+    if snapshot.plate ~= row.vehicle_plate and not supervisor then
+        return notify(src, 'Return the same vehicle that was checked out.', 'error')
+    end
+
+    local fuel = clamp(snapshot.fuel, 0, 100)
     local notes = clean(data.damageNotes, 2500)
     MySQL.update([[UPDATE dpn_le_fleet_checkouts SET ending_body=?, ending_engine=?, ending_fuel=?, damage_notes=?, status='returned', returned_at=NOW() WHERE checkout_id=?]], {
         snapshot.body, snapshot.engine, fuel, notes, checkoutId
