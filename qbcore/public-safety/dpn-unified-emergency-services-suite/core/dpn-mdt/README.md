@@ -156,6 +156,21 @@ Client exports:
 
 The server checks access before returning data or mutating records. Do not trust client-side UI permissions alone. Keep MIB/admin features behind job grade and ACE permissions.
 
+
+### Request throttling and status validation
+
+The server applies per-player, per-callback throttling before invoking MDT callback handlers. Normal callbacks use `Config.RateLimits.DefaultCallbackMs`; database-heavy search/profile/audit callbacks can use `Config.RateLimits.HeavyCallbackMs`.
+
+The client-facing `dpn-mdt:server:SetUnitStatus` event is separately throttled. Status values must exist in `Config.UnitStatuses`, and the optional dispatch call ID is stripped of control characters and bounded to 64 characters before storage or forwarding to the Unified Emergency Network.
+
+Throttle state is removed when a player disconnects.
+
+### Dynamic SQL boundary
+
+The advanced QBCore compatibility layer builds some SELECT statements dynamically because table/column availability differs between servers. Dynamic table and column identifiers pass through `ident()`, which accepts only `[A-Za-z0-9_]` identifiers and surrounds them with SQL identifier quotes. Player-controlled search/profile values remain bound query parameters.
+
+Do not weaken `ident()` or interpolate client data into SQL text when extending the compatibility layer.
+
 Recommended ACE example:
 
 ```cfg
