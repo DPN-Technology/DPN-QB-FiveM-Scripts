@@ -139,7 +139,11 @@ def audit_resource(resource: pathlib.Path) -> ResourceAudit:
     has_validation = bool(VALIDATION_RE.search(server_text))
     has_rate = bool(RATE_RE.search(server_text))
     has_logs = bool(LOG_RE.search(server_text))
-    sql_concat = bool(SQL_CONCAT_RE.search(server_text))
+    dynamic_sql_lines = [
+        line.strip()
+        for line in server_text.splitlines()
+        if DYNAMIC_SQL_RE.search(line)
+    ]
 
     if metadata.get("status", "").lower() in {"imported", "legacy", "unknown"}:
         add(
@@ -203,12 +207,17 @@ def audit_resource(resource: pathlib.Path) -> ResourceAudit:
             7,
         )
 
-    if sql_concat:
+    if dynamic_sql_lines:
+        # Dynamic SQL is not automatically injectable: some resources safely
+        # interpolate validated identifiers or bounded numeric constants. Keep
+        # this as a review signal instead of declaring a vulnerability.
+        safe_identifier_layer = "local function ident" in server_text and "^[%w_]+$" in server_text
+        deduction = 4 if safe_identifier_layer else 8
         add(
-            "critical",
-            "SQL_CONCAT",
-            "Possible dynamic SQL string concatenation detected; verify all query data is parameterized.",
-            30,
+            "moderate",
+            "DYNAMIC_SQL_REVIEW",
+            f"{len(dynamic_sql_lines)} dynamic SQL construction signal(s) found; verify interpolated values are allowlisted, numeric, or otherwise not client-controlled.",
+            deduction,
         )
 
     if broadcasts:
