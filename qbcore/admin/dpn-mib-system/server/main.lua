@@ -2,17 +2,28 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local cooldowns = {}
 
 local function player(src) return QBCore.Functions.GetPlayer(src) end
-local function isAdmin(src)
-    if not Config.UseAdminPermission then return false end
-    for _, ace in pairs(Config.AcePermissions or { 'dpn.mib', 'command.mib' }) do
+
+local function hasAce(src, permissions)
+    for _, ace in pairs(permissions or {}) do
         if IsPlayerAceAllowed(src, ace) then return true end
     end
+    return false
+end
+
+local function isAdmin(src)
+    if not Config.UseAdminPermission then return false end
+    if hasAce(src, Config.AdminAcePermissions or {}) then return true end
     return QBCore.Functions.HasPermission(src, Config.AdminPermission) or QBCore.Functions.HasPermission(src, 'god')
 end
+
+local function hasMIBAce(src)
+    return hasAce(src, Config.AcePermissions or { 'dpn.mib', 'command.mib' })
+end
+
 local function isMIB(src)
+    if isAdmin(src) or hasMIBAce(src) then return true end
     local P = player(src)
     if not P then return false end
-    if isAdmin(src) then return true end
     local jobData = P.PlayerData.job or {}
     local job = jobData.name
     if Config.RequireDuty and job and Config.AllowedJobs[job] == true and jobData.onduty == false then return false end
@@ -36,6 +47,34 @@ local function canUseDirectorLoadout(src)
     local jobData = P.PlayerData.job or {}
     local grade = jobData.grade or {}
     return jobData.name == Config.MIBJobName and tostring(grade.name or ''):lower() == 'director'
+end
+
+local POLICY_LEVELS = { mib = 1, director = 2, admin = 3 }
+
+local function sourcePolicyLevel(src)
+    if isAdmin(src) then return POLICY_LEVELS.admin end
+    if canUseDirectorLoadout(src) then return POLICY_LEVELS.director end
+    if isMIB(src) then return POLICY_LEVELS.mib end
+    return 0
+end
+
+local function authorizePolicy(src, requiredPolicy, action, target, reason)
+    requiredPolicy = tostring(requiredPolicy or 'mib'):lower()
+    local requiredLevel = POLICY_LEVELS[requiredPolicy] or POLICY_LEVELS.admin
+    if sourcePolicyLevel(src) >= requiredLevel then return true end
+
+    local boundedAction = tostring(action or 'unknown'):sub(1, 64)
+    local boundedReason = tostring(reason or ''):gsub('[\r\n]', ' '):sub(1, 160)
+    MIBLog(src, 'ACTION_AUTHORIZATION_DENIED', tonumber(target),
+        ('Action=%s Required=%s Reason=%s'):format(boundedAction, requiredPolicy, boundedReason))
+    DPN.Notify(src, ('%s clearance is required for this MIB action.'):format(requiredPolicy:upper()), 'error')
+    return false
+end
+
+local function authorizeToolAction(src, action, target, reason)
+    if not requireAccess(src, action, reason) then return false end
+    local requiredPolicy = (Config.MIBActionPolicy or {})[action] or 'mib'
+    return authorizePolicy(src, requiredPolicy, action, target, reason)
 end
 
 local function cooled(src, key, seconds)
@@ -83,9 +122,13 @@ CreateThread(function()
 end)
 
 RegisterNetEvent('dpn-mib:server:neuralize', function(target, class, reason)
-    local src = source; class = class or 'beta'
+    local src = source
+    local requestedClass = tostring(class or 'beta'):lower()
+    class = Config.Neuralizer.Classes[requestedClass] and requestedClass or 'beta'
     if not requireAccess(src, 'neuralizer', reason) then return end
-    local cfg = Config.Neuralizer.Classes[class] or Config.Neuralizer.Classes.beta
+    local requiredPolicy = (Config.NeuralizerPolicy or {})[class] or 'director'
+    if not authorizePolicy(src, requiredPolicy, 'neuralizer:'..class, target, reason) then return end
+    local cfg = Config.Neuralizer.Classes[class]
     local ok, wait = cooled(src, 'neuralizer_'..class, cfg.cooldown)
     if not ok then return DPN.Notify(src, ('Neuralizer recharging: %ss'):format(wait), 'error') end
     local targetOk, targetErr, resolvedTarget = validTargetInRange(src, target, Config.Neuralizer.Range, true)
@@ -101,7 +144,8 @@ end)
 
 RegisterNetEvent('dpn-mib:server:toolAction', function(action, target, payload)
     local src = source; payload = payload or {}
-    if not requireAccess(src, action, payload.reason) then return end
+    action = tostring(action or ''):lower()
+    if not authorizeToolAction(src, action, target, payload.reason) then return end
     if action == 'freeze' then
         local targetOk, targetErr, resolvedTarget = validTargetInRange(src, target, Config.Tools.freeze.range, false)
         if not targetOk then return DPN.Notify(src, targetErr, 'error') end
@@ -161,8 +205,12 @@ RegisterNetEvent('dpn-mib:server:toolAction', function(action, target, payload)
         MIBLog(src, 'BLACKSITE_LOCKDOWN', nil, payload.reason)
     elseif action == 'set_bucket' then
         target = tonumber(target)
-        local bucket = tonumber(payload.bucket or 0) or 0
+        local bucket = tonumber(payload.bucket)
+        local bounds = Config.RoutingBucketBounds or { min = 0, max = 9999 }
         if not target or not GetPlayerName(target) then return DPN.Notify(src, 'Invalid target.', 'error') end
+        if not bucket or bucket ~= math.floor(bucket) or bucket < (tonumber(bounds.min) or 0) or bucket > (tonumber(bounds.max) or 9999) then
+            return DPN.Notify(src, 'Routing bucket is outside the authorized server range.', 'error')
+        end
         SetPlayerRoutingBucket(target, bucket)
         MIBLog(src, 'ROUTING_BUCKET_SET', target, 'Bucket '..bucket..' | '..(payload.reason or ''))
         DPN.Notify(src, ('Target moved to routing bucket %s.'):format(bucket), 'success')
@@ -246,9 +294,13 @@ RegisterNetEvent('dpn-mib:server:devAction', function(action, target, payload)
 end)
 
 RegisterNetEvent('dpn-mib:server:advancedNeuralizer', function(mode, target, reason)
-    local src = source; mode = mode or 'beta'
+    local src = source
+    local requestedMode = tostring(mode or 'beta'):lower()
+    mode = Config.AdvancedNeuralizer.Classes[requestedMode] and requestedMode or 'beta'
     if not requireAccess(src, 'neuralizer', reason) then return end
-    local cfg = (Config.AdvancedNeuralizer.Classes and Config.AdvancedNeuralizer.Classes[mode]) or Config.AdvancedNeuralizer.Classes.beta
+    local requiredPolicy = (Config.AdvancedNeuralizerPolicy or {})[mode] or 'director'
+    if not authorizePolicy(src, requiredPolicy, 'advanced_neuralizer:'..mode, target, reason) then return end
+    local cfg = Config.AdvancedNeuralizer.Classes[mode]
     local ok, wait = cooled(src, 'advanced_neuralizer_'..mode, cfg.cooldown or 30)
     if not ok then return DPN.Notify(src, ('Advanced neuralizer charging: %ss'):format(wait), 'error') end
     local srcCoords = GetEntityCoords(GetPlayerPed(src))
