@@ -21,6 +21,8 @@ CALLBACK_RE = re.compile(r"\b(?:QBCore\.Functions\.CreateCallback|lib\.callback\
 SOURCE_RE = re.compile(r"\bsource\b")
 AUTH_RE = re.compile(
     r"(?i)(IsPlayerAceAllowed|HasPermission|GetPermission|isAdmin|isAuthorized|"
+    r"DPN\.Bridge\.Is[A-Za-z]+|DPN_EvidenceBridge\.Is[A-Za-z]+|"
+    r"DPNMedical[A-Za-z]*Authority|Can[A-Z][A-Za-z]+|"
     r"PlayerData\.(?:job|gang)|\.job\.name|\.gang\.name|allowedJobs|allowedGroups|"
     r"permission|authorized|whitelist|role)"
 )
@@ -46,9 +48,8 @@ LOG_RE = re.compile(
     r"logger|audit|logEvent|webhook|discord)"
 )
 BROADCAST_RE = re.compile(r"TriggerClientEvent\s*\([^\n,]+,\s*-1\b")
-SQL_CONCAT_RE = re.compile(
-    r"(?is)(?:MySQL\.(?:query|update|insert|execute|transaction)[^\n]{0,250}|"
-    r"(?:SELECT|INSERT|UPDATE|DELETE)[^\n]{0,250})\.\."
+DYNAMIC_SQL_RE = re.compile(
+    r"(?im)^.*(?:SELECT|INSERT|UPDATE|DELETE)[^\n]*(?::format\(|\.\.)[^\n]*$"
 )
 LOOP_RE = re.compile(r"(?is)while\s+true\s+do(?P<body>.{0,1200}?)end")
 WAIT_ZERO_RE = re.compile(r"\b(?:Wait|Citizen\.Wait)\s*\(\s*0\s*\)")
