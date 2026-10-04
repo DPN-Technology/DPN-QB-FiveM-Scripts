@@ -174,6 +174,36 @@ local function ValidateCoords(coords)
     return { x = x, y = y, z = z }
 end
 
+local function GetAuthoritativeTarget(src, netId)
+    netId = tonumber(netId)
+    if not netId or netId <= 0 then
+        return nil, 'Invalid StarChase target data.'
+    end
+
+    local target = NetworkGetEntityFromNetworkId(netId)
+    if not target or target == 0 or not DoesEntityExist(target) then
+        return nil, 'StarChase target is no longer available.'
+    end
+
+    if GetEntityType(target) ~= 2 then
+        return nil, 'StarChase target must be a vehicle.'
+    end
+
+    local ped = GetPlayerPed(src)
+    if not ped or ped == 0 or not DoesEntityExist(ped) then
+        return nil, 'Officer entity is unavailable.'
+    end
+
+    local officerCoords = GetEntityCoords(ped)
+    local targetCoords = GetEntityCoords(target)
+    local maxDistance = tonumber(Config.Fire.maxDistance) or 62.0
+    if #(officerCoords - targetCoords) > maxDistance + 5.0 then
+        return nil, 'StarChase target is outside the authorized lock distance.'
+    end
+
+    return target
+end
+
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
     Wait(1000)
@@ -266,10 +296,34 @@ QBCore.Functions.CreateCallback('dpn-starchase:server:launch', function(src, cb,
     end
 
     payload = type(payload) == 'table' and payload or {}
+    local targetVehicle, targetErr = GetAuthoritativeTarget(src, payload.netId)
+    if not targetVehicle then
+        cb({ ok = false, message = targetErr or 'Invalid StarChase target data.' })
+        return
+    end
+
     local netId = tonumber(payload.netId)
-    local coords = ValidateCoords(payload.coords)
-    if not netId or netId <= 0 or not coords then
-        cb({ ok = false, message = 'Invalid StarChase target data.' })
+    local targetCoords = GetEntityCoords(targetVehicle)
+    local targetModel = GetEntityModel(targetVehicle)
+    local targetPlate = TrimPlate(GetVehicleNumberPlateText(targetVehicle))
+    local targetSpeed = GetEntitySpeed(targetVehicle) * 2.236936
+    local targetHeading = GetEntityHeading(targetVehicle)
+
+    local maxTargetSpeed = tonumber(Config.Fire.maxTargetSpeed) or 180.0
+    if targetSpeed > maxTargetSpeed then
+        cb({ ok = false, message = ('Target speed exceeds safe tracker lock limit: %.0f MPH.'):format(maxTargetSpeed) })
+        return
+    end
+
+    if Config.Fire.rejectIfTargetStopped and targetSpeed < 1.0 then
+        cb({ ok = false, message = 'Target vehicle is not moving.' })
+        return
+    end
+
+    local officerPed = GetPlayerPed(src)
+    local officerVehicle = officerPed and officerPed ~= 0 and GetVehiclePedIsIn(officerPed, false) or 0
+    if Config.Fire.preventSameVehicle and officerVehicle and officerVehicle ~= 0 and officerVehicle == targetVehicle then
+        cb({ ok = false, message = Config.Messages.noTarget })
         return
     end
 
@@ -286,13 +340,13 @@ QBCore.Functions.CreateCallback('dpn-starchase:server:launch', function(src, cb,
     local trackerId = GenerateTrackerId(src)
     local tracker = {
         id = trackerId,
-        plate = TrimPlate(payload.plate),
+        plate = targetPlate,
         netId = netId,
-        model = tostring(payload.model or 'unknown'),
-        coords = coords,
-        heading = tonumber(payload.heading) or 0.0,
-        speed = tonumber(payload.speed) or 0.0,
-        street = tostring(payload.street or 'Unknown'),
+        model = tostring(targetModel),
+        coords = { x = targetCoords.x + 0.0, y = targetCoords.y + 0.0, z = targetCoords.z + 0.0 },
+        heading = targetHeading,
+        speed = targetSpeed,
+        street = tostring(payload.street or 'Unknown'):sub(1, 96),
         createdBy = src,
         officerName = PlayerName(Player),
         job = jobName,
