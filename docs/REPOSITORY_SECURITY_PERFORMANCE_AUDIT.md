@@ -2,7 +2,7 @@
 
 Status: current-main evidence index
 
-Baseline refreshed through `main` at `2d88c57091f178ceb964feaf4df1f5f52c8afc1e`.
+Baseline refreshed through `main` at `6853a48be6a1d8d55f4a21cfcb900911c4791d34`.
 
 ## Current state
 
@@ -13,13 +13,13 @@ The repository has materially advanced since the original September audit, so ol
 - MIB director-loadout escalation: current source now uses a server-side `canUseDirectorLoadout(src)` check.
 - MIB range-bound target authority: `freeze`, `scan`, neuralizer target actions, and `revive` use server-observed entity proximity; revive also enforces its server-side cooldown.
 - Training Academy scenario authority: instructor sessions are owner-bound, trainee enrollment is server-authoritative, grading requires exact-session membership, and stale ownership is cleaned on closure/disconnect.
+- Medical Test Lab export authority: mutation exports are default-deny by server-derived invoking resource, with `dpn-medical-admin-tools` explicitly trusted and invoking-resource evidence recorded.
 - Medical dispatch v9-v12 single-route remediation: refreshed from current main in PR #74.
 - PD doorbell unconditional fallback polling: refreshed from current main in PR #75.
 
 ### Confirmed current-main hardening targets
 
 - MIB action-specific privilege policy remains broader than the existing general `requireAccess` gate.
-- Medical Test Lab mutation exports still need a bounded server-derived invoking-resource trust boundary.
 - LE forced vehicle placement still needs server-side validation of the client-selected vehicle network ID.
 
 ## Engineering rules
