@@ -21,6 +21,7 @@ BLOCKED_SUFFIXES = {".pem", ".pfx", ".key"}
 WORKFLOW_WRITE_ALLOWLIST = {
     "dpn-auto-script-index.yml",
     "dpn-build-release.yml",
+    "dpn-repository-release.yml",
 }
 TEXT_SCAN_SUFFIXES = {
     ".lua", ".js", ".mjs", ".cjs", ".ts", ".json", ".yml", ".yaml",
