@@ -751,9 +751,6 @@ CreateThread(function()
                         if #(pedCoords - coords) <= Config.Tracker.broadcastUpdateDistance then
                             sleep = math.min(sleep, 500)
                             TriggerServerEvent('dpn-starchase:server:updateTracker', id, {
-                                coords = CoordsToTable(coords),
-                                heading = GetEntityHeading(veh),
-                                speed = VehicleSpeedMph(veh),
                                 street = GetStreetName(coords)
                             })
                             CreateTrackerProp(tracker)
