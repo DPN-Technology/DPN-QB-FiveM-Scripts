@@ -1,0 +1,19 @@
+name: DPN Green Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  green-gate:
+    uses: DPN-Technology/.github/.github/workflows/dpn-green-gate.yml@main
+    with:
+      lifecycle: development
+      require_security_policy: true
+      require_dependency_record: false
+      require_runbook: false
