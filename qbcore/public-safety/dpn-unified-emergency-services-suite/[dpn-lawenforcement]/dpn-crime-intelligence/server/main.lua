@@ -1,4 +1,26 @@
 local QBCore = exports['qb-core']:GetCoreObject()
+local requestRate = {}
+
+local function allowRequest(src, bucket, cooldownMs)
+    if src <= 0 then return true end
+    local nowMs = GetGameTimer()
+    local cooldown = math.max(100, math.floor(tonumber(cooldownMs) or 500))
+    local playerRate = requestRate[src]
+    if not playerRate then
+        playerRate = {}
+        requestRate[src] = playerRate
+    end
+    local last = playerRate[bucket] or 0
+    if nowMs - last < cooldown then return false end
+    playerRate[bucket] = nowMs
+    return true
+end
+
+local function rateLimit(src, bucket, cooldownMs)
+    if allowRequest(src, bucket, cooldownMs) then return false end
+    TriggerClientEvent('QBCore:Notify', src, 'Please wait before repeating that intelligence action.', 'error')
+    return true
+end
 
 local function clean(value, maxLength)
     local text = tostring(value or ''):gsub('[%z\1-\8\11\12\14-\31]', '')
@@ -80,12 +102,14 @@ end
 
 RegisterNetEvent('dpn-crime-intelligence:server:open', function()
     local src = source
+    if rateLimit(src, 'open', Config.RateLimits.OpenMs) then return end
     if not allowed(src, false) then return notify(src, 'Crime-intelligence access denied.', 'error') end
     getDashboard(src)
 end)
 
 RegisterNetEvent('dpn-crime-intelligence:server:search', function(query)
     local src = source
+    if rateLimit(src, 'search', Config.RateLimits.SearchMs) then return end
     if not allowed(src, false) then return end
     query = clean(query, 64):gsub('^%s*(.-)%s*$', '%1')
     if #query < 2 then return notify(src, 'Enter at least two characters.', 'error') end
@@ -127,6 +151,7 @@ end)
 
 RegisterNetEvent('dpn-crime-intelligence:server:createReport', function(data)
     local src = source
+    if rateLimit(src, 'mutation', Config.RateLimits.MutationMs) then return end
     local ok, info = allowed(src, false)
     if not ok or type(data) ~= 'table' then return end
     local reportId = ('INT-%s-%04d'):format(os.date('%Y%m%d%H%M%S'), math.random(1000,9999))
@@ -143,6 +168,7 @@ end)
 
 RegisterNetEvent('dpn-crime-intelligence:server:addWatchlist', function(data)
     local src = source
+    if rateLimit(src, 'mutation', Config.RateLimits.MutationMs) then return end
     local ok, info = allowed(src, true)
     if not ok or type(data) ~= 'table' then return notify(src, 'Supervisor authorization required.', 'error') end
     local subjectType = data.subjectType == 'vehicle' and 'vehicle' or 'person'
@@ -163,7 +189,10 @@ end)
 
 RegisterNetEvent('dpn-crime-intelligence:server:clearWatchlist', function(id)
     local src = source
+    if rateLimit(src, 'mutation', Config.RateLimits.MutationMs) then return end
     if not allowed(src, true) then return end
+    id = tonumber(id)
+    if not id or id < 1 then return end
     MySQL.update('UPDATE dpn_intel_watchlists SET active=0, updated_at=NOW() WHERE id=?', { tonumber(id) })
     audit(src, 'CLEAR_WATCHLIST', { id=id })
     getDashboard(src)
@@ -171,6 +200,7 @@ end)
 
 RegisterNetEvent('dpn-crime-intelligence:server:addLink', function(data)
     local src = source
+    if rateLimit(src, 'mutation', Config.RateLimits.MutationMs) then return end
     local ok, info = allowed(src, false)
     if not ok or type(data) ~= 'table' then return end
     local reportId = clean(data.reportId, 64)
@@ -198,6 +228,7 @@ end
 
 RegisterNetEvent('dpn-crime-intelligence:server:alert', function(payload)
     local src = source
+    if src > 0 and rateLimit(src, 'alert', Config.RateLimits.AlertMs) then return end
     if src > 0 and not allowed(src, false) then return end
     intelligenceAlert(payload)
 end)
@@ -206,4 +237,9 @@ exports('CreateIntelAlert', intelligenceAlert)
 exports('GetRiskProfile', getRiskProfile)
 exports('IsWatchlisted', function(subjectType, subjectKey)
     return MySQL.single.await('SELECT * FROM dpn_intel_watchlists WHERE subject_type=? AND subject_key=? AND active=1 LIMIT 1', { subjectType, clean(subjectKey,80):upper() })
+end)
+
+
+AddEventHandler('playerDropped', function()
+    requestRate[source] = nil
 end)
