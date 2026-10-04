@@ -48,6 +48,21 @@ Config.ALPR = {
     HotlistAlert = true
 }
 
+Config.Security = {
+    -- Fixed-window limits are tracked independently per player and event.
+    EventWindowSeconds = 10,
+    RateLimitAuditCooldownSeconds = 10,
+    EventLimits = {
+        open = 6,
+        setStatus = 12,
+        createCall = 4,
+        panic = 2,
+        plateCheck = 12,
+        addHotlist = 5,
+        saveNote = 6
+    }
+}
+
 Config.Modules = {
     Dispatch = true,
     ALPR = true,
