@@ -20,7 +20,7 @@
   <img alt="DPN Security Supply Chain" src="https://img.shields.io/github/actions/workflow/status/DPN-Technology/DPN-QB-FiveM-Scripts/dpn-security-supply-chain.yml?branch=main&style=flat-square&label=supply%20chain">
   <img alt="DPN Script Index" src="https://img.shields.io/github/actions/workflow/status/DPN-Technology/DPN-QB-FiveM-Scripts/dpn-auto-script-index.yml?branch=main&style=flat-square&label=script%20index">
 </p>
-<p align="center"><sub>Release baseline: <code>1.0.0</code> • Main branch is the controlled distribution baseline.</sub></p>
+<p align="center"><sub>Release model: per-resource versioning • Published artifacts are produced from the controlled <code>main</code> branch.</sub></p>
 <!-- DPN-QC-STATUS:END -->
 
 <!-- DPN-REPO-SHOWCASE:START -->
@@ -77,7 +77,7 @@ flowchart LR
 | --- | --- |
 | [Security policy](SECURITY.md) | Vulnerability reporting, protected-data guidance and security expectations |
 | [Architecture](qbcore/public-safety/dpn-unified-emergency-services-suite/docs/ARCHITECTURE.md) | System boundaries, major components and engineering model |
-| [GitHub Releases](https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/releases) | Published versions and downloadable release artifacts |
+| [GitHub Releases](https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/releases) | Published per-resource versions and downloadable release artifacts |\n| [Release process](docs/RELEASE_PROCESS.md) | Packaging, checksum, evidence and publication workflow |
 
 > **Repository presentation rule:** status, release and security claims in this README should stay tied to repository evidence. Visual polish must not imply a capability is production-ready when the underlying project documentation says otherwise.
 
