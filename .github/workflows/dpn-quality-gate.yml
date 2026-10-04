@@ -21,6 +21,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Validate Python tooling syntax
+        run: python3 -m compileall -q tools
+
       - name: Run DPN repository validator
         run: python3 tools/dpn_repo_validator.py
 
