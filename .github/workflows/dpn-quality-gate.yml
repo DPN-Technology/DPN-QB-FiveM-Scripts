@@ -76,6 +76,9 @@ jobs:
       - name: Validate MIB loadout authorization
         run: python3 tools/check_mib_loadout_authorization.py
 
+      - name: Validate MIB target proximity authority
+        run: python3 tools/check_mib_target_proximity_authority.py
+
       - name: Validate PD doorbell cooldown authority
         run: python3 tools/check_pd_doorbell_cooldown_authority.py
 
