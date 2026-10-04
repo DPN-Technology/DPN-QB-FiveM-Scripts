@@ -55,9 +55,11 @@ end
 CreateThread(function()
     Wait(15000)
     if not dbEnabled() then return end
-    local days = tonumber(Config.Persistence.pruneEventsAfterDays) or 0
+    local days = math.floor(tonumber(Config.Persistence.pruneEventsAfterDays) or 0)
     if days <= 0 then return end
+    days = math.min(days, 36500)
+    local cutoff = os.date('%Y-%m-%d %H:%M:%S', os.time() - (days * 86400))
     pcall(function()
-        MySQL.query.await(('DELETE FROM dpn_medical_events WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)'):format(days))
+        MySQL.query.await('DELETE FROM dpn_medical_events WHERE created_at < ?', { cutoff })
     end)
 end)
