@@ -146,8 +146,13 @@ RegisterNetEvent('dpn-mib:server:toolAction', function(action, target, payload)
         MIBLog(src, 'SCENE_MEMORY_PROTOCOL', nil, payload.reason)
     elseif action == 'revive' then
         target = tonumber(target or src)
-        if not target or not GetPlayerName(target) then return DPN.Notify(src, 'Invalid target.', 'error') end
-        TriggerClientEvent('hospital:client:Revive', target); MIBLog(src, 'MEDICAL_OVERRIDE', target, payload.reason)
+        local targetOk, targetErr, resolvedTarget = validTargetInRange(src, target, Config.Tools.revive.range, false)
+        if not targetOk then return DPN.Notify(src, targetErr, 'error') end
+        target = resolvedTarget
+        local ok, wait = cooled(src, 'revive', Config.Tools.revive.cooldown)
+        if not ok then return DPN.Notify(src, ('Medical override cooldown: %ss'):format(wait), 'error') end
+        TriggerClientEvent('hospital:client:Revive', target)
+        MIBLog(src, 'MEDICAL_OVERRIDE', target, payload.reason)
     elseif action == 'armor' then
         TriggerClientEvent('dpn-mib:client:setArmor', src, Config.Tools.armor.amount); MIBLog(src, 'SUIT_ARMOR_PROTOCOL', nil, payload.reason)
     elseif action == 'lockdown' then
