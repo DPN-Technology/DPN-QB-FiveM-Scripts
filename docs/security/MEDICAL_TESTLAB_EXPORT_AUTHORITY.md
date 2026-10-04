@@ -1,25 +1,23 @@
 # Medical Test Lab Export Authority Contract
 
-Baseline: `main` at `6bea5b82dd09764584e9e6ea9664c23a15b580e4`.
+Baseline refreshed from `main` at `e4916bfeda81b3599c6c156f252c29cb1b942249`.
 
-## Current finding
+## Resolution
 
-`dpn-medical-core/server/testlab.lua` still exposes mutation-capable server exports without a server-derived invoking-resource authorization boundary.
+Mutation-capable Medical Test Lab exports now use a server-derived invoking-resource trust boundary.
 
-- `RestoreTestSnapshot(target, actor)` can commit a stored snapshot back into canonical medical state.
-- `ApplyTestScenario(target, scenarioId, options, actor)` can replace/mutate canonical patient state, persist it, and emit downstream life-state events.
-- The free-form `actor` argument is audit metadata, not authority.
+- `ApplyTestScenario(target, scenarioId, options, actor)` and `RestoreTestSnapshot(target, actor)` call a centralized `authorizeMutationCaller()` guard before privileged mutation work.
+- Authority comes from FiveM runtime context via `GetInvokingResource()`; neither the free-form `actor` string nor any client-provided resource name participates in authorization.
+- The allowlist is explicit and default-deny. The currently verified integration is `dpn-medical-admin-tools`.
+- Unknown, missing, or unapproved invoking resources fail closed before canonical medical state is mutated, snapshots are restored, persistence is written, or downstream life-state events are emitted.
+- Snapshot restoration is implemented as a private `restoreTestSnapshot()` function. `ApplyTestScenario(..., 'restore_snapshot', ...)` calls that internal function after its own authorization rather than re-entering the public export and depending on self-invocation semantics.
+- Server-derived invoking-resource identity is added to medical mutation audit metadata and persisted test-run evidence.
+- Read-only Test Lab exports remain separate from the privileged mutation boundary.
 
-`dpn-medical-admin-tools` is a legitimate current caller of `ApplyTestScenario`, so hardening must preserve that workflow through an explicit trusted-resource policy.
+## Compatibility
 
-## Required authority model
+Existing export names and argument ordering are unchanged. `dpn-medical-admin-tools` continues using `ApplyTestScenario` through the existing export proxy, while untrusted resources can no longer invoke Test Lab mutations merely by supplying a convincing actor string.
 
-- Derive the invoking resource from server runtime context such as `GetInvokingResource()` or one centralized equivalent.
-- Default deny unknown external resources for privileged mutation exports.
-- Explicitly allow bounded legitimate Medical Admin/Test Lab integrations.
-- Preserve existing export names and argument ordering.
-- Keep read-only exports under separate risk review.
-- Fail before snapshots, state mutation, persistence, or downstream events when caller authority is not established.
-- Add additive Quality Gate coverage for the boundary.
+## Regression coverage
 
-No client-supplied resource name or free-form actor string may become an authorization token.
+`tools/check_medical_testlab_export_authority.py` is wired into DPN Quality Gate. It verifies the explicit allowlist, runtime caller derivation, default-deny behavior, pre-mutation authorization ordering, internal restore path, audit evidence, and preservation of read-only exports.
