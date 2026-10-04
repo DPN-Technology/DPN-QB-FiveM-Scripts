@@ -27,6 +27,26 @@ jobs:
       - name: Run DPN repository validator
         run: python3 tools/dpn_repo_validator.py
 
+      - name: Audit resource hardening posture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/audit_resource_hardening.py \
+            --top 15 \
+            --markdown /tmp/dpn-resource-hardening.md \
+            --json /tmp/dpn-resource-hardening.json
+          cat /tmp/dpn-resource-hardening.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload hardening audit evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dpn-resource-hardening-audit
+          path: |
+            /tmp/dpn-resource-hardening.md
+            /tmp/dpn-resource-hardening.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Dry-run Release Factory v2
         shell: bash
         run: |
