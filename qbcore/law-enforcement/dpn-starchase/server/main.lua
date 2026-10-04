@@ -432,13 +432,37 @@ RegisterNetEvent('dpn-starchase:server:updateTracker', function(trackerId, updat
     UpdateThrottle[id] = now + 1
 
     update = type(update) == 'table' and update or {}
-    local coords = ValidateCoords(update.coords)
-    if not coords then return end
 
-    tracker.coords = coords
-    tracker.heading = tonumber(update.heading) or tracker.heading or 0.0
-    tracker.speed = tonumber(update.speed) or tracker.speed or 0.0
-    tracker.street = tostring(update.street or tracker.street or 'Unknown')
+    local targetNetId = tonumber(tracker.netId)
+    if not targetNetId or targetNetId <= 0 then return end
+
+    local targetVehicle = NetworkGetEntityFromNetworkId(targetNetId)
+    if not targetVehicle or targetVehicle == 0 or not DoesEntityExist(targetVehicle) then return end
+    if GetEntityType(targetVehicle) ~= 2 then return end
+
+    local officerPed = GetPlayerPed(src)
+    if not officerPed or officerPed == 0 or not DoesEntityExist(officerPed) then return end
+
+    local targetCoords = GetEntityCoords(targetVehicle)
+    local officerCoords = GetEntityCoords(officerPed)
+    local maxBroadcastDistance = tonumber(Config.Tracker.broadcastUpdateDistance) or 650.0
+    if #(officerCoords - targetCoords) > maxBroadcastDistance + 25.0 then return end
+
+    tracker.coords = {
+        x = targetCoords.x + 0.0,
+        y = targetCoords.y + 0.0,
+        z = targetCoords.z + 0.0
+    }
+    tracker.heading = GetEntityHeading(targetVehicle)
+    tracker.speed = GetEntitySpeed(targetVehicle) * 2.236936
+
+    local street = tostring(update.street or ''):sub(1, 96)
+    if street ~= '' then
+        tracker.street = street
+    elseif not tracker.street or tracker.street == '' then
+        tracker.street = 'Unknown'
+    end
+
     tracker.lastUpdate = now
 
     BroadcastToAuthorized('dpn-starchase:client:trackerUpdated', CompactTracker(tracker))
