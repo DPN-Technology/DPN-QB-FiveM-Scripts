@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   green-gate:
-    uses: DPN-Technology/.github/.github/workflows/dpn-green-gate.yml@main
+    uses: DPN-Technology/.github/.github/workflows/dpn-green-gate.yml@e0c9976d0c3534a4122f344642f4a08a5fc3f8c1
     with:
       lifecycle: development
       require_security_policy: true
