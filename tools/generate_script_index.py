@@ -7,6 +7,23 @@ import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 FRAMEWORKS = ("qbcore", "standalone", "hybrid")
+FRAMEWORK_LABELS = {
+    "qbcore": "QBCore",
+    "standalone": "Standalone",
+    "hybrid": "Hybrid",
+}
+DISPLAY_REPLACEMENTS = (
+    ("Dpn ", "DPN "),
+    ("Dpn-", "DPN-"),
+    ("Icu", "ICU"),
+    ("Pg 7x", "PG-7X"),
+)
+
+def format_display_name(value: object) -> str:
+    name = str(value or "Unnamed")
+    for source, replacement in DISPLAY_REPLACEMENTS:
+        name = name.replace(source, replacement)
+    return name
 
 records = []
 for framework in FRAMEWORKS:
@@ -55,7 +72,7 @@ else:
         if framework != current_framework:
             current_framework = framework
             current_category = None
-            lines += [f"## {framework.title()}", ""]
+            lines += [f"## {FRAMEWORK_LABELS.get(framework, framework.title())}", ""]
         if category != current_category:
             current_category = category
             lines += [
@@ -64,7 +81,7 @@ else:
                 "| Resource | Version | Status | Description |",
                 "|---|---:|---|---|",
             ]
-        name = item.get("display_name", item.get("name", "Unnamed"))
+        name = format_display_name(item.get("display_name", item.get("name", "Unnamed")))
         path = item["_path"]
         version = item.get("version", "—")
         status = item.get("status", "—")
