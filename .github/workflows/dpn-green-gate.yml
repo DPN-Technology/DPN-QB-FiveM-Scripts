@@ -1,4 +1,4 @@
-name: DPN Enterprise Green Gate
+name: DPN Enterprise Standard Gate
 
 on:
   pull_request:
@@ -15,12 +15,12 @@ jobs:
     uses: DPN-Technology/.github/.github/workflows/dpn-green-gate.yml@edd44de1a948eee0344842e0eb85089bc2c6f2ff
     with:
       lifecycle: development
-      enterprise_mode: audit
+      enterprise_mode: enforce
       governance_tier: standard
       require_security_policy: true
       require_dependency_record: false
       require_runbook: false
       require_codeowners: false
-      require_pr_template: false
+      require_pr_template: true
       require_action_sha_pinning: true
       require_explicit_workflow_permissions: true
