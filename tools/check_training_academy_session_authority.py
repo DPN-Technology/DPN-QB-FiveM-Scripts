@@ -32,6 +32,7 @@ def main() -> None:
     app = APP.read_text(encoding='utf-8')
 
     required_server = {
+        'instructor/admin tool boundary': 'local function canUseInstructorTools(src)',
         'scenario ownership helper': 'local function canManageScenario(src, session)',
         'instructor ownership binding': 'session.instructor == src and InstructorSessions[src] == session.id',
         'system scenario admin boundary': 'session.instructor == 0 and isAcademyAdmin(src)',
@@ -73,6 +74,10 @@ def main() -> None:
 
     if "RegisterNUICallback('setScenarioTrainee'" not in client:
         fail('client is missing the trainee enrollment callback')
+    if 'viewerSource = src' not in server or 'academyAdmin = isAcademyAdmin(src)' not in server:
+        fail('server does not publish viewer authority context to the instructor UI')
+    if 'Number(s.instructor) === Number(state.viewerSource)' not in app:
+        fail('instructor UI does not filter sessions to the authorized owner/admin view')
     for needle in ("post('setScenarioTrainee'", "post('gradeScenario'", "post('endSession'"):
         if needle not in app:
             fail(f'instructor UI missing managed scenario action: {needle}')
