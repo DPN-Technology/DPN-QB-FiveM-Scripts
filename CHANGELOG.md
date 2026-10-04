@@ -22,6 +22,6 @@ This project follows semantic-versioning principles for formal releases where pr
 
 ## Release history
 
-GitHub Releases and resource-specific `resource.json`, `fxmanifest.lua`, and README version information remain the authoritative source for previously published resource versions until older release notes are normalized into this changelog.
+Resource-specific `resource.json` and `fxmanifest.lua` define source versions. GitHub Releases become the authoritative distribution record only when a resource has actually been published through the DPN release workflow.
 
 © DPN Technology.
