@@ -2,7 +2,7 @@
 
 Status: current-main evidence index
 
-Baseline refreshed through `main` at `efb9eef0055c823775e04282815c66a5c7780ffa`.
+Baseline refreshed through `main` at `9233cae414f5325f40d6a88f44a299f7f78ac0dd`.
 
 ## Current state
 
@@ -18,6 +18,10 @@ The repository has materially advanced since the original September audit, so ol
 - LE forced vehicle placement: PR #100 resolves client-selected network IDs server-side, verifies a real vehicle entity, and requires server-observed officer/target proximity before placement.
 - Medical dispatch v9-v12 single-route remediation: refreshed from current main in PR #74.
 - PD doorbell unconditional fallback polling: refreshed from current main in PR #75.
+
+### Fresh post-wave audit work
+
+- StarChase SQL identifier hardening: dynamic table-name construction is now constrained by a server-owned identifier validator, bounded fallback, parameterized row values, and a deterministic Quality Gate regression check.
 
 ### Confirmed current-main hardening targets
 

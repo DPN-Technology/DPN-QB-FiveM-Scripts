@@ -4,6 +4,14 @@
 > **Official DPN Technology Release** — Created by **Diesel, CEO of DPN Technology**. This resource is part of the DPN FiveM community release library and is governed by the repository DPN Technology Community Source License (DPN-CSL). Use and modification are permitted under the license; commercial resale requires explicit DPN Technology authorization.
 
 
+## v1.1.2 Database Hardening
+
+- Database table identifiers are validated server-side before they are interpolated into SQL.
+- Identifiers are limited to MySQL-safe alphanumeric/underscore names with a 64-character maximum.
+- Invalid configured identifiers fail closed to `dpn_starchase_logs` and emit a bounded server warning.
+- Row values continue to use parameterized placeholders.
+- The resource is now marked `hardened` in DPN resource metadata after regression coverage was added.
+
 Advanced QBCore police StarChase-style GPS tracker launcher system for FiveM.
 
 This is a full from-scratch rebuild. It does not depend on Rockstar Editor, recording systems, weapons damage, bullets, explosions, or the old WIP code.
