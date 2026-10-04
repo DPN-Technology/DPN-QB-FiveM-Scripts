@@ -204,6 +204,35 @@ local function GetAuthoritativeTarget(src, netId)
     return target
 end
 
+local function IsWithinTrackerRemovalDistance(src, tracker, maxDistance)
+    local ped = GetPlayerPed(src)
+    if not ped or ped == 0 or not DoesEntityExist(ped) then
+        return false
+    end
+
+    local referenceCoords
+    local netId = tonumber(tracker and tracker.netId)
+    if netId and netId > 0 then
+        local targetVehicle = NetworkGetEntityFromNetworkId(netId)
+        if targetVehicle and targetVehicle ~= 0 and DoesEntityExist(targetVehicle) and GetEntityType(targetVehicle) == 2 then
+            referenceCoords = GetEntityCoords(targetVehicle)
+        end
+    end
+
+    if not referenceCoords then
+        referenceCoords = tracker and tracker.coords
+        if type(referenceCoords) ~= 'table' then return false end
+        referenceCoords = vector3(
+            tonumber(referenceCoords.x) or 0.0,
+            tonumber(referenceCoords.y) or 0.0,
+            tonumber(referenceCoords.z) or 0.0
+        )
+    end
+
+    local removalDistance = tonumber(maxDistance) or 2.0
+    return #(GetEntityCoords(ped) - referenceCoords) <= removalDistance + 2.5
+end
+
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
     Wait(1000)
@@ -402,6 +431,11 @@ QBCore.Functions.CreateCallback('dpn-starchase:server:removeNearest', function(s
     local tracker = ActiveTrackers[tostring(trackerId or '')]
     if not tracker then cb({ ok = false, message = Config.Messages.nearestMissing }) return end
 
+    if not IsWithinTrackerRemovalDistance(src, tracker, Config.Tracker.physicalRemovalDistance) then
+        cb({ ok = false, message = Config.Messages.nearestMissing })
+        return
+    end
+
     EndTracker(tracker.id, 'physical_officer_removed', src, { coords = ValidateCoords(coords) })
     cb({ ok = true, message = Config.Messages.removed, removedId = tostring(trackerId or ''), trackers = GetTrackersList() })
 end)
@@ -411,6 +445,10 @@ RegisterNetEvent('dpn-starchase:server:civilianRemove', function(trackerId, coor
     if not Config.Tracker.civilianRemoval then return end
     local tracker = ActiveTrackers[tostring(trackerId or '')]
     if not tracker then return end
+
+    if not IsWithinTrackerRemovalDistance(src, tracker, Config.Tracker.physicalRemovalDistance) then
+        return
+    end
 
     EndTracker(tracker.id, 'physical_removed', src, { coords = ValidateCoords(coords), civilian = true })
     if Config.Tracker.removalAlertToPolice then
