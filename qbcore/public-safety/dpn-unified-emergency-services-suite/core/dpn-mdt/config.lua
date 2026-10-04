@@ -4,6 +4,42 @@ Config.Debug = false
 Config.Command = 'mdt'
 Config.Keybind = 'F11'
 Config.CallbackTimeout = 8000 -- milliseconds before the client reports a missing/stuck server callback
+
+-- Server-side request throttles. Each callback name receives its own bucket.
+Config.RateLimits = {
+    Enabled = true,
+    DefaultCallbackMs = 200,
+    HeavyCallbackMs = 600,
+    UnitStatusMs = 500,
+    HeavyCallbacks = {
+        GetInitialData = true,
+        SearchCitizens = true,
+        GetCitizenProfile = true,
+        SearchVehicles = true,
+        GetVehicleProfile = true,
+        SearchPenalCode = true,
+        GetCitizenCharges = true,
+        SearchReports = true,
+        GetReport = true,
+        GetAuditLogs = true
+    }
+}
+
+-- Unit statuses accepted from client-facing MDT status updates.
+Config.UnitStatuses = {
+    available = true,
+    busy = true,
+    enroute = true,
+    onscene = true,
+    transporting = true,
+    court = true,
+    corrections = true,
+    unavailable = true,
+    at_hospital = true,
+    at_station = true,
+    offradio = true,
+    out_of_service = true
+}
 Config.OnlyShowOnDuty = true
 Config.DefaultTheme = 'leo'
 Config.Locale = 'en'
