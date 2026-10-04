@@ -63,7 +63,7 @@ jobs:
           checksum="$archive.sha256"
           sha256sum "$archive" > "$checksum"
           sha256sum -c "$checksum"
-          evidence="dist/dpn-starchase-v1.1.1.release-evidence.json"
+          evidence="dist/dpn-starchase-v1.1.2.release-evidence.json"
           python3 tools/generate_release_evidence.py "$resource" "$archive" "$checksum" --output "$evidence"
           test -s "$evidence"
 
