@@ -9,7 +9,7 @@ game 'gta5'
 lua54 'yes'
 author 'Diesel — CEO of DPN Technology'
 description 'dpn-medical-core v14 - time-critical trauma and resuscitation command'
-version '14.0.0'
+version '14.0.1'
 
 ui_page 'web/index.html'
 
