@@ -1,20 +1,25 @@
 # Training Academy Session Authority Hardening Contract
 
-Baseline: `main` at `6bea5b82dd09764584e9e6ea9664c23a15b580e4`.
+Baseline refreshed from `main` at `2d88c57091f178ceb964feaf4df1f5f52c8afc1e`.
 
-## Current finding
+## Resolution
 
-Current `dpn-training-academy/server/main.lua` verifies instructor role for `gradeScenario` and `endSession`, but still does not prove that the caller owns the referenced instructor-created session.
+Instructor scenario mutations now use a server-authoritative ownership and membership model.
 
-`gradeScenario` also validates that the target is an online LEO but does not prove that the target is enrolled in `session.trainees`.
+- Instructor-created scenarios are bound to both `session.instructor` and `InstructorSessions[source]`.
+- An instructor cannot create a second active scenario until the current one is closed or abandoned.
+- Trainee enrollment and removal are explicit server events controlled by the scenario owner.
+- Trainees are keyed by the server-derived persistent player identifier rather than trusting a client ownership claim.
+- `gradeScenario` fails closed unless the caller owns the active scenario and the target is currently online, eligible, and enrolled in that exact session.
+- `endSession` requires the same ownership authority and clears the instructor ownership index.
+- Instructor disconnects mark their still-open scenario `abandoned`, preventing orphaned mutable sessions.
+- System-created scenarios remain `instructor = 0`; only holders of the configured academy admin ACE can manage them through player-facing mutation events.
+- External/system scenario creation records the invoking resource as `ownerResource` for audit context.
 
-External/system scenarios continue to use `instructor = 0`, so hardening must preserve explicit server-owned compatibility for those paths.
+## Preserved behavior
 
-## Required invariants
+Course scoring, certifications, dispatch integration, external scenario creation, SQL audit records, NUI workflows, and existing event names remain intact. The instructor UI now exposes explicit trainee enrollment/removal and scenario closure so the authoritative membership contract is usable in normal gameplay.
 
-- Instructor-created session mutations require `session.instructor == source` or equivalent authoritative ownership.
-- Grading additionally requires authoritative trainee membership.
-- Missing, stale, closed, wrong-type, cross-instructor, and non-member mutations fail closed.
-- Session closure clears or updates ownership indexes consistently.
-- Existing events, UI workflows, course scoring, certifications, dispatch integration, external scenario exports, audit records, and unique functionality remain intact.
-- Add focused Quality Gate coverage for ownership and membership checks.
+## Regression coverage
+
+`tools/check_training_academy_session_authority.py` is wired into DPN Quality Gate and fails when session ownership, enrollment authority, grade membership checks, ownership-index cleanup, or the NUI enrollment path is removed.
