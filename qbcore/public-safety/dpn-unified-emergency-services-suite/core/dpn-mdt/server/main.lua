@@ -121,7 +121,37 @@ local function safeConfiguredIdentifier(key)
     local configured = Config.Database and Config.Database[key] or fallback
     local value = tostring(configured or '')
 
-    if value == '' or #value > 64 or not value:match('^[%w_]+
+    if value == '' or #value > 64 or value:find('[^%w_]') then
+        print(('^3[dpn-mdt][SECURITY]^7 Invalid Config.Database.%s identifier %q; using %s instead.'):format(
+            tostring(key),
+            value:sub(1, 96),
+            fallback
+        ))
+        return fallback
+    end
+
+    return value
+end
+
+local DPNDB = {
+    players = safeConfiguredIdentifier('players'),
+    vehicles = safeConfiguredIdentifier('vehicles'),
+    apartments = safeConfiguredIdentifier('apartments'),
+    houses = safeConfiguredIdentifier('houses'),
+    phoneVehicles = safeConfiguredIdentifier('phoneVehicles')
+}
+
+local columnCache = {}
+local tableCache = {}
+
+local function ident(value)
+    value = tostring(value or '')
+    if value == '' or #value > 64 or value:find('[^%w_]') then
+        error(('Unsafe SQL identifier: %s'):format(value:sub(1, 96)))
+    end
+    return ('`%s`'):format(value)
+end
+
 local function qcol(alias, column)
     if alias and alias ~= '' then
         return ident(alias) .. '.' .. ident(column)
