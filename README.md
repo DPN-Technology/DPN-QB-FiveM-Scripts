@@ -1,6 +1,6 @@
 <!-- DPN-REPO-HERO:START -->
 <p align="center"><img src=".github/readme-hero.svg" alt="DPN FiveM Resource Library" width="100%"></p>
-<p align="center"><img alt="DPN Technology" src="https://img.shields.io/badge/DPN-Technology-111111?style=flat-square&logo=github"> <img alt="Development" src="https://img.shields.io/badge/Development-Active-4DA3FF?style=flat-square"> <img alt="Organization" src="https://img.shields.io/badge/Organization-DPN--Technology-4DA3FF?style=flat-square"></p>
+<p align="center"><img alt="DPN Technology" src="https://img.shields.io/badge/DPN-Technology-111111?style=flat-square&logo=github"> <img alt="Development" src="https://img.shields.io/badge/Development-Active-E10600?style=flat-square"> <img alt="Organization" src="https://img.shields.io/badge/Organization-DPN--Technology-E10600?style=flat-square"></p>
 <!-- DPN-REPO-HERO:END -->
 
 <!-- DPN-LIVE-STATUS:START -->
@@ -15,6 +15,7 @@
 <!-- DPN-QC-STATUS:START -->
 <p align="center">
   <strong>DPN QUALITY CONTROL // MAIN BRANCH</strong><br>
+  <sub>Release baseline: <a href="https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/releases"><strong>latest published release</strong></a> • Controlled distribution branch: <code>main</code></sub><br>
   <img alt="DPN Quality Gate" src="https://img.shields.io/github/actions/workflow/status/DPN-Technology/DPN-QB-FiveM-Scripts/dpn-quality-gate.yml?branch=main&style=flat-square&label=quality%20gate">
   <img alt="DPN Security Baseline" src="https://img.shields.io/github/actions/workflow/status/DPN-Technology/DPN-QB-FiveM-Scripts/dpn-security-baseline.yml?branch=main&style=flat-square&label=security%20baseline">
   <img alt="DPN Security Supply Chain" src="https://img.shields.io/github/actions/workflow/status/DPN-Technology/DPN-QB-FiveM-Scripts/dpn-security-supply-chain.yml?branch=main&style=flat-square&label=supply%20chain">
@@ -77,7 +78,7 @@ flowchart LR
 | --- | --- |
 | [Security policy](SECURITY.md) | Vulnerability reporting, protected-data guidance and security expectations |
 | [Architecture](qbcore/public-safety/dpn-unified-emergency-services-suite/docs/ARCHITECTURE.md) | System boundaries, major components and engineering model |
-| [GitHub Releases](https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/releases) | Published per-resource versions and downloadable release artifacts |\n| [Release process](docs/RELEASE_PROCESS.md) | Packaging, checksum, evidence and publication workflow |
+| [GitHub Releases](https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/releases) | Published per-resource versions and downloadable release artifacts || [Release process](docs/RELEASE_PROCESS.md) | Packaging, checksum, evidence and publication workflow |
 
 > **Repository presentation rule:** status, release and security claims in this README should stay tied to repository evidence. Visual polish must not imply a capability is production-ready when the underlying project documentation says otherwise.
 
