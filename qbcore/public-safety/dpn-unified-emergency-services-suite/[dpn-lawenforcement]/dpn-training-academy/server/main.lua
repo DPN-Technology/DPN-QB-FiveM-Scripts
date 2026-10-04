@@ -32,6 +32,10 @@ local function isAcademyAdmin(src)
     return Config.AceAdmin and IsPlayerAceAllowed(src, Config.AceAdmin) == true
 end
 
+local function canUseInstructorTools(src)
+    return DPN.Bridge.IsInstructor(src) or isAcademyAdmin(src)
+end
+
 local function canManageScenario(src, session)
     if type(session) ~= 'table' or session.type ~= 'scenario' then return false end
     if session.status == 'closed' or session.status == 'abandoned' then return false end
@@ -104,7 +108,9 @@ RegisterNetEvent('dpn-training-academy:server:requestOpen', function()
             courses = Config.Courses,
             certs = Config.Certifications,
             scenarios = Config.ScenarioPresets,
-            instructor = DPN.Bridge.IsInstructor(src),
+            instructor = canUseInstructorTools(src),
+            viewerSource = src,
+            academyAdmin = isAcademyAdmin(src),
             sessions = ActiveSessions
         })
     end)
@@ -173,7 +179,7 @@ end)
 
 RegisterNetEvent('dpn-training-academy:server:createScenario', function(data)
     local src = source
-    if not DPN.Bridge.IsInstructor(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
+    if not canUseInstructorTools(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
     local existingId = InstructorSessions[src]
     local existing = existingId and ActiveSessions[existingId] or nil
     if existing and existing.status ~= 'closed' and existing.status ~= 'abandoned' then
@@ -205,7 +211,7 @@ end)
 
 RegisterNetEvent('dpn-training-academy:server:setScenarioTrainee', function(sessionId, targetServerId, enrolled)
     local src = source
-    if not DPN.Bridge.IsInstructor(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
+    if not canUseInstructorTools(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
     sessionId = clean(sessionId, 64)
     local session = ActiveSessions[sessionId]
     if not canManageScenario(src, session) then
@@ -240,7 +246,7 @@ end)
 
 RegisterNetEvent('dpn-training-academy:server:gradeScenario', function(sessionId, targetServerId, score, notes)
     local src = source
-    if not DPN.Bridge.IsInstructor(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
+    if not canUseInstructorTools(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
     sessionId = clean(sessionId, 64)
     local session = ActiveSessions[sessionId]
     if not canManageScenario(src, session) then
@@ -270,7 +276,7 @@ end)
 RegisterNetEvent('dpn-training-academy:server:endSession', function(sessionId)
     local src = source
     sessionId = clean(sessionId, 64)
-    if not DPN.Bridge.IsInstructor(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
+    if not canUseInstructorTools(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
     local session = ActiveSessions[sessionId]
     if not canManageScenario(src, session) then
         return DPN.Bridge.Notify(src, 'You do not own that active training scenario.', 'error')
