@@ -2,7 +2,7 @@
 
 Status: current-main evidence index
 
-Baseline refreshed through `main` at `6853a48be6a1d8d55f4a21cfcb900911c4791d34`.
+Baseline refreshed through `main` at `da29b48dcb425bad0501383a5fc7da6fc6586b36`.
 
 ## Current state
 
@@ -14,13 +14,13 @@ The repository has materially advanced since the original September audit, so ol
 - MIB range-bound target authority: `freeze`, `scan`, neuralizer target actions, and `revive` use server-observed entity proximity; revive also enforces its server-side cooldown.
 - Training Academy scenario authority: instructor sessions are owner-bound, trainee enrollment is server-authoritative, grading requires exact-session membership, and stale ownership is cleaned on closure/disconnect.
 - Medical Test Lab export authority: mutation exports are default-deny by server-derived invoking resource, with `dpn-medical-admin-tools` explicitly trusted and invoking-resource evidence recorded.
+- LE forced vehicle placement: PR #100 resolves client-selected network IDs server-side, verifies a real vehicle entity, and requires server-observed officer/target proximity before placement.
 - Medical dispatch v9-v12 single-route remediation: refreshed from current main in PR #74.
 - PD doorbell unconditional fallback polling: refreshed from current main in PR #75.
 
 ### Confirmed current-main hardening targets
 
 - MIB action-specific privilege policy remains broader than the existing general `requireAccess` gate.
-- LE forced vehicle placement still needs server-side validation of the client-selected vehicle network ID.
 
 ## Engineering rules
 

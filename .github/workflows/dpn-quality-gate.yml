@@ -85,6 +85,9 @@ jobs:
       - name: Validate Medical Test Lab export authority
         run: python3 tools/check_medical_testlab_export_authority.py
 
+      - name: Validate LE vehicle placement authority
+        run: python3 tools/check_le_vehicle_placement_authority.py
+
       - name: Validate PD doorbell cooldown authority
         run: python3 tools/check_pd_doorbell_cooldown_authority.py
 
