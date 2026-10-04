@@ -1,7 +1,8 @@
-name: DPN Green Gate
+name: DPN Enterprise Green Gate
 
 on:
   pull_request:
+  merge_group:
   push:
     branches: [main]
   workflow_dispatch:
@@ -11,9 +12,14 @@ permissions:
 
 jobs:
   green-gate:
-    uses: DPN-Technology/.github/.github/workflows/dpn-green-gate.yml@e0c9976d0c3534a4122f344642f4a08a5fc3f8c1
+    uses: DPN-Technology/.github/.github/workflows/dpn-green-gate.yml@main
     with:
       lifecycle: development
+      enterprise_mode: audit
       require_security_policy: true
       require_dependency_record: false
       require_runbook: false
+      require_codeowners: false
+      require_pr_template: false
+      require_action_sha_pinning: true
+      require_explicit_workflow_permissions: true
