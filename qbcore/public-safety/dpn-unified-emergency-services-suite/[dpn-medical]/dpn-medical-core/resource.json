@@ -1,7 +1,7 @@
 {
   "name": "dpn-medical-core",
   "display_name": "Dpn Medical Core",
-  "version": "14.0.0",
+  "version": "14.0.1",
   "framework": "qbcore",
   "category": "public-safety",
   "status": "imported",
