@@ -30,7 +30,7 @@ def main() -> None:
     controls = {
         "safe configured identifier helper": "local function safeConfiguredIdentifier(key)",
         "identifier length bound": "#value > 64",
-        "strict identifier allowlist": "value:match('^[%w_]+$')",
+        "strict identifier allowlist": "value:find('[^%w_]')",
         "known-safe defaults": "local DB_DEFAULTS = {",
         "bounded invalid identifier log": "value:sub(1, 96)",
         "server-owned filter allowlist": "local COUNT_FILTERS = {",
