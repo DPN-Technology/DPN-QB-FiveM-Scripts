@@ -1,7 +1,7 @@
 {
   "name": "dpn-training-academy",
   "display_name": "Dpn Training Academy",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "framework": "qbcore",
   "category": "public-safety",
   "status": "imported",

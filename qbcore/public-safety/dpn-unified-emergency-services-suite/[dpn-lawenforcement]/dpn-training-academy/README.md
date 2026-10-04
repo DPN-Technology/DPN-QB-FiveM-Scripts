@@ -8,10 +8,10 @@ Advanced FiveM law enforcement training academy for DPN Technology.
 
 ## Features
 
-- QBCore / ESX / standalone bridge
-- Academy command UI: `/academy` or F7
+- QBCore-native runtime with DPN bridge integration
+- Academy command UI: `/academy` or F2
 - Firearms, EVOC, drone, evidence, field training, and incident command certifications
-- Instructor scenario staging and grading
+- Instructor-owned scenario staging with server-authoritative trainee enrollment, grading, and closure
 - Training records and expiring certifications
 - SQL-backed audit logs
 - DPN ecosystem hooks for dispatch, evidence, drone, smart city, and incident command
@@ -40,8 +40,12 @@ add_ace group.admin dpn.academy.instructor allow
 
 ## Commands
 
-- `/academy` opens the academy UI.
+- `/academy` opens the academy UI (default key: F2).
 - `/finishacademy` completes and scores the active course.
+
+## Scenario authority
+
+Instructor-created scenarios are owned by the creating instructor. Trainees must be explicitly enrolled before they can be graded, and cross-instructor or closed-session mutations fail closed. System-created scenarios remain server-owned; academy admins can manage them through the same audited instructor interface.
 
 ## Exports
 

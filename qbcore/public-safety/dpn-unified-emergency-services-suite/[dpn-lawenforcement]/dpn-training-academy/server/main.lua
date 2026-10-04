@@ -28,6 +28,30 @@ local function broadcastSessions()
     end
 end
 
+local function isAcademyAdmin(src)
+    return Config.AceAdmin and IsPlayerAceAllowed(src, Config.AceAdmin) == true
+end
+
+local function canUseInstructorTools(src)
+    return DPN.Bridge.IsInstructor(src) or isAcademyAdmin(src)
+end
+
+local function canManageScenario(src, session)
+    if type(session) ~= 'table' or session.type ~= 'scenario' then return false end
+    if session.status == 'closed' or session.status == 'abandoned' then return false end
+    if session.instructor == src and InstructorSessions[src] == session.id then return true end
+    return session.instructor == 0 and isAcademyAdmin(src)
+end
+
+local function enrolledTrainee(session, targetServerId)
+    targetServerId = tonumber(targetServerId)
+    if not targetServerId or not DPN.Bridge.IsLEO(targetServerId) then return nil, nil end
+    local identifier = DPN.Bridge.GetIdentifier(targetServerId)
+    if not identifier or identifier == '' then return nil, nil end
+    local trainee = session.trainees and session.trainees[identifier] or nil
+    return trainee, identifier
+end
+
 local function calculateCourseScore(course, session, scoreData)
     scoreData = type(scoreData) == 'table' and scoreData or {}
     local stats = type(scoreData.stats) == 'table' and scoreData.stats or {}
@@ -84,7 +108,9 @@ RegisterNetEvent('dpn-training-academy:server:requestOpen', function()
             courses = Config.Courses,
             certs = Config.Certifications,
             scenarios = Config.ScenarioPresets,
-            instructor = DPN.Bridge.IsInstructor(src),
+            instructor = canUseInstructorTools(src),
+            viewerSource = src,
+            academyAdmin = isAcademyAdmin(src),
             sessions = ActiveSessions
         })
     end)
@@ -153,7 +179,13 @@ end)
 
 RegisterNetEvent('dpn-training-academy:server:createScenario', function(data)
     local src = source
-    if not DPN.Bridge.IsInstructor(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
+    if not canUseInstructorTools(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
+    local existingId = InstructorSessions[src]
+    local existing = existingId and ActiveSessions[existingId] or nil
+    if existing and existing.status ~= 'closed' and existing.status ~= 'abandoned' then
+        return DPN.Bridge.Notify(src, ('End active scenario %s before creating another.'):format(existingId), 'error')
+    end
+    InstructorSessions[src] = nil
     data = type(data) == 'table' and data or {}
     local presetId = clean(data.preset or 'traffic_stop', 64)
     local preset = Config.ScenarioPresets[presetId] or Config.ScenarioPresets.traffic_stop
@@ -177,36 +209,95 @@ RegisterNetEvent('dpn-training-academy:server:createScenario', function(data)
     end
 end)
 
-RegisterNetEvent('dpn-training-academy:server:gradeScenario', function(sessionId, targetServerId, score, notes)
+RegisterNetEvent('dpn-training-academy:server:setScenarioTrainee', function(sessionId, targetServerId, enrolled)
     local src = source
-    if not DPN.Bridge.IsInstructor(src) then return end
+    if not canUseInstructorTools(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
     sessionId = clean(sessionId, 64)
     local session = ActiveSessions[sessionId]
+    if not canManageScenario(src, session) then
+        return DPN.Bridge.Notify(src, 'You do not own that active training scenario.', 'error')
+    end
     targetServerId = tonumber(targetServerId)
-    if not session or not targetServerId or not DPN.Bridge.IsLEO(targetServerId) then return end
+    if not targetServerId or not DPN.Bridge.IsLEO(targetServerId) then
+        return DPN.Bridge.Notify(src, 'Trainee must be an online emergency-services member.', 'error')
+    end
+    local identifier = DPN.Bridge.GetIdentifier(targetServerId)
+    if not identifier or identifier == '' then return DPN.Bridge.Notify(src, 'Unable to resolve trainee identity.', 'error') end
+    session.trainees = session.trainees or {}
+    if enrolled == false then
+        if not session.trainees[identifier] then return DPN.Bridge.Notify(src, 'That member is not enrolled in this scenario.', 'error') end
+        session.trainees[identifier] = nil
+        insertAudit(src, 'remove_scenario_trainee', { session = sessionId, target = identifier })
+        DPN.Bridge.Notify(src, 'Trainee removed from scenario.', 'success')
+        TriggerClientEvent('dpn-training-academy:client:notify', targetServerId, ('Removed from training scenario %s.'):format(session.label), 'primary')
+    else
+        session.trainees[identifier] = {
+            identifier = identifier,
+            source = targetServerId,
+            name = DPN.Bridge.GetName(targetServerId),
+            enrolledAt = now()
+        }
+        insertAudit(src, 'enroll_scenario_trainee', { session = sessionId, target = identifier })
+        DPN.Bridge.Notify(src, 'Trainee enrolled in scenario.', 'success')
+        TriggerClientEvent('dpn-training-academy:client:notify', targetServerId, ('Enrolled in training scenario %s.'):format(session.label), 'primary')
+    end
+    broadcastSessions()
+end)
+
+RegisterNetEvent('dpn-training-academy:server:gradeScenario', function(sessionId, targetServerId, score, notes)
+    local src = source
+    if not canUseInstructorTools(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
+    sessionId = clean(sessionId, 64)
+    local session = ActiveSessions[sessionId]
+    if not canManageScenario(src, session) then
+        return DPN.Bridge.Notify(src, 'You do not own that active training scenario.', 'error')
+    end
+    local trainee, identifier = enrolledTrainee(session, targetServerId)
+    if not trainee then
+        return DPN.Bridge.Notify(src, 'Target must be enrolled in this scenario before grading.', 'error')
+    end
+    targetServerId = tonumber(targetServerId)
     score = math.max(0, math.min(100, math.floor(tonumber(score) or 0)))
     notes = clean(notes or '', 2000)
-    local identifier = DPN.Bridge.GetIdentifier(targetServerId)
-    local name = DPN.Bridge.GetName(targetServerId)
+    local name = trainee.name or DPN.Bridge.GetName(targetServerId)
     if dbReady() then
         MySQL.insert('INSERT INTO dpn_academy_records (session_id, identifier, name, course_id, course_label, score, passed, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())', {
             sessionId, identifier, name, session.preset or 'scenario', session.label, score, score >= 80 and 1 or 0, notes or ''
         })
     end
+    trainee.lastScore = score
+    trainee.lastGradedAt = now()
+    trainee.lastGradedBy = DPN.Bridge.GetIdentifier(src)
     TriggerClientEvent('dpn-training-academy:client:notify', targetServerId, ('Scenario graded: %s%%'):format(score), 'primary')
     insertAudit(src, 'grade_scenario', { session = sessionId, target = identifier, score = score })
+    broadcastSessions()
 end)
 
 RegisterNetEvent('dpn-training-academy:server:endSession', function(sessionId)
     local src = source
     sessionId = clean(sessionId, 64)
-    if not DPN.Bridge.IsInstructor(src) then return end
-    if ActiveSessions[sessionId] then
-        ActiveSessions[sessionId].status = 'closed'
-        ActiveSessions[sessionId].endedAt = now()
-        insertAudit(src, 'end_session', { session = sessionId })
-        broadcastSessions()
+    if not canUseInstructorTools(src) then return DPN.Bridge.Notify(src, 'Instructor access required.', 'error') end
+    local session = ActiveSessions[sessionId]
+    if not canManageScenario(src, session) then
+        return DPN.Bridge.Notify(src, 'You do not own that active training scenario.', 'error')
     end
+    session.status = 'closed'
+    session.endedAt = now()
+    if session.instructor == src and InstructorSessions[src] == sessionId then InstructorSessions[src] = nil end
+    insertAudit(src, 'end_session', { session = sessionId })
+    broadcastSessions()
+end)
+
+AddEventHandler('playerDropped', function()
+    local src = source
+    local sessionId = InstructorSessions[src]
+    local session = sessionId and ActiveSessions[sessionId] or nil
+    if session and session.instructor == src and session.status ~= 'closed' then
+        session.status = 'abandoned'
+        session.endedAt = now()
+    end
+    InstructorSessions[src] = nil
+    if session then broadcastSessions() end
 end)
 
 libCallback = libCallback or {}
@@ -229,6 +320,7 @@ exports('CreateScenario', function(data)
         label = clean(data.label or 'External Training Scenario', 120),
         instructor = 0,
         instructorName = clean(data.instructorName or 'DPN System', 120),
+        ownerResource = clean(GetInvokingResource() or 'dpn-training-academy', 120),
         startedAt = now(),
         status = 'staged',
         location = type(data.location) == 'table' and {

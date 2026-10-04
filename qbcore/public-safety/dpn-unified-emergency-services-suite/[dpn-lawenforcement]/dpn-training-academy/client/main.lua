@@ -42,6 +42,11 @@ RegisterNUICallback('createScenario', function(data, cb)
     cb(true)
 end)
 
+RegisterNUICallback('setScenarioTrainee', function(data, cb)
+    TriggerServerEvent('dpn-training-academy:server:setScenarioTrainee', data.sessionId, tonumber(data.target), data.enrolled == true)
+    cb(true)
+end)
+
 RegisterNUICallback('gradeScenario', function(data, cb)
     TriggerServerEvent('dpn-training-academy:server:gradeScenario', data.sessionId, tonumber(data.target), tonumber(data.score), data.notes)
     cb(true)
