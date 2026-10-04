@@ -11,7 +11,7 @@ lua54 'yes'
 name 'dpn-training-academy'
 author 'Diesel — CEO of DPN Technology'
 description 'Emergency-services training, certifications, scoring and scenarios'
-version '4.0.0'
+version '4.0.1'
 
 ui_page 'html/index.html'
 shared_scripts { 'config.lua', 'shared/bridge.lua' }
