@@ -3,12 +3,12 @@
   --bg-2: #0a1830;
   --panel: #0c182a;
   --panel-2: #12233a;
-  --line: rgba(120, 170, 255, 0.24);
+  --line: rgba(225, 80, 80, 0.24);
   --text: #eaf3ff;
   --muted: #8ba4c4;
-  --accent: #2d8dff;
-  --accent-2: #34d6ff;
-  --accent-rgb: 45, 141, 255;
+  --accent: #e10600;
+  --accent-2: #ff4b4b;
+  --accent-rgb: 225, 6, 0;
   --danger: #ff5d73;
   --warning: #ffd166;
   --ok: #5cff9e;
