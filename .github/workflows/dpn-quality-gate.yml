@@ -27,6 +27,20 @@ jobs:
       - name: Run DPN repository validator
         run: python3 tools/dpn_repo_validator.py
 
+      - name: Dry-run Release Factory v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          resource="qbcore/law-enforcement/dpn-starchase"
+          archive="$(python3 tools/package_resource.py "$resource")"
+          python3 -m zipfile -t "$archive"
+          checksum="$archive.sha256"
+          sha256sum "$archive" > "$checksum"
+          sha256sum -c "$checksum"
+          evidence="dist/dpn-starchase-v1.1.1.release-evidence.json"
+          python3 tools/generate_release_evidence.py "$resource" "$archive" "$checksum" --output "$evidence"
+          test -s "$evidence"
+
       - name: Validate FiveM manifest integrity
         run: python3 tools/check_fivem_manifest_integrity.py
 
