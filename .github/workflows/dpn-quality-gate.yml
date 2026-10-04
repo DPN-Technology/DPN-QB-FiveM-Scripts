@@ -79,6 +79,9 @@ jobs:
       - name: Validate MIB target proximity authority
         run: python3 tools/check_mib_target_proximity_authority.py
 
+      - name: Validate MIB action privilege policy
+        run: python3 tools/check_mib_action_policy.py
+
       - name: Validate Training Academy session authority
         run: python3 tools/check_training_academy_session_authority.py
 
