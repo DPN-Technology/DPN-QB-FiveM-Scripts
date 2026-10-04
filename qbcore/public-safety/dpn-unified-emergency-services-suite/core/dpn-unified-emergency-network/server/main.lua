@@ -110,15 +110,17 @@ function DPN_UNES.Server.UpsertUnit(src, data)
         profile.heading = old.heading
     end
 
-    if type(data.vehicle) == 'table' then
+    local pedVehicle = GetVehiclePedIsIn(ped, false)
+    if pedVehicle and pedVehicle > 0 and DoesEntityExist(pedVehicle) and GetPedInVehicleSeat(pedVehicle, -1) == ped then
+        local modelHash = GetEntityModel(pedVehicle)
         profile.vehicle = {
-            plate = tostring(data.vehicle.plate or ''):sub(1, 16),
-            model = tostring(data.vehicle.model or ''):sub(1, 64),
-            speed = math.max(0, math.min(250, tonumber(data.vehicle.speed) or 0)),
-            netId = tonumber(data.vehicle.netId)
+            plate = tostring(GetVehicleNumberPlateText(pedVehicle) or ''):sub(1, 16),
+            model = tostring(modelHash),
+            speed = math.max(0, math.min(250, GetEntitySpeed(pedVehicle) * 2.236936)),
+            netId = NetworkGetNetworkIdFromEntity(pedVehicle)
         }
     else
-        profile.vehicle = old.vehicle
+        profile.vehicle = nil
     end
 
     profile.status = tableHas(DPN_UNES.Config.UnitStatuses, data.status) and data.status or old.status or profile.status or 'available'
