@@ -129,11 +129,12 @@ RegisterNetEvent('dpn-training-academy:server:finishCourse', function(sessionId,
         })
         if passed then
             local expiryDays = math.max(1, math.min(3650, math.floor(tonumber(cert.expiresDays or Config.DefaultCertExpiryDays) or 90)))
-            local certQuery = ([[INSERT INTO dpn_academy_certs (identifier, name, cert_id, cert_label, score, issued_at, expires_at)
-                VALUES (?, ?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL %d DAY))
-                ON DUPLICATE KEY UPDATE score = VALUES(score), issued_at = NOW(), expires_at = VALUES(expires_at), cert_label = VALUES(cert_label)]]):format(expiryDays)
+            local expiresAt = os.date('%Y-%m-%d %H:%M:%S', now() + (expiryDays * 86400))
+            local certQuery = [[INSERT INTO dpn_academy_certs (identifier, name, cert_id, cert_label, score, issued_at, expires_at)
+                VALUES (?, ?, ?, ?, ?, NOW(), ?)
+                ON DUPLICATE KEY UPDATE score = VALUES(score), issued_at = NOW(), expires_at = VALUES(expires_at), cert_label = VALUES(cert_label)]]
             MySQL.update(certQuery, {
-                session.identifier, session.traineeName, course.cert, cert.label, score
+                session.identifier, session.traineeName, course.cert, cert.label, score, expiresAt
             })
         end
     end
