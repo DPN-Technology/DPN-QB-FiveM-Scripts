@@ -2,15 +2,6 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local open = false
 local lastCoords = nil
 
-local function getVehicleData()
-    local ped = PlayerPedId()
-    local veh = GetVehiclePedIsIn(ped, false)
-    if veh and veh ~= 0 then
-        return { plate = GetVehicleNumberPlateText(veh), model = GetDisplayNameFromVehicleModel(GetEntityModel(veh)), speed = math.floor(GetEntitySpeed(veh) * 2.236936), netId = NetworkGetNetworkIdFromEntity(veh) }
-    end
-    return nil
-end
-
 local function sendCurrentGps(reason)
     local ped = PlayerPedId()
     if DoesEntityExist(ped) then
@@ -18,7 +9,7 @@ local function sendCurrentGps(reason)
         local heading = GetEntityHeading(ped)
         local coords = { x = c.x, y = c.y, z = c.z }
         lastCoords = coords
-        TriggerServerEvent('dpn-unes:server:unitLocation', { coords = coords, heading = heading, vehicle = getVehicleData(), reason = reason or 'manual' })
+        TriggerServerEvent('dpn-unes:server:unitLocation', { coords = coords, heading = heading, reason = reason or 'manual' })
         return true
     end
     return false
@@ -62,7 +53,7 @@ CreateThread(function()
             local coords = { x = c.x, y = c.y, z = c.z }
             if open or not lastCoords or #(vector3(c.x,c.y,c.z) - vector3(lastCoords.x,lastCoords.y,lastCoords.z)) > 2.0 then
                 lastCoords = coords
-                TriggerServerEvent('dpn-unes:server:unitLocation', { coords = coords, heading = heading, vehicle = getVehicleData(), reason = open and 'ui_live_heartbeat' or 'movement' })
+                TriggerServerEvent('dpn-unes:server:unitLocation', { coords = coords, heading = heading, reason = open and 'ui_live_heartbeat' or 'movement' })
             end
         end
     end
