@@ -51,10 +51,4 @@ jobs:
             exit 0
           fi
 
-          gh release create "$TAG"             --target "$GITHUB_SHA"             --title "DPN FiveM Script Library v$VERSION"             --generate-notes             --notes "Official DPN Technology FiveM Script Library repository baseline.
-
-This release represents the tested repository baseline documented in docs/RELEASE_PROFILE.md.
-
-Created by Diesel, CEO of DPN Technology.
-
-DPN Technology — Develop • Pioneer • Navigate."
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "DPN FiveM Script Library v$VERSION" --generate-notes --notes "Official DPN Technology FiveM Script Library repository baseline. See docs/RELEASE_PROFILE.md for the tested release model. Created by Diesel, CEO of DPN Technology. DPN Technology — Develop • Pioneer • Navigate."
