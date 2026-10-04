@@ -397,9 +397,32 @@ RegisterNetEvent('dpn-le-core:server:putInVehicle', function(target, vehicleNetI
     if not actionAllowed(src, true) or not target or not vehicleNetId then return end
     if not withinDistance(src, target, Config.Interactions.VehicleDistance) then return end
     if not Restrained[target] then return DPNBridge.Notify(src, 'The subject must be restrained first.', 'error') end
+
+    local vehicle = NetworkGetEntityFromNetworkId(vehicleNetId)
+    if not vehicle or vehicle <= 0 or not DoesEntityExist(vehicle) or GetEntityType(vehicle) ~= 2 then
+        return DPNBridge.Notify(src, 'A valid nearby vehicle is required.', 'error')
+    end
+
+    local sourcePed = GetPlayerPed(src)
+    local targetPed = GetPlayerPed(target)
+    if not sourcePed or sourcePed <= 0 or not targetPed or targetPed <= 0 then
+        return DPNBridge.Notify(src, 'Player entities are unavailable.', 'error')
+    end
+
+    local vehicleCoords = GetEntityCoords(vehicle)
+    local maxVehicleDistance = tonumber(Config.Interactions.VehicleDistance) or 5.0
+    local sourceDistance = #(GetEntityCoords(sourcePed) - vehicleCoords)
+    local targetDistance = #(GetEntityCoords(targetPed) - vehicleCoords)
+    if sourceDistance > maxVehicleDistance + 2.0 or targetDistance > maxVehicleDistance + 2.0 then
+        return DPNBridge.Notify(src, 'The target and vehicle must be nearby.', 'error')
+    end
+
     Escorting[target] = nil
     TriggerClientEvent('dpn-le-core:client:putInVehicle', target, vehicleNetId)
-    saveActionLog(src, 'PLACE_IN_VEHICLE', target, { vehicle = vehicleNetId })
+    saveActionLog(src, 'PLACE_IN_VEHICLE', target, {
+        vehicle = vehicleNetId,
+        vehicleDistance = math.max(sourceDistance, targetDistance)
+    })
 end)
 
 RegisterNetEvent('dpn-le-core:server:removeFromVehicle', function(target)
