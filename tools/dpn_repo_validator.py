@@ -221,8 +221,13 @@ for resource in sorted(set(resources)):
     manifest_text = manifest.read_text(encoding="utf-8", errors="ignore")
     if "DPN Technology" not in manifest_text:
         warning(manifest, "fxmanifest should identify DPN Technology")
-    if "version" not in manifest_text:
-        error(manifest, "fxmanifest should declare a version")
+
+    manifest_version_match = re.search(
+        r"(?m)^\s*version\s+['\"]([^'\"]+)['\"]",
+        manifest_text,
+    )
+    if not manifest_version_match:
+        error(manifest, "fxmanifest should declare a quoted version")
 
     if not metadata.exists():
         error(resource, "resource.json metadata is required for DPN indexing")
@@ -246,7 +251,22 @@ for resource in sorted(set(resources)):
         if data.get("name") != resource.name:
             error(metadata, "name must match the resource folder name")
 
-# Catch Lua code placed in a likely resource folder with no manifest.
+        metadata_version = data.get("version")
+        if not isinstance(metadata_version, str) or not metadata_version.strip():
+            error(metadata, "version must be a non-empty string")
+        elif manifest_version_match:
+            manifest_version = manifest_version_match.group(1).strip()
+            if manifest_version != metadata_version.strip():
+                error(
+                    metadata,
+                    f"version {metadata_version!r} does not match "
+                    f"fxmanifest.lua version {manifest_version!r}",
+                )
+
+# Catch Lua code placed in a likely resource root with no manifest.
+#
+# Child source directories such as client/, server/, and shared/ are normal
+# parts of a FiveM resource and must not be treated as independent resources.
 for framework in FRAMEWORKS:
     fw_root = ROOT / framework
     if not fw_root.exists():
@@ -256,9 +276,25 @@ for framework in FRAMEWORKS:
             continue
         if "templates" in directory.parts:
             continue
-        lua_here = list(directory.glob("*.lua"))
-        if lua_here and not (directory / "fxmanifest.lua").exists():
-            warning(directory, "Lua files found without fxmanifest.lua in this directory")
+        if not directory.name.startswith(("dpn-", "dpn_")):
+            continue
+        if (directory / "fxmanifest.lua").exists():
+            continue
+
+        has_lua = any(directory.rglob("*.lua"))
+        contains_child_resources = any(
+            manifest.parent != directory
+            for manifest in directory.rglob("fxmanifest.lua")
+        )
+        has_resource_markers = (
+            (directory / "resource.json").exists()
+            or (directory / "README.md").exists()
+            or any((directory / name).exists() for name in ("client", "server", "shared"))
+            or (directory / "config.lua").exists()
+        )
+
+        if has_lua and has_resource_markers and not contains_child_resources:
+            warning(directory, "likely DPN resource root contains Lua code but has no fxmanifest.lua")
 
 for msg in warnings:
     print(f"::warning::{msg}")
