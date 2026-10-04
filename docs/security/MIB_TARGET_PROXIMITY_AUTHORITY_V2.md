@@ -1,25 +1,31 @@
 # MIB Target Proximity Authority v2
 
-Baseline: `main` at `6bea5b82dd09764584e9e6ea9664c23a15b580e4`.
+Baseline refreshed from `main` at `250e74ebf11e7a75965835bd0a41d406c3cf5919`.
 
-## Current finding
+## Resolution
 
-Current `qbcore/admin/dpn-mib-system/server/main.lua` still validates general MIB/admin access and target existence for range-bound actions such as `freeze`, `scan`, and `revive`, but it does not independently prove caller-to-target distance on the server before those privileged effects. Client code selects nearby players, so proximity remains client-influenced.
+Range-bound MIB actions now establish proximity from server-observed player entities before privileged effects execute:
 
-Remote administrative operations such as `goto_player`, `bring`, `spectate`, routing-bucket management, and kick have intentionally different semantics and must not be mechanically forced through proximity checks.
+- `freeze` validates the target with `validTargetInRange(..., Config.Tools.freeze.range, ...)`.
+- `scan` validates the target with `validTargetInRange(..., Config.Tools.scan.range, ...)`.
+- `revive` now validates the target with `validTargetInRange(..., Config.Tools.revive.range, ...)` and applies the configured server-side cooldown before issuing the revive event.
+- Neuralizer target actions already use the same server-observed entity/coordinate authority model.
 
-## Required runtime contract
+The client may still propose a target ID, but it cannot establish proximity by itself. The server resolves caller and target peds, derives coordinates, applies the configured maximum distance, and fails closed when either entity cannot be validated.
 
-A focused runtime hardening change should:
+Remote administrative operations such as `goto_player`, `bring`, `spectate`, routing-bucket management, and kick intentionally preserve remote semantics and are not forced through proximity checks.
+
+## Runtime contract
 
 1. Resolve caller and target entities server-side.
 2. Derive coordinates from server-observed entities.
-3. Apply a configuration-owned maximum range only to actions whose intended semantics are local/range-bound.
-4. Fail closed when caller/target entities or coordinates cannot be validated.
-5. Preserve existing authorization, cooldowns, reasons, events, payloads, logging, notifications, and unique behavior.
-6. Keep explicitly remote administrative operations remote.
-7. Add an additive Quality Gate regression check.
+3. Apply configuration-owned maximum range only to local/range-bound actions.
+4. Fail closed when caller/target entities cannot be validated.
+5. Preserve existing authorization, reasons, events, payloads, logging, notifications, and unique behavior.
+6. Enforce action cooldowns server-side before effects.
+7. Keep explicitly remote administrative operations remote.
+8. Protect the contract with the additive `check_mib_target_proximity_authority.py` Quality Gate regression check.
 
 ## Acceptance criteria
 
-Range-bound MIB actions cannot execute solely because the client supplied a nearby target ID; server-observed proximity must be established before the effect.
+Range-bound MIB actions cannot execute solely because the client supplied a target ID; server-observed proximity must be established before the effect. CI fails if the required proximity guard, configured revive range, revive cooldown, or remote-action separation is removed.

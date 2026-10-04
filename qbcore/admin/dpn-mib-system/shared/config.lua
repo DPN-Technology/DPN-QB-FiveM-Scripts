@@ -55,7 +55,7 @@ Config.Tools = {
     wipe_scene = { label='Scene Memory Protocol', radius=22.0, cooldown=120 },
     spectate = { label='Remote Observation', cooldown=10 },
     entity_cleanup = { label='Anomaly Cleanup', radius=30.0, cooldown=30 },
-    revive = { label='Medical Override', cooldown=30 },
+    revive = { label='Medical Override', range=10.0, cooldown=30 },
     armor = { label='Suit Armor Protocol', amount=100, cooldown=45 },
     lockdown = { label='Local Blacksite Lockdown', radius=75.0, duration=60, cooldown=180 }
 }
