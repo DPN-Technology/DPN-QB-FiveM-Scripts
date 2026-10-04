@@ -5,6 +5,7 @@ local isLoggedIn = LocalPlayer.state.isLoggedIn
 -- Local variables
 local deployedSpikes = {}
 local playerSpikes = {}
+local recentSpikeHits = {}
 local isDeploying = false
 local lastDeployTime = 0
 
@@ -37,25 +38,18 @@ local function IsVehicleStationary(vehicle)
     return speed < 2.0
 end
 
-local function GetVehiclesInArea(coords, radius)
+local function GetVehiclesInArea(coords, radius, vehiclePool)
     local vehicles = {}
-    local handle, vehicle = FindFirstVehicle()
-    local finished = false
-    
-    repeat
+    for _, vehicle in ipairs(vehiclePool) do
         if DoesEntityExist(vehicle) then
             local vehicleCoords = GetEntityCoords(vehicle)
             local distance = #(coords - vehicleCoords)
-            
+
             if distance <= radius then
-                table.insert(vehicles, vehicle)
+                vehicles[#vehicles + 1] = vehicle
             end
         end
-        
-        finished, vehicle = FindNextVehicle(handle)
-    until not finished
-    
-    EndFindVehicle(handle)
+    end
     return vehicles
 end
 
@@ -217,6 +211,7 @@ local function CreateSpikeStrip(vehicle)
     
     deployedSpikes[spikeId] = spikeData
     playerSpikes[spikeId] = spikeData
+    recentSpikeHits[spikeId] = nil
     
     -- Sync with server
     TriggerServerEvent('qb-mobilespikes:server:deploySpike', spikeCoords, vehicleHeading, spikeId)
@@ -264,6 +259,7 @@ local function RemoveSpikeStrip(spikeId)
     -- Clean up data
     deployedSpikes[spikeId] = nil
     playerSpikes[spikeId] = nil
+    recentSpikeHits[spikeId] = nil
     
     -- Sync with server
     TriggerServerEvent('qb-mobilespikes:server:removeSpike', spikeId)
@@ -275,12 +271,18 @@ end
 
 local function CheckSpikeCollisions()
     local playerPed = PlayerPedId()
+    local now = GetGameTimer()
+    local hitCooldown = 1500
     local playerVehicle = GetVehiclePedIsIn(playerPed, false)
-    
+    -- Enumerate the world vehicle pool once per scan and reuse it for every
+    -- active spike. This avoids a full FindFirstVehicle/FindNextVehicle pass
+    -- for each deployed spike.
+    local vehiclePool = GetGamePool('CVehicle')
+
     for spikeId, spikeData in pairs(deployedSpikes) do
         if DoesEntityExist(spikeData.object) then
             local spikeCoords = GetEntityCoords(spikeData.object)
-            local vehicles = GetVehiclesInArea(spikeCoords, Config.DamageSettings.damageRadius)
+            local vehicles = GetVehiclesInArea(spikeCoords, Config.DamageSettings.damageRadius, vehiclePool)
             
             for _, vehicle in ipairs(vehicles) do
                 if vehicle ~= playerVehicle and vehicle ~= spikeData.vehicle then
@@ -291,6 +293,15 @@ local function CheckSpikeCollisions()
                         local speed = GetEntitySpeed(vehicle) * 3.6 -- km/h
                         
                         if speed >= Config.DamageSettings.minDamageSpeed and speed <= Config.DamageSettings.maxDamageSpeed then
+                            local spikeHits = recentSpikeHits[spikeId]
+                            local lastHit = spikeHits and spikeHits[vehicle]
+                            if lastHit and lastHit > now then
+                                goto continue_vehicle
+                            end
+
+                            recentSpikeHits[spikeId] = spikeHits or {}
+                            recentSpikeHits[spikeId][vehicle] = now + hitCooldown
+
                             -- Damage tires
                             if math.random(1, 100) <= Config.DamageSettings.tireDamageChance then
                                 for wheel = 0, 7 do
@@ -319,6 +330,16 @@ local function CheckSpikeCollisions()
                             end
                         end
                     end
+                end
+
+                ::continue_vehicle::
+            end
+        end
+
+        if recentSpikeHits[spikeId] then
+            for vehicle, expiresAt in pairs(recentSpikeHits[spikeId]) do
+                if expiresAt <= now or not DoesEntityExist(vehicle) then
+                    recentSpikeHits[spikeId][vehicle] = nil
                 end
             end
         end
@@ -546,6 +567,7 @@ RegisterNetEvent('qb-mobilespikes:client:removeSpike', function(spikeId)
         
         deployedSpikes[spikeId] = nil
         playerSpikes[spikeId] = nil
+        recentSpikeHits[spikeId] = nil
     end
 end)
 
