@@ -25,6 +25,17 @@ Config.PanicCommand = 'vpanic'
 Config.StatusCommand = 'vstatus'
 Config.PlateCommand = 'vplate'
 
+-- Per-player server event throttles. Values are milliseconds.
+Config.RateLimits = {
+    OpenMs = 500,
+    StatusMs = 300,
+    CreateCallMs = 1500,
+    PanicMs = 3000,
+    PlateCheckMs = 500,
+    HotlistMs = 750,
+    SaveNoteMs = 750
+}
+
 Config.Statuses = {
     ['10-8'] = 'Available',
     ['10-6'] = 'Busy',
