@@ -1,4 +1,15 @@
 local QBCore = exports['qb-core']:GetCoreObject()
+local statusRequestRate = {}
+
+local function allowStatusRequest(src)
+    if src <= 0 then return true end
+    local nowMs = GetGameTimer()
+    local cooldown = math.max(250, math.floor(tonumber(Config.StatusRequestCooldownMs) or 1000))
+    local last = statusRequestRate[src] or 0
+    if nowMs - last < cooldown then return false end
+    statusRequestRate[src] = nowMs
+    return true
+end
 
 local function isAdmin(src)
     if src == 0 then return true end
@@ -13,6 +24,7 @@ end
 
 RegisterNetEvent('dpn-real-traffic:server:requestStatus', function()
     local src = source
+    if not allowStatusRequest(src) then return end
     local tsState = GetResourceState(Config.TrafficLights.ResourceName)
     TriggerClientEvent('dpn-real-traffic:client:status', src, {
         debug = Config.Debug,
@@ -41,6 +53,10 @@ RegisterCommand(Config.Commands.Status, function(source)
 
     TriggerClientEvent('dpn-real-traffic:client:requestStatus', source)
 end, false)
+
+AddEventHandler('playerDropped', function()
+    statusRequestRate[source] = nil
+end)
 
 CreateThread(function()
     print('^2[dpn-real-traffic]^7 Loaded. Advanced AI traffic active for QBCore.')
