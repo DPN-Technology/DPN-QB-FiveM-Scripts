@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       resource_path:
-        description: "Resource path, e.g. qbcore/law-enforcement/dpn-example"
+        description: "Resource path, e.g. qbcore/law-enforcement/dpn-starchase"
         required: true
         type: string
       publish_release:
@@ -16,10 +16,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: dpn-resource-release-${{ inputs.resource_path }}
+  cancel-in-progress: false
+
 jobs:
   validate-package-release:
-    name: Validate and Package DPN Resource
+    name: Validate, Package & Evidence
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write
 
@@ -29,50 +34,141 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Require main for published releases
+        if: ${{ inputs.publish_release }}
+        shell: bash
+        env:
+          DPN_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          if [[ "$DPN_REF" != "refs/heads/main" ]]; then
+            echo "::error::Published DPN releases must be dispatched from the main branch."
+            exit 1
+          fi
+
       - name: Validate DPN repository
         run: python3 tools/dpn_repo_validator.py
 
-      - name: Package requested DPN resource
-        id: package
-        shell: bash
-        run: |
-          archive="$(python3 tools/package_resource.py "${{ inputs.resource_path }}")"
-          echo "archive=$archive" >> "$GITHUB_OUTPUT"
-
-      - name: Generate release checksum
-        id: checksum
-        shell: bash
-        run: |
-          checksum_file="${{ steps.package.outputs.archive }}.sha256"
-          sha256sum "${{ steps.package.outputs.archive }}" > "$checksum_file"
-          echo "checksum=$checksum_file" >> "$GITHUB_OUTPUT"
-
-      - name: Read DPN resource metadata
+      - name: Read and validate resource metadata
         id: metadata
-        shell: bash
+        shell: python
+        env:
+          RESOURCE_PATH: ${{ inputs.resource_path }}
         run: |
-          python3 - <<'PY'
           import json
           import os
           import pathlib
+          import re
 
-          p = pathlib.Path("${{ inputs.resource_path }}") / "resource.json"
-          data = json.loads(p.read_text(encoding="utf-8"))
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+          root = pathlib.Path.cwd().resolve()
+          requested = pathlib.Path(os.environ["RESOURCE_PATH"])
+          if requested.is_absolute() or ".." in requested.parts:
+              raise SystemExit("resource path must be repository-relative and may not contain '..'")
+
+          resource = (root / requested).resolve()
+          relative = resource.relative_to(root)
+          if not relative.parts or relative.parts[0] not in {"qbcore", "standalone", "hybrid"}:
+              raise SystemExit("resource must be under qbcore/, standalone/, or hybrid/")
+          if not resource.is_dir():
+              raise SystemExit("resource directory does not exist")
+
+          metadata_path = resource / "resource.json"
+          manifest_path = resource / "fxmanifest.lua"
+          data = json.loads(metadata_path.read_text(encoding="utf-8"))
+          manifest = manifest_path.read_text(encoding="utf-8")
+          match = re.search(r"(?m)^\s*version\s+['\"]([^'\"]+)['\"]\s*$", manifest)
+          if not match:
+              raise SystemExit("fxmanifest.lua must contain a quoted version declaration")
+          manifest_version = match.group(1).strip()
+          if manifest_version != data["version"]:
+              raise SystemExit(
+                  f"release version mismatch: resource.json={data['version']} "
+                  f"fxmanifest.lua={manifest_version}"
+              )
+
+          output = pathlib.Path(os.environ["GITHUB_OUTPUT"])
+          with output.open("a", encoding="utf-8") as f:
               f.write(f"name={data['name']}\n")
               f.write(f"version={data['version']}\n")
               f.write(f"display_name={data.get('display_name', data['name'])}\n")
               f.write(f"description={data.get('description', '')}\n")
-          PY
+              f.write(f"resource_path={relative.as_posix()}\n")
 
-      - name: Upload packaged resource
+      - name: Package requested DPN resource
+        id: package
+        shell: bash
+        env:
+          RESOURCE_PATH: ${{ steps.metadata.outputs.resource_path }}
+        run: |
+          set -euo pipefail
+          archive="$(python3 tools/package_resource.py "$RESOURCE_PATH")"
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+
+      - name: Verify package integrity
+        shell: bash
+        env:
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+        run: |
+          set -euo pipefail
+          python3 -m zipfile -t "$ARCHIVE"
+
+      - name: Generate release checksum
+        id: checksum
+        shell: bash
+        env:
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+        run: |
+          set -euo pipefail
+          checksum_file="$ARCHIVE.sha256"
+          sha256sum "$ARCHIVE" > "$checksum_file"
+          sha256sum -c "$checksum_file"
+          echo "checksum=$checksum_file" >> "$GITHUB_OUTPUT"
+
+      - name: Generate DPN release evidence
+        id: evidence
+        shell: bash
+        env:
+          RESOURCE_PATH: ${{ steps.metadata.outputs.resource_path }}
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+          CHECKSUM: ${{ steps.checksum.outputs.checksum }}
+        run: |
+          set -euo pipefail
+          evidence="dist/${{ steps.metadata.outputs.name }}-v${{ steps.metadata.outputs.version }}.release-evidence.json"
+          python3 tools/generate_release_evidence.py "$RESOURCE_PATH" "$ARCHIVE" "$CHECKSUM" --output "$evidence"
+          echo "evidence=$evidence" >> "$GITHUB_OUTPUT"
+
+      - name: Upload packaged resource and evidence
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.metadata.outputs.name }}-v${{ steps.metadata.outputs.version }}
           path: |
             ${{ steps.package.outputs.archive }}
             ${{ steps.checksum.outputs.checksum }}
+            ${{ steps.evidence.outputs.evidence }}
           if-no-files-found: error
+
+      - name: Write release summary
+        shell: bash
+        env:
+          RESOURCE_PATH: ${{ steps.metadata.outputs.resource_path }}
+          NAME: ${{ steps.metadata.outputs.display_name }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+          CHECKSUM: ${{ steps.checksum.outputs.checksum }}
+          EVIDENCE: ${{ steps.evidence.outputs.evidence }}
+        run: |
+          {
+            echo "# DPN FiveM Release Evidence"
+            echo
+            echo "- Resource: $NAME"
+            echo "- Version: `$VERSION`"
+            echo "- Path: `$RESOURCE_PATH`"
+            echo "- Source commit: `$GITHUB_SHA`"
+            echo "- Archive: `$ARCHIVE`"
+            echo "- Checksum: `$CHECKSUM`"
+            echo "- Evidence: `$EVIDENCE`"
+            echo "- Publish requested: `${{ inputs.publish_release }}`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish GitHub Release
         if: ${{ inputs.publish_release }}
@@ -82,16 +178,28 @@ jobs:
           TITLE: ${{ steps.metadata.outputs.display_name }} v${{ steps.metadata.outputs.version }}
           ARCHIVE: ${{ steps.package.outputs.archive }}
           CHECKSUM: ${{ steps.checksum.outputs.checksum }}
+          EVIDENCE: ${{ steps.evidence.outputs.evidence }}
           DESCRIPTION: ${{ steps.metadata.outputs.description }}
         shell: bash
         run: |
+          set -euo pipefail
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release tag $TAG already exists."
+            echo "::error::Release tag $TAG already exists."
             exit 1
           fi
-          gh release create "$TAG" "$ARCHIVE" "$CHECKSUM"             --title "$TITLE"             --notes "Official DPN Technology FiveM resource release.
+
+          gh release create "$TAG" "$ARCHIVE" "$CHECKSUM" "$EVIDENCE" \
+            --target "$GITHUB_SHA" \
+            --title "$TITLE" \
+            --notes "Official DPN Technology FiveM resource release.
 
           $DESCRIPTION
+
+          Source commit: $GITHUB_SHA
+
+          Release verification assets:
+          - SHA-256 checksum
+          - DPN release-evidence JSON
 
           Created by Diesel, CEO of DPN Technology.
 
