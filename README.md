@@ -12,6 +12,17 @@
 </p>
 <!-- DPN-LIVE-STATUS:END -->
 
+<!-- DPN-QC-STATUS:START -->
+<p align="center">
+  <strong>DPN QUALITY CONTROL // MAIN BRANCH</strong><br>
+  <img alt="DPN Quality Gate" src="https://img.shields.io/github/actions/workflow/status/DPN-Technology/DPN-QB-FiveM-Scripts/dpn-quality-gate.yml?branch=main&style=flat-square&label=quality%20gate">
+  <img alt="DPN Security Baseline" src="https://img.shields.io/github/actions/workflow/status/DPN-Technology/DPN-QB-FiveM-Scripts/dpn-security-baseline.yml?branch=main&style=flat-square&label=security%20baseline">
+  <img alt="DPN Security Supply Chain" src="https://img.shields.io/github/actions/workflow/status/DPN-Technology/DPN-QB-FiveM-Scripts/dpn-security-supply-chain.yml?branch=main&style=flat-square&label=supply%20chain">
+  <img alt="DPN Script Index" src="https://img.shields.io/github/actions/workflow/status/DPN-Technology/DPN-QB-FiveM-Scripts/dpn-auto-script-index.yml?branch=main&style=flat-square&label=script%20index">
+</p>
+<p align="center"><sub>Release baseline: <code>1.0.0</code> • Main branch is the controlled distribution baseline.</sub></p>
+<!-- DPN-QC-STATUS:END -->
+
 <!-- DPN-REPO-SHOWCASE:START -->
 <p align="center"><img src=".github/repo-showcase.svg" alt="DPN FiveM Resource Library capabilities" width="100%"></p>
 <p align="center"><a href="https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/releases"><strong>Releases</strong></a>&nbsp;•&nbsp;<a href="https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/issues"><strong>Issues</strong></a>&nbsp;•&nbsp;<a href="https://github.com/DPN-Technology/DPN-QB-FiveM-Scripts/pulls"><strong>Pull Requests</strong></a></p>
