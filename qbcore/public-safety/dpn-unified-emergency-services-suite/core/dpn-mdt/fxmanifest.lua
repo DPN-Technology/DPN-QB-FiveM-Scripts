@@ -11,7 +11,7 @@ lua54 'yes'
 name 'dpn-mdt'
 author 'Diesel — CEO of DPN Technology'
 description 'DPN Mobile Data Terminal for Law Enforcement, EMS, Fire, Courts, MIB/Admin, Dispatch, and Unified Emergency Service Network'
-version '1.1.0-charges'
+version '1.1.1-charges'
 
 ui_page 'html/index.html'
 
