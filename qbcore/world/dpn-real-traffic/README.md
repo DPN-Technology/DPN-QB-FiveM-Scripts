@@ -45,6 +45,14 @@ Advanced QBCore AI traffic realism resource for FiveM.
 - `/dpntrafficdebug` toggles local debug logging for admins.
 - `/dpntrafficstatus` shows resource status and `ts_Trafficlights` state.
 
+
+## Security & resilience
+
+- The server-side status request is read-only and returns only DPN traffic configuration/state information.
+- Status requests are throttled per player with `Config.StatusRequestCooldownMs` (default: 1000 ms) to prevent event spam.
+- The throttle state is cleared when a player disconnects.
+- Admin debug control remains protected by the configured ACE/QBCore admin permission checks.
+
 ## Configuration
 
 Edit `shared/config.lua`.
