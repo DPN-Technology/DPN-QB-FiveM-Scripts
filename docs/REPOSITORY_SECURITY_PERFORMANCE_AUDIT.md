@@ -2,7 +2,7 @@
 
 Status: current-main evidence index
 
-Baseline refreshed through `main` at `da29b48dcb425bad0501383a5fc7da6fc6586b36`.
+Baseline refreshed through `main` at `efb9eef0055c823775e04282815c66a5c7780ffa`.
 
 ## Current state
 
@@ -12,6 +12,7 @@ The repository has materially advanced since the original September audit, so ol
 
 - MIB director-loadout escalation: current source now uses a server-side `canUseDirectorLoadout(src)` check.
 - MIB range-bound target authority: `freeze`, `scan`, neuralizer target actions, and `revive` use server-observed entity proximity; revive also enforces its server-side cooldown.
+- MIB action-specific privilege policy: MIB ACE access is separated from admin authority; sensitive tool and neuralizer actions use server-derived MIB/Director/Admin policy tiers with denial auditing and bounded routing-bucket validation.
 - Training Academy scenario authority: instructor sessions are owner-bound, trainee enrollment is server-authoritative, grading requires exact-session membership, and stale ownership is cleaned on closure/disconnect.
 - Medical Test Lab export authority: mutation exports are default-deny by server-derived invoking resource, with `dpn-medical-admin-tools` explicitly trusted and invoking-resource evidence recorded.
 - LE forced vehicle placement: PR #100 resolves client-selected network IDs server-side, verifies a real vehicle entity, and requires server-observed officer/target proximity before placement.
@@ -20,7 +21,7 @@ The repository has materially advanced since the original September audit, so ol
 
 ### Confirmed current-main hardening targets
 
-- MIB action-specific privilege policy remains broader than the existing general `requireAccess` gate.
+- No previously confirmed current-main hardening targets remain open from this audit wave.
 
 ## Engineering rules
 
@@ -34,4 +35,4 @@ The repository has materially advanced since the original September audit, so ol
 
 ## Next runtime sequence
 
-Prefer small focused implementation PRs for the confirmed hardening targets above, each with a deterministic regression check integrated into DPN Quality Gate.
+Re-audit current `main` for the next authority, performance, and abuse-resistance targets. Preserve deterministic regression coverage for every completed hardening contract.
