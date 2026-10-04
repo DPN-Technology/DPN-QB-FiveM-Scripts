@@ -1,6 +1,6 @@
 # Law-Enforcement Vehicle Placement Authority Hardening
 
-Baseline refreshed from `main` at `222192644208077bef43085cc0b6baf153719a0a`.
+Baseline refreshed from `main` at `da29b48dcb425bad0501383a5fc7da6fc6586b36`.
 
 ## Resolution
 
