@@ -154,6 +154,11 @@ Client exports:
 
 ## Security Notes
 
+Current hardened release: **1.1.1-charges**.
+
+The dynamic SQL compatibility layer validates configured table identifiers once at startup, enforces a 64-character identifier bound, falls back to known-safe QBCore defaults when configuration is malformed, and only permits named SQL suffix filters from a server-owned allowlist. Raw client values are never interpolated into dynamic SQL text.
+
+
 The server checks access before returning data or mutating records. Do not trust client-side UI permissions alone. Keep MIB/admin features behind job grade and ACE permissions.
 
 
