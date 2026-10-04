@@ -11,7 +11,7 @@ lua54 'yes'
 name 'dpn-vehicle-computer'
 author 'Diesel — CEO of DPN Technology'
 description 'Advanced in-vehicle emergency-services terminal and ALPR'
-version '4.0.0'
+version '4.0.1'
 
 ui_page 'html/index.html'
 shared_scripts { 'config.lua', 'shared/bridge.lua' }
