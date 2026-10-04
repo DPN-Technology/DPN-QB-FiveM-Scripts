@@ -82,6 +82,9 @@ jobs:
       - name: Validate Training Academy session authority
         run: python3 tools/check_training_academy_session_authority.py
 
+      - name: Validate Medical Test Lab export authority
+        run: python3 tools/check_medical_testlab_export_authority.py
+
       - name: Validate LE vehicle placement authority
         run: python3 tools/check_le_vehicle_placement_authority.py
 
