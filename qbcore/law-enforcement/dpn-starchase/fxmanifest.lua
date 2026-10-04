@@ -11,7 +11,7 @@ lua54 'yes'
 name 'dpn-starchase'
 author 'Diesel — CEO of DPN Technology'
 description 'Advanced QBCore StarChase GPS tracker launcher with NUI remote, lock-on HUD, safe low-profile tracker props, GPS blips, logs, and physical removal.'
-version '1.1.1'
+version '1.1.2'
 
 shared_scripts {
     'config.lua'
