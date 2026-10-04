@@ -17,6 +17,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 FRAMEWORKS = ("qbcore", "standalone", "hybrid")
 
 NET_EVENT_RE = re.compile(r"\b(?:RegisterNetEvent|RegisterServerEvent)\s*\(")
+ZERO_ARG_NET_EVENT_RE = re.compile(
+    r"RegisterNetEvent\s*\([^,\n]+,\s*function\s*\(\s*\)",
+    re.MULTILINE,
+)
 CALLBACK_RE = re.compile(r"\b(?:QBCore\.Functions\.CreateCallback|lib\.callback\.register)\s*\(")
 SOURCE_RE = re.compile(r"\bsource\b")
 AUTH_RE = re.compile(
@@ -48,11 +52,11 @@ LOG_RE = re.compile(
     r"logger|audit|logEvent|webhook|discord)"
 )
 BROADCAST_RE = re.compile(r"TriggerClientEvent\s*\([^\n,]+,\s*-1\b")
-DYNAMIC_SQL_RE = re.compile(
-    r"(?im)^.*(?:SELECT|INSERT|UPDATE|DELETE)[^\n]*(?::format\(|\.\.)[^\n]*$"
+SQL_KEYWORD_RE = re.compile(r"(?i)\b(?:SELECT|INSERT|UPDATE|DELETE)\b")
+DYNAMIC_SQL_BLOCK_RE = re.compile(
+    r"(?is)(?:SELECT|INSERT|UPDATE|DELETE).*?\]\]\)?\s*:format\s*\("
 )
-LOOP_RE = re.compile(r"(?is)while\s+true\s+do(?P<body>.{0,1200}?)end")
-WAIT_ZERO_RE = re.compile(r"\b(?:Wait|Citizen\.Wait)\s*\(\s*0\s*\)")
+WHILE_TRUE_RE = re.compile(r"\bwhile\s+true\s+do\b")
 WAIT_ANY_RE = re.compile(r"\b(?:Wait|Citizen\.Wait)\s*\(")
 
 
@@ -95,6 +99,42 @@ def read_text(path: pathlib.Path) -> str:
         return ""
 
 
+def dynamic_sql_signals(text: str) -> list[str]:
+    """Return likely cases where the SQL expression itself is constructed dynamically.
+
+    Concatenation in a parameter value must not be mistaken for SQL construction.
+    """
+    signals: list[str] = []
+    for line in text.splitlines():
+        if not SQL_KEYWORD_RE.search(line):
+            continue
+        format_pos = line.find(":format(")
+        concat_pos = line.find("..")
+        positions = [pos for pos in (format_pos, concat_pos) if pos >= 0]
+        if not positions:
+            continue
+        dynamic_pos = min(positions)
+        first_comma = line.find(",")
+        if first_comma < 0 or dynamic_pos < first_comma:
+            signals.append(line.strip())
+
+    for match in DYNAMIC_SQL_BLOCK_RE.finditer(text):
+        snippet = " ".join(match.group(0).split())
+        signals.append(snippet[:240])
+
+    return list(dict.fromkeys(signal for signal in signals if signal))
+
+
+def uncooperative_loop_count(text: str) -> int:
+    """Estimate while-true loops that have no cooperative Wait signal in the file.
+
+    This deliberately avoids treating required per-frame FiveM loops as defects.
+    """
+    loop_count = len(WHILE_TRUE_RE.findall(text))
+    wait_count = len(WAIT_ANY_RE.findall(text))
+    return max(0, loop_count - wait_count)
+
+
 def lua_files(resource: pathlib.Path, part: str) -> list[pathlib.Path]:
     direct = resource / part
     files: list[pathlib.Path] = []
@@ -130,8 +170,10 @@ def audit_resource(resource: pathlib.Path) -> ResourceAudit:
         findings.append(Finding(severity, code, message, deduction))
 
     net_events = len(NET_EVENT_RE.findall(server_text))
+    zero_arg_events = len(ZERO_ARG_NET_EVENT_RE.findall(server_text))
     callbacks = len(CALLBACK_RE.findall(server_text))
     exposed_handlers = net_events + callbacks
+    input_bearing_handlers = max(0, net_events - zero_arg_events) + callbacks
     privileged_ops = len(PRIV_RE.findall(server_text))
     broadcasts = len(BROADCAST_RE.findall(server_text))
 
@@ -140,11 +182,7 @@ def audit_resource(resource: pathlib.Path) -> ResourceAudit:
     has_validation = bool(VALIDATION_RE.search(server_text))
     has_rate = bool(RATE_RE.search(server_text))
     has_logs = bool(LOG_RE.search(server_text))
-    dynamic_sql_lines = [
-        line.strip()
-        for line in server_text.splitlines()
-        if DYNAMIC_SQL_RE.search(line)
-    ]
+    dynamic_sql_lines = dynamic_sql_signals(server_text)
 
     if metadata.get("status", "").lower() in {"imported", "legacy", "unknown"}:
         add(
@@ -177,11 +215,11 @@ def audit_resource(resource: pathlib.Path) -> ResourceAudit:
             10,
         )
 
-    if exposed_handlers and not has_validation:
+    if input_bearing_handlers and not has_validation:
         add(
             "high",
             "INPUT_VALIDATION",
-            "Exposed server handlers have no observable type/bounds/proximity validation signal.",
+            f"{input_bearing_handlers} input-bearing server handler(s) have no observable type/bounds/proximity validation signal.",
             18,
         )
 
@@ -229,20 +267,16 @@ def audit_resource(resource: pathlib.Path) -> ResourceAudit:
             min(6, 2 + broadcasts),
         )
 
-    hot_loops = 0
-    for text in (server_text, client_text):
-        for match in LOOP_RE.finditer(text):
-            body = match.group("body")
-            if not WAIT_ANY_RE.search(body):
-                hot_loops += 2
-            elif WAIT_ZERO_RE.search(body):
-                hot_loops += 1
-    if hot_loops >= 2:
+    uncooperative_loops = sum(
+        uncooperative_loop_count(text)
+        for text in (server_text, client_text)
+    )
+    if uncooperative_loops:
         add(
-            "moderate",
-            "HOT_LOOP",
-            f"{hot_loops} potential hot-loop signal(s) found; review tick frequency and work performed per frame.",
-            min(10, 4 + hot_loops),
+            "high",
+            "UNCOOPERATIVE_LOOP",
+            f"{uncooperative_loops} while-true loop(s) have no observable cooperative Wait signal.",
+            min(18, 8 + (uncooperative_loops * 3)),
         )
 
     # Client-only resources have no server trust boundary to harden. Treat the

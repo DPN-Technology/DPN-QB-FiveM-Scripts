@@ -3,6 +3,9 @@ Config = {}
 Config.Debug = false
 Config.Framework = 'qb-core'
 
+-- Server-side throttle for the public read-only status request event.
+Config.StatusRequestCooldownMs = 1000
+
 -- Density tuning. Lower values improve performance and reduce GTA's chaotic traffic.
 Config.Density = {
     Enabled = true,
