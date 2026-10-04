@@ -2,6 +2,20 @@ local RESOURCE = GetCurrentResourceName()
 local VERSION = GetResourceMetadata(RESOURCE, 'version', 0) or 'unknown'
 local snapshots, testRuns = {}, {}
 
+local TRUSTED_TESTLAB_MUTATION_RESOURCES = {
+    ['dpn-medical-admin-tools'] = true
+}
+
+local function authorizeMutationCaller(operation)
+    local caller = GetInvokingResource()
+    if caller and TRUSTED_TESTLAB_MUTATION_RESOURCES[caller] == true then
+        return true, caller
+    end
+    local deniedCaller = caller or 'unknown'
+    print(('[dpn-medical-core] denied test-lab mutation export %s from %s'):format(tostring(operation or 'unknown'), deniedCaller))
+    return false, deniedCaller
+end
+
 local function deepCopy(value)
     local ok, encoded = pcall(json.encode, value)
     if not ok then return nil end
@@ -407,17 +421,28 @@ exports('GetTestScenarioCatalog', function() return DPN_MED.GetTestScenarioCatal
 exports('RunMedicalSelfTest', selfTest)
 exports('GetTestRunHistory', function(target) return testRuns[targetId(target) or 0] or {} end)
 
-exports('RestoreTestSnapshot', function(target, actor)
+local function restoreTestSnapshot(target, actor, callerResource)
     target=targetId(target);if not target then return false,'Invalid patient' end
     local snapshot=snapshots[target];if not snapshot then return false,'No test snapshot is available for this patient.' end
     local _,cid=stateFor(target);if not cid then return false,'Patient not found' end
-    DPNMedicalServer.Commit(target,cid,deepCopy(snapshot),'test_snapshot_restored',{actor=actor or 'medical-admin'})
+    DPNMedicalServer.Commit(target,cid,deepCopy(snapshot),'test_snapshot_restored',{
+        actor=actor or 'medical-admin',
+        invokingResource=callerResource
+    })
     snapshots[target]=nil
     TriggerClientEvent('dpn-medical-core:client:resetScreen',target)
     return true,'Previous medical state restored.'
+end
+
+exports('RestoreTestSnapshot', function(target, actor)
+    local authorized, callerResource = authorizeMutationCaller('RestoreTestSnapshot')
+    if not authorized then return false,'Unauthorized medical test-lab mutation caller.' end
+    return restoreTestSnapshot(target, actor, callerResource)
 end)
 
 exports('ApplyTestScenario', function(target, scenarioId, options, actor)
+    local authorized, callerResource = authorizeMutationCaller('ApplyTestScenario')
+    if not authorized then return false,{message='Unauthorized medical test-lab mutation caller.',scenarioId=tostring(scenarioId or '')} end
     target=targetId(target);scenarioId=tostring(scenarioId or '')
     options=type(options)=='table' and options or{}
     actor=tostring(actor or 'medical-admin'):sub(1,128)
@@ -425,7 +450,7 @@ exports('ApplyTestScenario', function(target, scenarioId, options, actor)
         local report=selfTest();return report.success,report
     end
     if scenarioId=='restore_snapshot' then
-        local ok,message=exports['dpn-medical-core']:RestoreTestSnapshot(target,actor);return ok,{message=message,scenarioId=scenarioId}
+        local ok,message=restoreTestSnapshot(target,actor,callerResource);return ok,{message=message,scenarioId=scenarioId}
     end
     local definition=catalogById(scenarioId);if not definition then return false,{message='Unknown test scenario.',scenarioId=scenarioId} end
     local current,cid=stateFor(target);if not current or not cid then return false,{message='Patient not found.',scenarioId=scenarioId} end
@@ -437,12 +462,12 @@ exports('ApplyTestScenario', function(target, scenarioId, options, actor)
     if not state then return false,{message=errorMessage or 'Scenario failed.',scenarioId=scenarioId} end
     state.status.lifeState=lifeState or state.status.lifeState or 'alive'
     if state.status.lifeState=='incapacitated' then state.status.incapacitatedAt=os.time() end
-    DPNMedicalServer.Commit(target,cid,state,'admin_test_scenario',{scenarioId=scenarioId,actor=actor,resetBefore=options.resetBefore~=false})
+    DPNMedicalServer.Commit(target,cid,state,'admin_test_scenario',{scenarioId=scenarioId,actor=actor,invokingResource=callerResource,resetBefore=options.resetBefore~=false})
     TriggerClientEvent('dpn-medical-core:client:lifeState',target,state.status.lifeState,details or{})
     if state.status.lifeState=='incapacitated' and state.status.cardiacArrest then
         TriggerClientEvent('dpn-medical-core:client:resetDamageTracker',target)
     end
-    local result={id=('TEST-%s-%s-%04d'):format(os.time(),target,math.random(0,9999)),scenarioId=scenarioId,label=definition.label,target=target,patientCid=cid,actor=actor,success=true,appliedAt=os.time(),state=summarize(state),message=definition.label..' applied successfully.'}
+    local result={id=('TEST-%s-%s-%04d'):format(os.time(),target,math.random(0,9999)),scenarioId=scenarioId,label=definition.label,target=target,patientCid=cid,actor=actor,invokingResource=callerResource,success=true,appliedAt=os.time(),state=summarize(state),message=definition.label..' applied successfully.'}
     testRuns[target]=testRuns[target] or{};table.insert(testRuns[target],1,result);while #testRuns[target]>25 do table.remove(testRuns[target]) end
     persistRun(result)
     TriggerEvent('dpn-medical:server:testScenarioApplied',target,cid,result,state)
