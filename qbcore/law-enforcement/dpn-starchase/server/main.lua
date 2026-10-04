@@ -309,6 +309,24 @@ QBCore.Functions.CreateCallback('dpn-starchase:server:launch', function(src, cb,
     local targetSpeed = GetEntitySpeed(targetVehicle) * 2.236936
     local targetHeading = GetEntityHeading(targetVehicle)
 
+    local maxTargetSpeed = tonumber(Config.Fire.maxTargetSpeed) or 180.0
+    if targetSpeed > maxTargetSpeed then
+        cb({ ok = false, message = ('Target speed exceeds safe tracker lock limit: %.0f MPH.'):format(maxTargetSpeed) })
+        return
+    end
+
+    if Config.Fire.rejectIfTargetStopped and targetSpeed < 1.0 then
+        cb({ ok = false, message = 'Target vehicle is not moving.' })
+        return
+    end
+
+    local officerPed = GetPlayerPed(src)
+    local officerVehicle = officerPed and officerPed ~= 0 and GetVehiclePedIsIn(officerPed, false) or 0
+    if Config.Fire.preventSameVehicle and officerVehicle and officerVehicle ~= 0 and officerVehicle == targetVehicle then
+        cb({ ok = false, message = Config.Messages.noTarget })
+        return
+    end
+
 
     if Config.Items.requireAmmo and Config.Items.removeAmmoOnFire then
         if not RemoveItem(src, Config.Items.ammoItem, 1) then
