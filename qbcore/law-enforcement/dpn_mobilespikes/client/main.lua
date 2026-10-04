@@ -418,16 +418,18 @@ CreateThread(function()
     while true do
         local sleep = 750
         local playerCoords = GetEntityCoords(PlayerPedId())
-        local hasNearbySpikes = false
 
         for _, spikeData in pairs(deployedSpikes) do
             if DoesEntityExist(spikeData.object) then
                 local distance = #(playerCoords - spikeData.coords)
                 
                 if distance <= 50.0 then
-                    hasNearbySpikes = true
-                    -- Rendering must stay frame-level only while a spike is nearby.
-                    sleep = 0
+                    -- Rendering must stay frame-level only when a visible element
+                    -- actually needs per-frame drawing.
+                    if (Config.Visual.drawMarker and distance <= 25.0)
+                        or (Config.Visual.drawText3D and distance <= Config.Visual.text3DDistance) then
+                        sleep = 0
+                    end
 
                     -- Draw marker
                     if Config.Visual.drawMarker and distance <= 25.0 then
