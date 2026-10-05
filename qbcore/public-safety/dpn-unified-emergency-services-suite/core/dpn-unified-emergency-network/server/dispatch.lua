@@ -3,7 +3,7 @@ local function agencyMatches(unitAgency, incidentAgencies)
     return false
 end
 
-RegisterNetEvent('dpn-unes:server:broadcastIncident', function(incident)
+AddEventHandler('dpn-unes:server:broadcastIncident', function(incident)
     for _, id in ipairs(GetPlayers()) do
         local src = tonumber(id)
         local unit = DPN_UNES.Server.GetUnitProfile(src)
