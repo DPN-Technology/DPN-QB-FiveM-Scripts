@@ -207,9 +207,14 @@ RegisterNetEvent('qb-mobilespikes:server:removeSpike', function(spikeId)
     end
 end)
 
--- Player disconnect cleanup
-RegisterNetEvent('QBCore:Server:OnPlayerUnload', function(src)
-    CleanupPlayerSpikes(src)
+-- Player disconnect cleanup.
+-- QBCore's unload hook is server-local; never expose it as a network event or
+-- accept a client-supplied source id. The authoritative source is the event context.
+AddEventHandler('QBCore:Server:OnPlayerUnload', function()
+    local src = source
+    if type(src) == 'number' and src > 0 then
+        CleanupPlayerSpikes(src)
+    end
 end)
 
 AddEventHandler('playerDropped', function(reason)
