@@ -164,19 +164,12 @@ end)
 RegisterNetEvent('dpn-unes:server:updateIncidentStatus', function(incidentId, status)
     local src = source
     if not allowMutation(src, 'updateIncidentStatus', 500) then return end
-    local src = source
+
     local unit = DPN_UNES.Server.GetUnitProfile(src)
     local incident = DPN_UNES.Cache.incidents[incidentId]
     if not unit or not incident then return end
 
-    local allowedStatus = false
-    for _, candidate in pairs(DPN_UNES.Constants) do
-        if type(candidate) == 'string' and candidate == status then
-            allowedStatus = true
-            break
-        end
-    end
-    if not allowedStatus then return end
+    if not INCIDENT_STATUS[status] then return end
 
     incident.status = status
     incident.updatedAt = os.time()
