@@ -26,7 +26,7 @@ def rel(path: Path) -> str:
 
 def main() -> int:
     if not MEDICAL_ROOT.is_dir():
-        print(f"ERROR: medical root not found: {MEDICAL_ROOT}")
+        print("ERROR: medical root not found")
         return 2
 
     errors: list[str] = []
