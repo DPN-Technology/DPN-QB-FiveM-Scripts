@@ -853,6 +853,7 @@ window.addNote = (callId) => {
 };
 
 window.addEventListener('message', (event) => {
+  if (!event || event.source !== window || event.origin !== window.location.origin) return;
   const data = event.data || {};
   if (data.action === 'open') app.classList.remove('hidden');
   if (data.action === 'close') app.classList.add('hidden');
