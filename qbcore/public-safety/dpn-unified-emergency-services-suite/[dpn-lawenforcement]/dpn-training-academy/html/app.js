@@ -13,6 +13,7 @@ document.getElementById('close').onclick = () => { app.classList.add('hidden'); 
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
 
 window.addEventListener('message', e => {
+  if (!e || e.source !== window || e.origin !== window.location.origin) return;
   if (e.data.action === 'open') { state = e.data.payload; app.classList.remove('hidden'); render(); }
   if (e.data.action === 'sessions') { state.sessions = e.data.sessions || {}; render(); }
 });
