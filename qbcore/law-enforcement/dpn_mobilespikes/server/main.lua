@@ -89,18 +89,6 @@ local function IsTooCloseToExistingSpike(coords)
     return false
 end
 
-local function IsValidDeploymentPosition(src, coords)
-    if type(src) ~= 'number' or src <= 0 or not coords then return false end
-
-    local ped = GetPlayerPed(src)
-    if not ped or ped == 0 or not DoesEntityExist(ped) then return false end
-
-    local maxDistance = math.max(1.0, tonumber(Config.Limits.maxPlacementDistance) or 12.0)
-    local playerCoords = GetEntityCoords(ped)
-    return #(playerCoords - coords) <= maxDistance
-end
-
-
 local function GetAuthorizedDeploymentVehicle(src)
     if type(src) ~= 'number' or src <= 0 then return nil, 'invalid_source' end
 
