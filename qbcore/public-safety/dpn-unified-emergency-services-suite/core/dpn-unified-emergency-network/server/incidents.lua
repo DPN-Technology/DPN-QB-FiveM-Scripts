@@ -15,6 +15,44 @@ local function hasAgency(list, agency)
     return false
 end
 
+local MutationRate = {}
+
+local INCIDENT_STATUS = {
+    [DPN_UNES.Constants.STATUS_CREATED] = true,
+    [DPN_UNES.Constants.STATUS_DISPATCHED] = true,
+    [DPN_UNES.Constants.STATUS_ASSIGNED] = true,
+    [DPN_UNES.Constants.STATUS_ENROUTE] = true,
+    [DPN_UNES.Constants.STATUS_ONSCENE] = true,
+    [DPN_UNES.Constants.STATUS_STAGED] = true,
+    [DPN_UNES.Constants.STATUS_TRANSPORTING] = true,
+    [DPN_UNES.Constants.STATUS_HOSPITAL] = true,
+    [DPN_UNES.Constants.STATUS_RESOLVED] = true,
+    [DPN_UNES.Constants.STATUS_ARCHIVED] = true,
+}
+
+local function cleanText(value, maxLength)
+    local text = tostring(value or '')
+    maxLength = math.max(1, tonumber(maxLength) or 128)
+    if #text > maxLength then text = text:sub(1, maxLength) end
+    return text
+end
+
+local function allowMutation(src, action, intervalMs)
+    src = tonumber(src) or 0
+    if src <= 0 then return true end
+
+    intervalMs = math.max(0, tonumber(intervalMs) or 0)
+    if intervalMs <= 0 then return true end
+
+    local nowMs = GetGameTimer()
+    MutationRate[src] = MutationRate[src] or {}
+    local last = MutationRate[src][action] or 0
+    if nowMs - last < intervalMs then return false end
+    MutationRate[src][action] = nowMs
+    return true
+end
+
+
 local function addHistory(incident, action, unit, note, extra)
     incident.history = incident.history or {}
     table.insert(incident.history, 1, { time = os.time(), action = action, callsign = unit and unit.callsign or 'SYSTEM', agency = unit and unit.agency or 'system', note = note, extra = extra })
@@ -24,15 +62,33 @@ end
 local function normalizeIncident(src, data)
     data = data or {}
     local unit = src ~= 0 and DPN_UNES.Server.GetUnitProfile(src) or nil
-    local incidentType = data.type or 'custom'
+    local incidentType = tostring(data.type or 'custom')
+    if not DPN_UNES.Config.IncidentTypes[incidentType] then
+        incidentType = 'custom'
+    end
     local typeCfg = DPN_UNES.Config.IncidentTypes[incidentType] or DPN_UNES.Config.IncidentTypes.custom or {}
-    local agencies = data.agencies or typeCfg.agencies or { unit and unit.agency or 'law' }
+
+    local agencies = {}
+    local requestedAgencies = type(data.agencies) == 'table' and data.agencies
+        or typeCfg.agencies
+        or { unit and unit.agency or 'law' }
+    for _, agency in ipairs(requestedAgencies) do
+        agency = cleanText(agency, 24):lower()
+        if DPN_UNES.Config.AgencyColors[agency] and not hasAgency(agencies, agency) and #agencies < 8 then
+            agencies[#agencies + 1] = agency
+        end
+    end
+    if #agencies == 0 then
+        agencies[1] = unit and unit.agency or 'law'
+    end
+
+    local serverCoords = src ~= 0 and getCoords(src) or nil
     local incident = {
-        id = data.id or uuid('UNES'),
+        id = cleanText(data.id or uuid('UNES'), 64),
         type = incidentType,
-        title = data.title or typeCfg.label or 'Emergency Incident',
-        description = data.description or '',
-        priority = tonumber(data.priority or typeCfg.priority or 3),
+        title = cleanText(data.title or typeCfg.label or 'Emergency Incident', 128),
+        description = cleanText(data.description or '', 2000),
+        priority = math.max(1, math.min(5, tonumber(data.priority or typeCfg.priority or 3) or 3)),
         agencies = agencies,
         escalation = data.escalation or typeCfg.escalation or {},
         status = DPN_UNES.Constants.STATUS_CREATED,
@@ -47,18 +103,18 @@ local function normalizeIncident(src, data)
         objectives = data.objectives or {},
         notes = data.notes or {},
         history = {},
-        coords = data.coords or getCoords(src),
-        postal = data.postal or 'UNKNOWN',
-        sceneCommander = data.sceneCommander,
-        commandAgency = data.commandAgency,
-        hazardLevel = data.hazardLevel or 'unknown',
-        caller = data.caller or '',
-        callback = data.callback or '',
-        stagingLocation = data.staging or data.stagingLocation or '',
-        crossStreet = data.crossStreet or '',
-        tac = data.tac or data.radioChannel or '',
-        responseMode = data.responseMode or 'normal',
-        callSource = data.callSource or 'manual',
+        coords = serverCoords or data.coords,
+        postal = cleanText(data.postal or 'UNKNOWN', 32),
+        sceneCommander = cleanText(data.sceneCommander, 64),
+        commandAgency = cleanText(data.commandAgency, 24),
+        hazardLevel = cleanText(data.hazardLevel or 'unknown', 32),
+        caller = cleanText(data.caller, 128),
+        callback = cleanText(data.callback, 64),
+        stagingLocation = cleanText(data.staging or data.stagingLocation, 128),
+        crossStreet = cleanText(data.crossStreet, 128),
+        tac = cleanText(data.tac or data.radioChannel, 64),
+        responseMode = cleanText(data.responseMode or 'normal', 32),
+        callSource = cleanText(data.callSource or 'manual', 32),
         callTaker = unit and unit.callsign or 'SYSTEM',
         triage = data.triage or { red = 0, yellow = 0, green = 0, black = 0 },
         createdAt = os.time(),
@@ -107,6 +163,8 @@ end)
 
 RegisterNetEvent('dpn-unes:server:updateIncidentStatus', function(incidentId, status)
     local src = source
+    if not allowMutation(src, 'updateIncidentStatus', 500) then return end
+    local src = source
     local unit = DPN_UNES.Server.GetUnitProfile(src)
     local incident = DPN_UNES.Cache.incidents[incidentId]
     if not unit or not incident then return end
@@ -131,6 +189,7 @@ end)
 
 RegisterNetEvent('dpn-unes:server:assignSelf', function(incidentId)
     local src = source
+    if not allowMutation(src, 'assignSelf', 500) then return end
     local unit = DPN_UNES.Server.GetUnitProfile(src)
     local incident = DPN_UNES.Cache.incidents[incidentId]
     if not unit or not incident then return end
@@ -149,7 +208,9 @@ RegisterNetEvent('dpn-unes:server:assignSelf', function(incidentId)
 end)
 
 RegisterNetEvent('dpn-unes:server:unassignSelf', function(incidentId)
-    local unit = DPN_UNES.Server.GetUnitProfile(source)
+    local src = source
+    if not allowMutation(src, 'unassignSelf', 500) then return end
+    local unit = DPN_UNES.Server.GetUnitProfile(src)
     local incident = DPN_UNES.Cache.incidents[incidentId]
     if not unit or not incident then return end
     local key = unit.unitKey or DPN_UNES.Server.GetUnitKey(unit)
@@ -163,14 +224,23 @@ end)
 
 RegisterNetEvent('dpn-unes:server:requestAgencySupport', function(data)
     local src = source
+    if not allowMutation(src, 'requestAgencySupport', 1000) then return end
     local incidentId = type(data) == 'table' and data.incidentId or data
     local agencies = type(data) == 'table' and data.agencies or {}
-    local note = type(data) == 'table' and data.note or ''
+    local note = cleanText(type(data) == 'table' and data.note or '', 500)
     local incident = DPN_UNES.Cache.incidents[incidentId]
     local unit = DPN_UNES.Server.GetUnitProfile(src)
     if not incident or not unit then return end
     incident.agencies = incident.agencies or {}
-    for _, agency in ipairs(agencies or {}) do if agency and agency ~= '' and not hasAgency(incident.agencies, agency) then table.insert(incident.agencies, agency) end end
+    local requested = 0
+    for _, agency in ipairs(agencies or {}) do
+        if requested >= 6 then break end
+        agency = cleanText(agency, 24):lower()
+        if DPN_UNES.Config.AgencyColors[agency] and not hasAgency(incident.agencies, agency) then
+            table.insert(incident.agencies, agency)
+            requested = requested + 1
+        end
+    end
     incident.updatedAt = os.time()
     addHistory(incident, 'support-request', unit, note, { agencies = agencies })
     saveIncident(incident)
@@ -181,13 +251,14 @@ end)
 
 RegisterNetEvent('dpn-unes:server:setSceneCommander', function(data)
     local src = source
+    if not allowMutation(src, 'setSceneCommander', 750) then return end
     local unit = DPN_UNES.Server.GetUnitProfile(src)
     if not unit then return end
     local incident = DPN_UNES.Cache.incidents[data.incidentId]
     if not incident then return end
     if DPN_UNES.Config.RequireDispatcherForCommandOverride and not unit.canCommand and not unit.canDispatch then return end
-    incident.sceneCommander = data.commander or unit.callsign
-    incident.commandAgency = data.agency or unit.agency
+    incident.sceneCommander = cleanText(data.commander or unit.callsign, 64)
+    incident.commandAgency = cleanText(data.agency or unit.agency, 24)
     addHistory(incident, 'scene-commander', unit, incident.sceneCommander)
     saveIncident(incident)
     DPN_UNES.Server.Audit(src, 'scene_commander_set', incident.id, { commander = incident.sceneCommander })
@@ -195,29 +266,35 @@ RegisterNetEvent('dpn-unes:server:setSceneCommander', function(data)
 end)
 
 RegisterNetEvent('dpn-unes:server:addIncidentNote', function(data)
-    local unit = DPN_UNES.Server.GetUnitProfile(source)
+    local src = source
+    if not allowMutation(src, 'addIncidentNote', 500) then return end
+    local unit = DPN_UNES.Server.GetUnitProfile(src)
     local incident = DPN_UNES.Cache.incidents[data.incidentId]
     if not unit or not incident or not data.note or data.note == '' then return end
     incident.notes = incident.notes or {}
-    table.insert(incident.notes, 1, { time = os.time(), callsign = unit.callsign, agency = unit.agency, note = data.note })
+    table.insert(incident.notes, 1, { time = os.time(), callsign = cleanText(unit.callsign, 32), agency = cleanText(unit.agency, 24), note = cleanText(data.note, 1000) })
     addHistory(incident, 'note', unit, data.note)
     saveIncident(incident)
     broadcast(incident)
 end)
 
 RegisterNetEvent('dpn-unes:server:addObjective', function(data)
-    local unit = DPN_UNES.Server.GetUnitProfile(source)
+    local src = source
+    if not allowMutation(src, 'addObjective', 500) then return end
+    local unit = DPN_UNES.Server.GetUnitProfile(src)
     local incident = DPN_UNES.Cache.incidents[data.incidentId]
     if not unit or not incident or not data.text then return end
     incident.objectives = incident.objectives or {}
-    table.insert(incident.objectives, { id = uuid('OBJ'), text = data.text, done = false, addedBy = unit.callsign })
+    table.insert(incident.objectives, { id = uuid('OBJ'), text = cleanText(data.text, 500), done = false, addedBy = cleanText(unit.callsign, 32) })
     addHistory(incident, 'objective-added', unit, data.text)
     saveIncident(incident)
     broadcast(incident)
 end)
 
 RegisterNetEvent('dpn-unes:server:toggleObjective', function(data)
-    local unit = DPN_UNES.Server.GetUnitProfile(source)
+    local src = source
+    if not allowMutation(src, 'toggleObjective', 300) then return end
+    local unit = DPN_UNES.Server.GetUnitProfile(src)
     local incident = DPN_UNES.Cache.incidents[data.incidentId]
     if not unit or not incident then return end
     for _, obj in ipairs(incident.objectives or {}) do if obj.id == data.objectiveId then obj.done = not obj.done; obj.completedBy = unit.callsign; obj.completedAt = os.time() end end
@@ -227,7 +304,9 @@ RegisterNetEvent('dpn-unes:server:toggleObjective', function(data)
 end)
 
 RegisterNetEvent('dpn-unes:server:updateTriage', function(data)
-    local unit = DPN_UNES.Server.GetUnitProfile(source)
+    local src = source
+    if not allowMutation(src, 'updateTriage', 500) then return end
+    local unit = DPN_UNES.Server.GetUnitProfile(src)
     local incident = DPN_UNES.Cache.incidents[data.incidentId]
     if not unit or not incident then return end
     incident.triage = { red = tonumber(data.red or 0) or 0, yellow = tonumber(data.yellow or 0) or 0, green = tonumber(data.green or 0) or 0, black = tonumber(data.black or 0) or 0 }
@@ -237,7 +316,9 @@ RegisterNetEvent('dpn-unes:server:updateTriage', function(data)
 end)
 
 RegisterNetEvent('dpn-unes:server:createBolo', function(data)
-    local unit = DPN_UNES.Server.GetUnitProfile(source)
+    local src = source
+    if not allowMutation(src, 'createBolo', 1000) then return end
+    local unit = DPN_UNES.Server.GetUnitProfile(src)
     if not unit or not data or not data.title then return end
     local bolo = { id = uuid('BOLO'), title = data.title, description = data.description or '', vehicle = data.vehicle or '', plate = data.plate or '', suspect = data.suspect or '', priority = tonumber(data.priority or 3), lastSeen = data.lastSeen or '', threat = data.threat or '', riskIndicators = data.riskIndicators or '', notifyAgencies = data.notifyAgencies or {'law'}, tags = data.tags or {}, linkedIncident = data.linkedIncident or '', createdBy = unit, active = true, createdAt = os.time() }
     DPN_UNES.Cache.bolos[bolo.id] = bolo
@@ -247,7 +328,9 @@ RegisterNetEvent('dpn-unes:server:createBolo', function(data)
 end)
 
 RegisterNetEvent('dpn-unes:server:archiveBolo', function(boloId)
-    local unit = DPN_UNES.Server.GetUnitProfile(source)
+    local src = source
+    if not allowMutation(src, 'archiveBolo', 500) then return end
+    local unit = DPN_UNES.Server.GetUnitProfile(src)
     local bolo = DPN_UNES.Cache.bolos[boloId]
     if not unit or not bolo then return end
     bolo.active = false; bolo.archivedAt = os.time(); bolo.archivedBy = unit.callsign
@@ -289,6 +372,10 @@ AddEventHandler('dpn-unes:server:linkRecord', function(incidentId, systemName, r
     MySQL.insert('INSERT INTO dpn_unes_links (incident_id, system_name, record_type, record_id, metadata, created_at) VALUES (?, ?, ?, ?, ?, NOW())', { incidentId, systemName, recordType, recordId, encodedMetadata })
     saveIncident(incident)
     broadcast(incident)
+end)
+
+AddEventHandler('playerDropped', function()
+    MutationRate[source] = nil
 end)
 
 exports('CreateIncident', function(src, data) TriggerEvent('dpn-unes:server:createIncident', src, data) end)
