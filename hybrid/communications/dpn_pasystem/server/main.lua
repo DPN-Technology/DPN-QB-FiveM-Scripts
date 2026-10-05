@@ -1,5 +1,6 @@
 local ActivePA = {}
 local LastStart = {}
+local LastHeartbeat = {}
 local Framework = nil
 local FrameworkName = 'standalone'
 
@@ -256,6 +257,7 @@ local function stopPA(src, reason)
     local active = ActivePA[src]
     if not active then return end
     ActivePA[src] = nil
+    LastHeartbeat[src] = nil
     TriggerClientEvent('dpn_pa:client:forceStop', src, reason or 'stopped')
     TriggerClientEvent('dpn_pa:client:incomingStop', -1, src, active.session)
     debugPrint(('Stopped PA for %s reason=%s'):format(src, reason or 'stopped'))
@@ -302,7 +304,7 @@ RegisterNetEvent('dpn_pa:server:startPA', function(data)
         return
     end
 
-    local vehOk, vehReason = validateVehicleServer(src, data)
+    local vehOk, vehReason, veh = validateVehicleServer(src, data)
     if not vehOk then
         notify(src, Config.Messages.no_vehicle, 'error')
         TriggerClientEvent('dpn_pa:client:startDenied', src, vehReason or 'no_vehicle')
@@ -312,15 +314,18 @@ RegisterNetEvent('dpn_pa:server:startPA', function(data)
     local range = Config.ClampRange(data and data.range)
     local session = ('%s:%s:%s'):format(src, now, math.random(1111, 9999))
     local ped = GetPlayerPed(src)
-    local coords = normalizeCoords(data and data.coords or GetEntityCoords(ped))
+    local coords = normalizeCoords(GetEntityCoords(ped))
+    local vehicleNetId = veh and NetworkGetNetworkIdFromEntity(veh) or 0
+    local plate = veh and tostring(GetVehicleNumberPlateText(veh) or ''):sub(1, 16) or 'UNKNOWN'
+    local model = veh and tostring(GetEntityModel(veh)) or 'unknown'
     local name = GetPlayerName(src) or ('ID ' .. tostring(src))
 
     ActivePA[src] = {
         session = session,
         range = range,
-        vehicleNetId = data and data.vehicleNetId or 0,
-        plate = data and data.plate or 'UNKNOWN',
-        model = data and data.model or 'unknown',
+        vehicleNetId = vehicleNetId,
+        plate = plate ~= '' and plate or 'UNKNOWN',
+        model = model,
         coords = coords,
         name = name,
         jobName = job and job.name or 'ACE',
@@ -343,22 +348,38 @@ RegisterNetEvent('dpn_pa:server:heartbeat', function(data)
     local active = ActivePA[src]
     if not active then return end
 
+    local heartbeatInterval = math.max(250, tonumber(Config.HeartbeatMinIntervalMs) or 1000)
+    local heartbeatNow = nowMs()
+    local lastHeartbeat = LastHeartbeat[src] or 0
+    if heartbeatNow - lastHeartbeat < heartbeatInterval then
+        return
+    end
+    LastHeartbeat[src] = heartbeatNow
+
     local allowed = isAuthorized(src)
     if not allowed then
         stopPA(src, 'permission')
         return
     end
 
-    local vehOk = validateVehicleServer(src, data or active)
+    local vehOk, _, veh = validateVehicleServer(src, data or active)
     if not vehOk then
         stopPA(src, 'vehicle')
         return
     end
 
-    active.coords = normalizeCoords(data and data.coords or active.coords)
+    local ped = GetPlayerPed(src)
+    local serverCoords = ped and ped ~= 0 and GetEntityCoords(ped) or nil
+    active.coords = serverCoords and normalizeCoords(serverCoords) or active.coords
+
     active.range = Config.ClampRange(data and data.range or active.range)
-    active.vehicleNetId = data and data.vehicleNetId or active.vehicleNetId
-    active.plate = data and data.plate or active.plate
+
+    if veh and DoesEntityExist(veh) then
+        active.vehicleNetId = NetworkGetNetworkIdFromEntity(veh)
+        local plate = tostring(GetVehicleNumberPlateText(veh) or ''):sub(1, 16)
+        active.plate = plate ~= '' and plate or active.plate
+        active.model = tostring(GetEntityModel(veh))
+    end
 
     if Config.MaxTransmissionSeconds then
         local ageSeconds = (nowMs() - active.startedAt) / 1000
@@ -398,6 +419,7 @@ end, false)
 AddEventHandler('playerDropped', function()
     stopPA(source, 'dropped')
     LastStart[source] = nil
+    LastHeartbeat[source] = nil
 end)
 
 AddEventHandler('onResourceStop', function(resource)
