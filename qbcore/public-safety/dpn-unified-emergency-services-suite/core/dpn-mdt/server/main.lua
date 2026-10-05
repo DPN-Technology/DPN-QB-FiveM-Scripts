@@ -108,22 +108,48 @@ end
 
 -- Advanced QBCore database compatibility layer. This lets the MDT pull real player/vehicle data
 -- without crashing when a server has slightly different QBCore column sets.
-local DPNDB = Config.Database or {}
-DPNDB.players = DPNDB.players or 'players'
-DPNDB.vehicles = DPNDB.vehicles or 'player_vehicles'
-DPNDB.apartments = DPNDB.apartments or 'apartments'
-DPNDB.houses = DPNDB.houses or 'player_houses'
-DPNDB.phoneVehicles = DPNDB.phoneVehicles or 'phone_vehicles'
+local DB_DEFAULTS = {
+    players = 'players',
+    vehicles = 'player_vehicles',
+    apartments = 'apartments',
+    houses = 'player_houses',
+    phoneVehicles = 'phone_vehicles'
+}
+
+local function safeConfiguredIdentifier(key)
+    local fallback = assert(DB_DEFAULTS[key], ('Missing database identifier fallback for %s'):format(tostring(key)))
+    local configured = Config.Database and Config.Database[key] or fallback
+    local value = tostring(configured or '')
+
+    if value == '' or #value > 64 or value:find('[^%w_]') then
+        print(('^3[dpn-mdt][SECURITY]^7 Invalid Config.Database.%s identifier %q; using %s instead.'):format(
+            tostring(key),
+            value:sub(1, 96),
+            fallback
+        ))
+        return fallback
+    end
+
+    return value
+end
+
+local DPNDB = {
+    players = safeConfiguredIdentifier('players'),
+    vehicles = safeConfiguredIdentifier('vehicles'),
+    apartments = safeConfiguredIdentifier('apartments'),
+    houses = safeConfiguredIdentifier('houses'),
+    phoneVehicles = safeConfiguredIdentifier('phoneVehicles')
+}
 
 local columnCache = {}
 local tableCache = {}
 
 local function ident(value)
     value = tostring(value or '')
-    if value:match('^[%w_]+$') then
-        return ('`%s`'):format(value)
+    if value == '' or #value > 64 or value:find('[^%w_]') then
+        error(('Unsafe SQL identifier: %s'):format(value:sub(1, 96)))
     end
-    error(('Unsafe SQL identifier: %s'):format(value))
+    return ('`%s`'):format(value)
 end
 
 local function qcol(alias, column)
@@ -331,17 +357,28 @@ local function getCitizenSummary(citizenid)
     return normalizePlayerRow(row)
 end
 
-local function countWhere(tableName, column, value, whereExtra)
+local COUNT_FILTERS = {
+    active = "AND status = 'active'"
+}
+
+local function countWhere(tableName, column, value, filterKey)
     if not tableExists(tableName) or not hasColumn(tableName, column) then return 0 end
     local sql = ('SELECT COUNT(*) FROM %s WHERE %s = ?'):format(ident(tableName), ident(column))
-    if whereExtra then sql = sql .. ' ' .. whereExtra end
+
+    if filterKey then
+        local clause = COUNT_FILTERS[filterKey]
+        if not clause then
+            error(('Unsafe SQL count filter key: %s'):format(tostring(filterKey):sub(1, 64)))
+        end
+        sql = sql .. ' ' .. clause
+    end
+
     return tonumber(dbScalar(sql, { value })) or 0
 end
 
-local function countLike(tableName, column, value, whereExtra)
+local function countLike(tableName, column, value)
     if not tableExists(tableName) or not hasColumn(tableName, column) then return 0 end
     local sql = ('SELECT COUNT(*) FROM %s WHERE %s LIKE ?'):format(ident(tableName), ident(column))
-    if whereExtra then sql = sql .. ' ' .. whereExtra end
     return tonumber(dbScalar(sql, { '%' .. tostring(value or '') .. '%' })) or 0
 end
 
@@ -688,7 +725,7 @@ callback('SearchCitizens', function(src, payload)
     for _, row in ipairs(rows) do
         normalizePlayerRow(row)
         row.vehicleCount = countWhere(DPNDB.vehicles, 'citizenid', row.citizenid)
-        row.activeWarrantCount = countWhere('dpn_mdt_warrants', 'citizenid', row.citizenid, "AND status = 'active'")
+        row.activeWarrantCount = countWhere('dpn_mdt_warrants', 'citizenid', row.citizenid, 'active')
         row.reportCount = countLike('dpn_mdt_reports', 'involved', row.citizenid)
         row.correctionsCount = countWhere('dpn_mdt_corrections_records', 'citizenid', row.citizenid)
     end

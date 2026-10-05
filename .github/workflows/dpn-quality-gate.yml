@@ -97,6 +97,9 @@ jobs:
       - name: Validate vehicle computer security controls
         run: python3 tools/check_vehicle_computer_security.py
 
+      - name: Validate MDT SQL boundary
+        run: python3 tools/check_mdt_sql_boundary.py
+
       - name: Validate PD doorbell cooldown authority
         run: python3 tools/check_pd_doorbell_cooldown_authority.py
 
