@@ -39,6 +39,7 @@ function renderAlerts() {
   });
 }
 window.addEventListener('message', event => {
+  if (!event || event.source !== window || event.origin !== window.location.origin) return;
   const message = event.data || {};
   if (message.action === 'open') {
     app.classList.remove('hidden'); units = message.units || {}; alerts = message.alerts || [];
