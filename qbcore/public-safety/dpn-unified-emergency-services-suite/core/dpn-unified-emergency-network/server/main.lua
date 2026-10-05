@@ -147,8 +147,21 @@ function DPN_UNES.Server.GetOpenPayload(src)
     }
 end
 
-RegisterNetEvent('QBCore:Server:OnJobUpdate', function(src) if src then DPN_UNES.Server.UpsertUnit(src) end end)
-RegisterNetEvent('QBCore:Server:SetDuty', function() DPN_UNES.Server.UpsertUnit(source) end)
+-- QBCore lifecycle hooks are server-local. Never expose these as network events
+-- or trust a client-supplied player source.
+AddEventHandler('QBCore:Server:OnJobUpdate', function()
+    local src = source
+    if type(src) == 'number' and src > 0 then
+        DPN_UNES.Server.UpsertUnit(src)
+    end
+end)
+
+AddEventHandler('QBCore:Server:SetDuty', function()
+    local src = source
+    if type(src) == 'number' and src > 0 then
+        DPN_UNES.Server.UpsertUnit(src)
+    end
+end)
 
 RegisterNetEvent('dpn-unes:server:unitLocation', function(data)
     DPN_UNES.Server.UpsertUnit(source, data or {})
