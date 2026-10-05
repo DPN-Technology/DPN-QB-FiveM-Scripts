@@ -101,6 +101,47 @@ local function IsValidDeploymentPosition(src, coords)
 end
 
 
+local function GetAuthorizedDeploymentVehicle(src)
+    if type(src) ~= 'number' or src <= 0 then return nil, 'invalid_source' end
+
+    local ped = GetPlayerPed(src)
+    if not ped or ped == 0 or not DoesEntityExist(ped) then
+        return nil, 'no_player'
+    end
+
+    local vehicle = GetVehiclePedIsIn(ped, false)
+    if not vehicle or vehicle == 0 or not DoesEntityExist(vehicle) then
+        return nil, 'no_vehicle'
+    end
+
+    if GetPedInVehicleSeat(vehicle, -1) ~= ped then
+        return nil, 'not_driver'
+    end
+
+    local model = GetEntityModel(vehicle)
+    if not Config.AuthorizedVehicles[model] then
+        return nil, 'unauthorized_vehicle'
+    end
+
+    local speedKmh = GetEntitySpeed(vehicle) * 3.6
+    if speedKmh >= 2.0 then
+        return nil, 'vehicle_moving'
+    end
+
+    return vehicle
+end
+
+local function CalculateServerDeploymentPosition(vehicle)
+    local vehicleCoords = GetEntityCoords(vehicle)
+    local rearVector = GetEntityForwardVector(vehicle) * -1.0
+    local offset = Config.SpikeSettings.offset or vector3(0.0, -4.5, -0.8)
+
+    return vehicleCoords
+        + (rearVector * math.abs(tonumber(offset.y) or 0.0))
+        + vector3(tonumber(offset.x) or 0.0, 0.0, tonumber(offset.z) or 0.0)
+end
+
+
 local function RemoveSpike(spikeId)
     local spikeData = deployedSpikes[spikeId]
     if not spikeData then return false end
@@ -137,20 +178,28 @@ local function CleanupPlayerSpikes(src)
 end
 
 -- Events
-RegisterNetEvent('qb-mobilespikes:server:deploySpike', function(coords, heading, spikeId)
+RegisterNetEvent('qb-mobilespikes:server:deploySpike', function(_coords, _heading, spikeId)
     local src = source
     local Player = GetPlayer(src)
 
     if not Player or not HasAuthorization(src) then return end
 
     local normalizedSpikeId = NormalizeSpikeId(spikeId)
-    local normalizedCoords = NormalizeCoords(coords)
-    local normalizedHeading = tonumber(heading)
-
-    if not normalizedSpikeId or not normalizedCoords or not IsFiniteNumber(normalizedHeading) then
-        print(('[qb-mobilespikes] Rejected invalid deployment payload from player %s'):format(src))
+    if not normalizedSpikeId then
+        print(('[qb-mobilespikes] Rejected invalid spike id from player %s'):format(src))
         return
     end
+
+    local vehicle, vehicleError = GetAuthorizedDeploymentVehicle(src)
+    if not vehicle then
+        print(('[qb-mobilespikes] Rejected deployment from player %s: %s'):format(src, vehicleError))
+        return
+    end
+
+    -- Placement geometry and heading are derived from the server-owned vehicle.
+    -- Never trust a client to choose an arbitrary world position or orientation.
+    local normalizedCoords = CalculateServerDeploymentPosition(vehicle)
+    local normalizedHeading = GetEntityHeading(vehicle)
 
     if deployedSpikes[normalizedSpikeId] then
         print(('[qb-mobilespikes] Rejected duplicate spike id %s from player %s'):format(normalizedSpikeId, src))
@@ -175,11 +224,6 @@ RegisterNetEvent('qb-mobilespikes:server:deploySpike', function(coords, heading,
         return
     end
 
-    if not IsValidDeploymentPosition(src, normalizedCoords) then
-        print(('[qb-mobilespikes] Rejected remote deployment position from player %s'):format(src))
-        return
-    end
-
     if IsTooCloseToExistingSpike(normalizedCoords) then
         return
     end
@@ -189,6 +233,7 @@ RegisterNetEvent('qb-mobilespikes:server:deploySpike', function(coords, heading,
         heading = normalizedHeading,
         owner = src,
         netId = normalizedSpikeId,
+        vehicleNetId = NetworkGetNetworkIdFromEntity(vehicle),
         timestamp = os.time()
     }
 
