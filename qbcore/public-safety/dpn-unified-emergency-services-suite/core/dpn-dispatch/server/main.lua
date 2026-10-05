@@ -2,6 +2,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local Calls = {}
 local Units = {}
 local Reports = {}
+local RequestRate = {}
 local NextCallId = math.random(1000, 9999)
 local NextReportId = math.random(5000, 9999)
 
@@ -11,6 +12,25 @@ _G.DPNDispatchServer = Dispatch
 local function Now()
     return os.time()
 end
+
+local function RateAllowed(src, action, intervalMs)
+    if not src or src <= 0 then return true end
+
+    intervalMs = math.max(0, tonumber(intervalMs) or 0)
+    if intervalMs <= 0 then return true end
+
+    local nowMs = GetGameTimer()
+    RequestRate[src] = RequestRate[src] or {}
+    local last = RequestRate[src][action] or 0
+
+    if nowMs - last < intervalMs then
+        return false
+    end
+
+    RequestRate[src][action] = nowMs
+    return true
+end
+
 
 local function SafePlayerName(src)
     if not src or src == 0 then return 'System' end
@@ -739,23 +759,29 @@ end
 RegisterNetEvent('dpn-dispatch:server:registerUnit', function(payload)
     local src = source
     if not CanOpenDispatch(src) then return end
+    if not RateAllowed(src, 'registerUnit', (Config.RateLimits and Config.RateLimits.registerUnitMs) or 2000) then return end
+
     local unit = FormatUnit(src)
     if not unit then return end
+
+    -- The server owns live unit identity/location. Client payloads may only provide
+    -- low-risk presentation fields after validation.
+    unit.coords = GetCoords(src) or unit.coords
     if type(payload) == 'table' then
-        unit.coords = NormalizeCoords(payload.coords) or unit.coords
         unit.status = Config.UnitStatuses[payload.status] and payload.status or unit.status
-        unit.radio = payload.radio or unit.radio
+        unit.radio = DPNDispatch.SanitizeString(payload.radio, '', 32)
     end
     Units[src] = unit
     if DPNDispatchMDT then DPNDispatchMDT.SyncUnit(unit, 'registered') end
     BroadcastState()
 end)
 
-RegisterNetEvent('dpn-dispatch:server:updateUnitPosition', function(coords)
+RegisterNetEvent('dpn-dispatch:server:updateUnitPosition', function(_coords)
     local src = source
     if not CanOpenDispatch(src) then return end
+    if not RateAllowed(src, 'updateUnitPosition', (Config.RateLimits and Config.RateLimits.positionMs) or 750) then return end
     if not Units[src] then Units[src] = FormatUnit(src) or {} end
-    Units[src].coords = NormalizeCoords(coords) or GetCoords(src)
+    Units[src].coords = GetCoords(src) or Units[src].coords
     Units[src].lastSeen = Now()
     if DPNDispatchMDT then DPNDispatchMDT.SyncUnit(Units[src], 'position') end
 end)
@@ -763,11 +789,16 @@ end)
 RegisterNetEvent('dpn-dispatch:server:setUnitStatus', function(status, radio)
     local src = source
     if not CanOpenDispatch(src) then return end
-    SetUnitStatus(src, tostring(status or 'available'), radio)
+    if not RateAllowed(src, 'setUnitStatus', (Config.RateLimits and Config.RateLimits.statusMs) or 750) then return end
+    SetUnitStatus(src, tostring(status or 'available'), DPNDispatch.SanitizeString(radio, '', 32))
 end)
 
 RegisterNetEvent('dpn-dispatch:server:createCall', function(data)
     local src = source or 0
+    if src > 0 and not RateAllowed(src, 'createCall', (Config.RateLimits and Config.RateLimits.createCallMs) or 1500) then
+        Notify(src, 'Dispatch request throttled. Please wait a moment.', 'error')
+        return
+    end
     if src > 0 and data and data.fromDispatch and not CanOpenDispatch(src) then
         Notify(src, 'You are not authorized to create dispatch calls.', 'error')
         return
@@ -921,6 +952,7 @@ end)
 
 AddEventHandler('playerDropped', function()
     local src = source
+    RequestRate[src] = nil
     Units[src] = nil
     for _, call in pairs(Calls) do
         local assigned = {}

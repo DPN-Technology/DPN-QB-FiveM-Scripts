@@ -29,6 +29,15 @@ Config.RestrictSealedReports = true
 -- How often client unit coordinates are sent to dispatch while on duty.
 Config.UnitPositionUpdateMs = 5000
 
+-- Server-side request floors. These protect broadcast/database-heavy handlers
+-- even when a malicious client ignores the normal client polling cadence.
+Config.RateLimits = {
+    registerUnitMs = 2000,
+    positionMs = 750,
+    statusMs = 750,
+    createCallMs = 1500,
+}
+
 -- How long closed/cancelled calls stay visible in the UI before cleanup.
 Config.ClosedCallCleanupMinutes = 30
 

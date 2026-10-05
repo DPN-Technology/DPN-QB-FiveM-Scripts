@@ -77,6 +77,7 @@ Config.RangePresets = {
 -- Abuse protection / cleanup.
 Config.StartCooldownMs = 900
 Config.HeartbeatMs = 1250
+Config.HeartbeatMinIntervalMs = 1000 -- Server-side anti-spam floor for PA heartbeat events
 Config.StopIfVehicleStopsExisting = true
 Config.StopIfPlayerDead = true
 Config.StopIfPlayerExitsVehicle = true
