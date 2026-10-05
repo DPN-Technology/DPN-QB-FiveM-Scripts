@@ -171,6 +171,7 @@ setInterval(() => {
 }, 1000);
 
 window.addEventListener('message', (event) => {
+    if (!event || event.source !== window || event.origin !== window.location.origin) return;
     const data = event.data || {};
     if (data.action === 'open') {
         config = Object.assign(config, data.config || {});
