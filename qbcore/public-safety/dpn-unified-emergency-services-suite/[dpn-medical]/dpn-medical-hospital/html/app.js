@@ -140,6 +140,7 @@ function setVisible(visible) {
 }
 
 window.addEventListener('message', (event) => {
+    if (!event || event.source !== window || event.origin !== window.location.origin) return;
     const data = event.data || {};
 
     if (data.wardLabels) wardLabels = data.wardLabels;
