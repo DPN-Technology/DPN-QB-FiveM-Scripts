@@ -761,6 +761,13 @@ function resetReportForm() {
   renderReports();
 }
 
+function setOwnRecord(collection, key, value) {
+  const safeKey = String(key ?? '').trim();
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(safeKey)) return false;
+  Object.defineProperty(collection, safeKey, { value, writable: true, enumerable: true, configurable: true });
+  return true;
+}
+
 function fillText(id, value) { const el = document.getElementById(id); if (el) el.value = Array.isArray(value) ? value.join('\n') : (value || ''); }
 function setChecked(id, value) { const el = document.getElementById(id); if (el) el.checked = !!value; }
 
@@ -846,12 +853,13 @@ window.addNote = (callId) => {
 };
 
 window.addEventListener('message', (event) => {
+  if (!event || event.source !== window || event.origin !== window.location.origin) return;
   const data = event.data || {};
   if (data.action === 'open') app.classList.remove('hidden');
   if (data.action === 'close') app.classList.add('hidden');
   if (data.action === 'syncState') syncState(data.state);
   if (data.action === 'newCall') {
-    state.calls[String(data.call.id)] = data.call;
+    setOwnRecord(state.calls, String(data.call.id), data.call);
     render();
   }
   if (data.action === 'setTab') selectTab(data.tab);

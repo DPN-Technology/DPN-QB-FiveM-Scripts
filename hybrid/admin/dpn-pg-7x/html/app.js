@@ -93,7 +93,7 @@
         var k;
         data = data || {};
         for (k in data) {
-            if (data.hasOwnProperty(k)) state[k] = data[k];
+            if (Object.prototype.hasOwnProperty.call(data, k) && Object.prototype.hasOwnProperty.call(state, k)) state[k] = data[k];
         }
     }
 
@@ -237,6 +237,7 @@
     }
 
     function handleMessage(event) {
+        if (!event || event.source !== window || event.origin !== window.location.origin) return;
         var data;
         try {
             data = event && event.data ? event.data : {};

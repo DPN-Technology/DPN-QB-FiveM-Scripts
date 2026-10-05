@@ -252,6 +252,7 @@
     document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { post('close'); } });
 
     window.addEventListener('message', function (event) {
+        if (!event || event.source !== window || event.origin !== window.location.origin) return;
         var data = event.data || {};
         if (data.state) { state = data.state; }
         if (data.target !== undefined) { target = data.target; }

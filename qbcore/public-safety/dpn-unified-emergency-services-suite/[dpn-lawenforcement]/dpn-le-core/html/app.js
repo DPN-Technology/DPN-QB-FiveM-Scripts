@@ -85,6 +85,13 @@ function render() {
     renderUnits();
 }
 
+function setOwnRecord(collection, key, value) {
+    const safeKey = String(key ?? '').trim();
+    if (!/^[A-Za-z0-9_-]{1,64}$/.test(safeKey)) return false;
+    Object.defineProperty(collection, safeKey, { value, writable: true, enumerable: true, configurable: true });
+    return true;
+}
+
 function renderSearch(result) {
     $('searchSubject').textContent = `${result.name || 'Unknown'} • ${result.citizenid || 'No ID'}`;
     const money = result.money || {};
@@ -95,6 +102,7 @@ function renderSearch(result) {
 }
 
 window.addEventListener('message', (event) => {
+    if (!event || event.source !== window || event.origin !== window.location.origin) return;
     const data = event.data || {};
     if (data.action === 'toggle') app.classList.toggle('hidden', !data.show);
     if (data.action === 'state') {
@@ -106,7 +114,7 @@ window.addEventListener('message', (event) => {
         render();
     }
     if (data.action === 'newCall' && data.call) {
-        state.calls[callId(data.call)] = data.call;
+        setOwnRecord(state.calls, callId(data.call), data.call);
         renderCalls();
     }
     if (data.action === 'searchResult') {

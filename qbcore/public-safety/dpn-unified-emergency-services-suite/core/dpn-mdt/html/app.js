@@ -589,6 +589,7 @@ function mockResponse(name, payload) {
   return { ok: true, results: [] };
 }
 window.addEventListener('message', async (event) => {
+  if (!event || event.source !== window || event.origin !== window.location.origin) return;
   const data = event.data || {};
   if (data.action === 'open') { $('#app').classList.remove('hidden'); state.open = true; await refresh(); }
   if (data.action === 'close') { $('#app').classList.add('hidden'); state.open = false; }

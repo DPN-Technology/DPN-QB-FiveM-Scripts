@@ -33,18 +33,31 @@ function showToast(message) {
 }
 
 function normalizeTrackers(input) {
-    const output = {};
+    const output = Object.create(null);
+    const safeId = (value) => {
+        const id = String(value ?? '').trim();
+        return /^[A-Za-z0-9_-]{1,64}$/.test(id) ? id : null;
+    }
     if (Array.isArray(input)) {
-        input.forEach(t => { if (t && t.id) output[t.id] = t; });
+        input.forEach(t => {
+            const id = safeId(t?.id);
+            if (!id) return;
+            Object.defineProperty(output, id, { value: t, writable: true, enumerable: true, configurable: true });
+        });
     } else if (input && typeof input === 'object') {
-        Object.keys(input).forEach(key => {
-            const t = input[key];
-            if (t && t.id) output[t.id] = t;
+        Object.values(input).forEach(t => {
+            const id = safeId(t?.id);
+            if (!id) return;
+            Object.defineProperty(output, id, { value: t, writable: true, enumerable: true, configurable: true });
         });
     }
     return output;
 }
 
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
 
 function controlRows() {
     const controls = config.controls || {};
@@ -57,9 +70,11 @@ function controlRows() {
     return rows.map(([key, label]) => {
         const item = controls[key] || {};
         if (item.enabled === false) return '';
-        const boundKey = item.defaultKey || 'UNBOUND';
-        const command = item.command ? `/${item.command}` : '';
-        return `<div class="keybind-row"><span class="keybind-key">${boundKey}</span><span class="keybind-label">${label} ${command ? `<small>${command}</small>` : ''}</span></div>`;
+        const boundKey = String(item.defaultKey || 'UNBOUND');
+        const command = item.command ? `/${String(item.command)}` : '';
+        const safeKey = escapeHtml(boundKey);
+        const safeCommand = escapeHtml(command);
+        return `<div class="keybind-row"><span class="keybind-key">${safeKey}</span><span class="keybind-label">${label} ${safeCommand ? `<small>${safeCommand}</small>` : ''}</span></div>`;
     }).join('');
 }
 
@@ -156,6 +171,7 @@ setInterval(() => {
 }, 1000);
 
 window.addEventListener('message', (event) => {
+    if (!event || event.source !== window || event.origin !== window.location.origin) return;
     const data = event.data || {};
     if (data.action === 'open') {
         config = Object.assign(config, data.config || {});

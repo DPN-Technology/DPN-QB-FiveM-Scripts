@@ -40,6 +40,7 @@ function renderOpen(payload) {
   });
 }
 window.addEventListener('message', event => {
+  if (!event || event.source !== window || event.origin !== window.location.origin) return;
   const message = event.data || {};
   if (message.action === 'open') renderOpen(message.payload);
   if (message.action === 'plateResult') plateResult(message.payload || {});
