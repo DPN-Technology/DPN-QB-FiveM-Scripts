@@ -71,6 +71,7 @@ function renderEvents(events) {
   });
 }
 window.addEventListener('message', event => {
+  if (!event || event.source !== window || event.origin !== window.location.origin) return;
   const data = event.data || {};
   if (data.action === 'setVisible') app.classList.toggle('hidden', !data.visible);
   if (data.action === 'bolos') renderBolos(data.bolos || []);
