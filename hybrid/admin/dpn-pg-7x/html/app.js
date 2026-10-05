@@ -237,6 +237,7 @@
     }
 
     function handleMessage(event) {
+        if (!event || event.source !== window || event.origin !== window.location.origin) return;
         var data;
         try {
             data = event && event.data ? event.data : {};
