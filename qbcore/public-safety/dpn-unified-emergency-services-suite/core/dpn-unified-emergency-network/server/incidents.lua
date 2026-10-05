@@ -81,8 +81,21 @@ local function broadcast(incident)
 end
 
 RegisterNetEvent('dpn-unes:server:createIncident', function(srcOverride, dataOverride)
-    local src = type(srcOverride) == 'number' and srcOverride or source
-    local data = type(srcOverride) == 'table' and srcOverride or (dataOverride or {})
+    local networkSource = tonumber(source) or 0
+    local src
+    local data
+
+    -- Network callers can only create incidents as themselves. The optional
+    -- (source, data) form remains available for trusted server-side TriggerEvent calls.
+    if networkSource > 0 then
+        src = networkSource
+        data = type(srcOverride) == 'table' and srcOverride or {}
+    else
+        src = type(srcOverride) == 'number' and srcOverride or 0
+        data = type(dataOverride) == 'table' and dataOverride
+            or (type(srcOverride) == 'table' and srcOverride or {})
+    end
+
     if src ~= 0 and not DPN_UNES.Server.IsEmergencyUnit(src) then return end
     local incident = normalizeIncident(src, data)
     DPN_UNES.Cache.incidents[incident.id] = incident
@@ -93,9 +106,20 @@ RegisterNetEvent('dpn-unes:server:createIncident', function(srcOverride, dataOve
 end)
 
 RegisterNetEvent('dpn-unes:server:updateIncidentStatus', function(incidentId, status)
-    local unit = DPN_UNES.Server.GetUnitProfile(source)
+    local src = source
+    local unit = DPN_UNES.Server.GetUnitProfile(src)
     local incident = DPN_UNES.Cache.incidents[incidentId]
     if not unit or not incident then return end
+
+    local allowedStatus = false
+    for _, candidate in pairs(DPN_UNES.Constants) do
+        if type(candidate) == 'string' and candidate == status then
+            allowedStatus = true
+            break
+        end
+    end
+    if not allowedStatus then return end
+
     incident.status = status
     incident.updatedAt = os.time()
     addHistory(incident, 'status:' .. status, unit)
@@ -231,11 +255,38 @@ RegisterNetEvent('dpn-unes:server:archiveBolo', function(boloId)
     TriggerClientEvent('dpn-unes:client:boloUpdated', -1, bolo)
 end)
 
-RegisterNetEvent('dpn-unes:server:linkRecord', function(incidentId, systemName, recordType, recordId, metadata)
+-- Record linking is an internal integration operation. Clients must not be able to
+-- inject arbitrary linked records or metadata into incident history.
+AddEventHandler('dpn-unes:server:linkRecord', function(incidentId, systemName, recordType, recordId, metadata)
     local incident = DPN_UNES.Cache.incidents[incidentId]
     if not incident then return end
-    table.insert(incident.linkedRecords, { system = systemName, type = recordType, id = recordId, metadata = metadata, time = os.time() })
-    MySQL.insert('INSERT INTO dpn_unes_links (incident_id, system_name, record_type, record_id, metadata, created_at) VALUES (?, ?, ?, ?, ?, NOW())', { incidentId, systemName, recordType, recordId, json.encode(metadata or {}) })
+
+    systemName = tostring(systemName or ''):sub(1, 48)
+    recordType = tostring(recordType or ''):sub(1, 48)
+    recordId = tostring(recordId or ''):sub(1, 128)
+    if systemName == '' or recordType == '' or recordId == '' then return end
+
+    local encodedMetadata = '{}'
+    local ok, encoded = pcall(json.encode, type(metadata) == 'table' and metadata or {})
+    if ok and type(encoded) == 'string' and #encoded <= 8000 then
+        encodedMetadata = encoded
+    else
+        encodedMetadata = json.encode({ truncated = true })
+    end
+
+    incident.linkedRecords = incident.linkedRecords or {}
+    table.insert(incident.linkedRecords, {
+        system = systemName,
+        type = recordType,
+        id = recordId,
+        metadata = type(metadata) == 'table' and metadata or {},
+        time = os.time()
+    })
+    while #incident.linkedRecords > 100 do
+        table.remove(incident.linkedRecords)
+    end
+
+    MySQL.insert('INSERT INTO dpn_unes_links (incident_id, system_name, record_type, record_id, metadata, created_at) VALUES (?, ?, ?, ?, ?, NOW())', { incidentId, systemName, recordType, recordId, encodedMetadata })
     saveIncident(incident)
     broadcast(incident)
 end)
