@@ -139,7 +139,7 @@ def main() -> int:
     )
     require(
         incidents,
-        "if not allowedStatus then return end",
+        "if not INCIDENT_STATUS[status] then return end",
         "UNES incident status validation",
         failures,
     )
