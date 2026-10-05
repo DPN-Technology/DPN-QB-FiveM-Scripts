@@ -37,7 +37,12 @@
                 var btn = document.createElement('button');
                 btn.className = 'preset';
                 if (Math.round(Number(preset.range)) === Math.round(Number(selectedRange))) btn.classList.add('active');
-                btn.innerHTML = '<strong>' + preset.label + ' · ' + rangeLabel(preset.range) + '</strong><small>' + (preset.description || '') + '</small>';
+                var strong = document.createElement('strong');
+                strong.textContent = String(preset.label || '') + ' · ' + rangeLabel(preset.range);
+                var small = document.createElement('small');
+                small.textContent = String(preset.description || '');
+                btn.appendChild(strong);
+                btn.appendChild(small);
                 btn.addEventListener('click', function () {
                     selectedRange = Number(preset.range);
                     updateRangeInputs();
@@ -72,7 +77,12 @@
                 var binding = keybinds[key];
                 var row = document.createElement('div');
                 row.className = 'keybind';
-                row.innerHTML = '<span>' + binding.label + '</span><kbd>' + binding.default + '</kbd>';
+                var label = document.createElement('span');
+                label.textContent = String(binding.label || '');
+                var key = document.createElement('kbd');
+                key.textContent = String(binding.default || '');
+                row.appendChild(label);
+                row.appendChild(key);
                 list.appendChild(row);
             }
         }
