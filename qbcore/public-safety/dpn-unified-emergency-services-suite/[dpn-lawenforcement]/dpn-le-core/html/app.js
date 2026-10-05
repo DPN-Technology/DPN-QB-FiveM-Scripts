@@ -102,6 +102,7 @@ function renderSearch(result) {
 }
 
 window.addEventListener('message', (event) => {
+    if (!event || event.source !== window || event.origin !== window.location.origin) return;
     const data = event.data || {};
     if (data.action === 'toggle') app.classList.toggle('hidden', !data.show);
     if (data.action === 'state') {
