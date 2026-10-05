@@ -146,5 +146,6 @@ Config.Limits = {
     maxSpikesGlobal = 20,
     deploymentCooldown = 5000, -- 5 seconds
     minDistanceBetweenSpikes = 15.0, -- Meters
+    maxPlacementDistance = 12.0, -- Server-authorized distance from deploying player
     autoRetractTime = 1800000, -- 30 minutes in ms
 }
