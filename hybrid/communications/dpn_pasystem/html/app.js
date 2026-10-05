@@ -214,6 +214,7 @@
     });
 
     window.addEventListener('message', function (event) {
+        if (!event || event.source !== window || event.origin !== window.location.origin) return;
         var payload = event.data || {};
         var action = payload.action;
         var data = payload.data;
