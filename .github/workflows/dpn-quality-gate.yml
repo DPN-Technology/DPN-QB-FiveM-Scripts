@@ -102,7 +102,7 @@ jobs:
 
       - name: Validate PD doorbell cooldown authority
         run: python3 tools/check_pd_doorbell_cooldown_authority.py
-
+\n      - name: Validate runtime authority controls\n        run: python3 tools/check_runtime_authority.py\n
       - name: Validate emergency correlation contract
         run: python3 tools/check_emergency_correlation_contract.py
 
