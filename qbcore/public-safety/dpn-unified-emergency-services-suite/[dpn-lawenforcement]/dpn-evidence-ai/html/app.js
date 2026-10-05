@@ -80,6 +80,7 @@ function render() {
   });
 }
 window.addEventListener('message', event => {
+  if (!event || event.source !== window || event.origin !== window.location.origin) return;
   const message = event.data || {};
   if (message.action === 'show') byId('app').classList.remove('hidden');
   if (message.action === 'hide') byId('app').classList.add('hidden');
